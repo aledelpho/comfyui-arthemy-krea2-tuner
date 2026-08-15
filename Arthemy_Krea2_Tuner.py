@@ -19,7 +19,7 @@ import zlib
 import time
 import hashlib
 import logging
-from typing import Tuple, Dict, Any, Generator
+from typing import Tuple, Dict, Any, Generator, Optional, List, Union, Set
 import torch
 import safetensors.torch
 import comfy.lora
@@ -170,7 +170,7 @@ class Krea2TensorParser:
         }
 
     @classmethod
-    def extract_model_block_idx(cls, clean_key: str):
+    def extract_model_block_idx(cls, clean_key: str) -> Tuple[Optional[int], str]:
         """Dynamic inspection of model block index with regex fallback."""
         if any(prefix in clean_key for prefix in ["txtfusion", "txtmlp", "tmlp", "tproj", "first", "last"]):
             return None, clean_key
@@ -184,7 +184,7 @@ class Krea2TensorParser:
         return None, clean_key
 
     @classmethod
-    def extract_clip_layer_idx(cls, clean_key: str):
+    def extract_clip_layer_idx(cls, clean_key: str) -> Tuple[Optional[int], str]:
         """Dynamic inspection of CLIP layer index with regex fallback."""
         parts = clean_key.split(".")
         for i, p in enumerate(parts):
@@ -196,7 +196,7 @@ class Krea2TensorParser:
         return None, clean_key
 
     @classmethod
-    def match_model_sub_tensor(cls, sub_key: str):
+    def match_model_sub_tensor(cls, sub_key: str) -> Optional[str]:
         for widget_key, target_suffixes in cls.MODEL_SURGEON_MAP.items():
             for target_suffix in target_suffixes:
                 if (sub_key == target_suffix 
@@ -207,7 +207,7 @@ class Krea2TensorParser:
         return None
 
     @classmethod
-    def match_clip_sub_tensor(cls, sub_key: str):
+    def match_clip_sub_tensor(cls, sub_key: str) -> Optional[str]:
         for widget_key, target_suffixes in cls.CLIP_SURGEON_MAP.items():
             for target_suffix in target_suffixes:
                 if (sub_key == target_suffix 
@@ -218,11 +218,11 @@ class Krea2TensorParser:
         return None
 
     @classmethod
-    def get_descriptive_model_surgeon_map(cls):
+    def get_descriptive_model_surgeon_map(cls) -> Dict[str, Tuple[str, ...]]:
         return dict(cls.MODEL_SURGEON_MAP)
 
     @classmethod
-    def get_descriptive_clip_surgeon_map(cls):
+    def get_descriptive_clip_surgeon_map(cls) -> Dict[str, Tuple[str, ...]]:
         return dict(cls.CLIP_SURGEON_MAP)
 
 # ==============================================================================
@@ -232,13 +232,13 @@ class ComfyPatcherAdapter:
     """Safe wrapper for ComfyUI ModelPatcher operations using official APIs."""
 
     @staticmethod
-    def isolate_patcher(model_or_clip):
+    def isolate_patcher(model_or_clip: Any) -> Any:
         """Creates a clean, isolated patcher clone natively using ComfyUI API."""
         patcher = get_patcher(model_or_clip)
         return patcher.clone()
 
     @staticmethod
-    def calculate_safe_weight(model_or_clip, key: str, base_weight: torch.Tensor, model_sd: dict = None) -> torch.Tensor:
+    def calculate_safe_weight(model_or_clip: Any, key: str, base_weight: torch.Tensor, model_sd: Optional[Dict[str, Any]] = None) -> torch.Tensor:
         """Calculates active weight safely without mutating model state or accessing private attributes.
         Resolves exact internal state_dict key name and reuses pre-computed model_sd to guarantee O(1) performance."""
         patcher = get_patcher(model_or_clip)
@@ -279,7 +279,7 @@ RE_GENERAL_BLOCKS = re.compile(r"blocks\.(\d+)\.")
 # Minimal 2-byte dummy tensor for VBAR ComfyUI patch alignment
 DUMMY_PATCH_TENSOR = torch.zeros((1, 1), dtype=torch.bfloat16)
 
-def sanitize_patch_tensor(tensor: torch.Tensor, target_dtype: torch.dtype = None, target_device: torch.device = None) -> torch.Tensor:
+def sanitize_patch_tensor(tensor: Optional[torch.Tensor], target_dtype: Optional[torch.dtype] = None, target_device: Optional[torch.device] = None) -> Optional[torch.Tensor]:
     """Rules 1, 2, 3: Memory Safety, Dtype/Device Preservation & Empty Buffer Guard.
     
     1. Memory Safety: Enforce contiguous memory layout and detachment via .clone().detach().contiguous()
@@ -301,7 +301,7 @@ def sanitize_patch_tensor(tensor: torch.Tensor, target_dtype: torch.dtype = None
     # Apply Rule 1: Contiguity and detachment
     return tensor.to(dtype=dtype, device=device).clone().detach().contiguous()
 
-def resolve_target_key(patcher, k: str, model_sd: dict = None) -> str:
+def resolve_target_key(patcher: Any, k: str, model_sd: Optional[Dict[str, Any]] = None) -> str:
     """Finds the exact state_dict key in patcher.model matching k with O(1) cached lookup."""
     if model_sd is None:
         if patcher is None or not hasattr(patcher, "model"):
@@ -343,7 +343,7 @@ def resolve_target_key(patcher, k: str, model_sd: dict = None) -> str:
 
     return k
 
-def add_patches_to_front(model_patcher, patches: dict, strength_patch: float = 1.0, strength_model: float = 1.0):
+def add_patches_to_front(model_patcher: Any, patches: Dict[str, Any], strength_patch: float = 1.0, strength_model: float = 1.0) -> List[str]:
     """Safely injects patches into a ModelPatcher using standard ComfyUI add_patches API.
     
     Dynamically resolves exact key names in the model/clip state_dict and formats 
@@ -436,7 +436,7 @@ def add_patches_to_front(model_patcher, patches: dict, strength_patch: float = 1
 # BASE NODE & UTILITIES
 # ==============================================================================
 
-def get_patcher(obj):
+def get_patcher(obj: Any) -> Any:
     """Safely retrieves the ModelPatcher/ModelPatcherDynamic object whether obj is a model/clip wrapper or patcher directly."""
     if obj is None:
         return None
@@ -465,7 +465,7 @@ def soft_target_weight(delta: float, mode: str = "Soft Value") -> float:
         return 1.0 + delta
     return 1.0 + (delta * SOFT_DAMPENING_FACTOR)
 
-def get_clean_weight(patcher, key: str, current_weight: torch.Tensor) -> torch.Tensor:
+def get_clean_weight(patcher: Any, key: str, current_weight: torch.Tensor) -> torch.Tensor:
     if hasattr(patcher, "backup") and key in patcher.backup:
         b = patcher.backup[key]
         if isinstance(b, tuple) and len(b) > 0:
@@ -489,7 +489,7 @@ def dequantize_weight(weight: Any, scale: Any = None) -> torch.Tensor:
         return fp32_w
     return weight
 
-def resolve_granular_weight(clean_key: str, granular_map: dict, default_val: float) -> float:
+def resolve_granular_weight(clean_key: str, granular_map: Dict[str, Any], default_val: float) -> float:
     if not granular_map:
         return default_val
     if clean_key in granular_map:
@@ -690,7 +690,7 @@ class ArthemyKrea2ModelTuner(BaseKrea2Node):
     FUNCTION = "tune_model"
     CATEGORY = "Arthemy/Krea2 Tuners"
 
-    def tune_model(self, model, mode, vectors_override, granular_json="", **kwargs):
+    def tune_model(self, model: Any, mode: str = "Soft Value", vectors_override: str = "", granular_json: str = "", **kwargs: float) -> Tuple[Any, str]:
         def get_target_weight(delta): return soft_target_weight(delta, mode)
         final_weights = [1.0] * 34
         use_vector = False
@@ -793,9 +793,9 @@ class ArthemyKrea2CLIPTuner(BaseKrea2Node):
     FUNCTION = "tune_clip"
     CATEGORY = "Arthemy/Krea2 Tuners"
 
-    def tune_clip(self, clip, mode, vectors_override, granular_json="",
-                  Embedding=0.0, Layer_1=0.0, Layer_2=0.0, Layer_3=0.0,
-                  Layer_4=0.0, Layer_5=0.0, Layer_6=0.0, Layer_7=0.0, **kwargs):
+    def tune_clip(self, clip: Any, mode: str = "Soft Value", vectors_override: str = "", granular_json: str = "",
+                  Embedding: float = 0.0, Layer_1: float = 0.0, Layer_2: float = 0.0, Layer_3: float = 0.0,
+                  Layer_4: float = 0.0, Layer_5: float = 0.0, Layer_6: float = 0.0, Layer_7: float = 0.0, **kwargs: float) -> Tuple[Any, str]:
         def get_target_weight(delta): return soft_target_weight(delta, mode)
         final_weights = [1.0] * 8
         use_vector = False
@@ -936,7 +936,7 @@ class ArthemyKrea2ModelBlockSurgeonTuner(BaseSurgeonTuner):
     FUNCTION = "tune_model_surgeon"
     CATEGORY = "Arthemy/Krea2 Tuners"
 
-    def tune_model_surgeon(self, model, target_block, mode, vectors_override, granular_json="", **kwargs):
+    def tune_model_surgeon(self, model: Any, target_block: str = "Block_1 (All 0-4)", mode: str = "Soft Value", vectors_override: str = "", granular_json: str = "", **kwargs: float) -> Tuple[Any, str]:
         selected = self.MODEL_TARGET_MAP.get(target_block, None)
         if selected is None:
             # Graceful fallback for legacy workflows
@@ -1023,7 +1023,7 @@ class ArthemyKrea2CLIPBlockSurgeonTuner(BaseSurgeonTuner):
     FUNCTION = "tune_clip_surgeon"
     CATEGORY = "Arthemy/Krea2 Tuners"
 
-    def tune_clip_surgeon(self, clip, target_layer, mode, vectors_override, granular_json="", **kwargs):
+    def tune_clip_surgeon(self, clip: Any, target_layer: str = "Layer_1 (All 0-4)", mode: str = "Soft Value", vectors_override: str = "", granular_json: str = "", **kwargs: float) -> Tuple[Any, str]:
         selected = self.CLIP_TARGET_MAP.get(target_layer, None)
         if selected is None:
             clean = target_layer.strip().lstrip("↳").strip()
@@ -1064,7 +1064,7 @@ class ArthemyKrea2ModelChaosBlockSurgeonTuner(BaseSurgeonTuner):
     FUNCTION = "chaos_tune_model_surgeon"
     CATEGORY = "Arthemy/Krea2 Tuners"
 
-    def chaos_tune_model_surgeon(self, model, target_block, tune_mode, seed, chaos_strength, **kwargs):
+    def chaos_tune_model_surgeon(self, model: Any, target_block: str = "Block_1 (All 0-4)", tune_mode: str = "Block-Level", seed: int = 0, chaos_strength: float = 0.1, **kwargs: float) -> Tuple[Any, str]:
         selected = self.MODEL_TARGET_MAP.get(target_block, None)
         if selected is None:
             clean = target_block.strip().lstrip("↳").strip()
@@ -1109,7 +1109,7 @@ class ArthemyKrea2CLIPChaosBlockSurgeonTuner(BaseSurgeonTuner):
     FUNCTION = "chaos_tune_clip_surgeon"
     CATEGORY = "Arthemy/Krea2 Tuners"
 
-    def chaos_tune_clip_surgeon(self, clip, target_layer, tune_mode, seed, chaos_strength, **kwargs):
+    def chaos_tune_clip_surgeon(self, clip: Any, target_layer: str = "Layer_1 (All 0-4)", tune_mode: str = "Block-Level", seed: int = 0, chaos_strength: float = 0.1, **kwargs: float) -> Tuple[Any, str]:
         selected = self.CLIP_TARGET_MAP.get(target_layer, None)
         if selected is None:
             clean = target_layer.strip().lstrip("↳").strip()
@@ -1320,7 +1320,7 @@ class ArthemyKrea2LoraBlockLoader(BaseKrea2Node):
     FUNCTION = "load_lora"
     CATEGORY = "Arthemy/Krea2 LoRA"
 
-    def load_lora(self, model, clip, lora_name, strength_model, strength_clip, **kwargs):
+    def load_lora(self, model: Any, clip: Any, lora_name: str, strength_model: float = 1.0, strength_clip: float = 1.0, **kwargs: float) -> Tuple[Any, Any, str]:
         if strength_model == 0 and strength_clip == 0:
             return (model, clip, "LoRA bypassed (strength 0)")
         lora_path = folder_paths.get_full_path("loras", lora_name)
@@ -1382,7 +1382,7 @@ class ArthemyKrea2LoadSubBlockLora(BaseKrea2Node):
     FUNCTION = "load_sub_block_lora"
     CATEGORY = "Arthemy/Krea2 LoRA"
 
-    def load_sub_block_lora(self, model, clip, lora_name, strength_model, strength_clip, target_block, **kwargs):
+    def load_sub_block_lora(self, model: Any, clip: Any, lora_name: str, strength_model: float = 1.0, strength_clip: float = 1.0, target_block: str = "Block_1 (All 0-4)", **kwargs: float) -> Tuple[Any, Any, str]:
         if strength_model == 0 and strength_clip == 0:
             return (model, clip, "LoRA bypassed (strength 0)")
 
@@ -1450,7 +1450,7 @@ class ArthemyKrea2LoadChaosLoraBlockSurgeon(BaseSurgeonTuner):
     FUNCTION = "load_chaos_lora_surgeon"
     CATEGORY = "Arthemy/Krea2 LoRA"
 
-    def load_chaos_lora_surgeon(self, model, clip, lora_name, strength_model, strength_clip, target_block, seed, base_chance, **kwargs):
+    def load_chaos_lora_surgeon(self, model: Any, clip: Any, lora_name: str, strength_model: float = 1.0, strength_clip: float = 1.0, target_block: str = "Block_1 (All 0-4)", seed: int = 0, base_chance: float = 0.5, **kwargs: float) -> Tuple[Any, Any, str]:
         if strength_model == 0 and strength_clip == 0:
             return (model, clip, "LoRA bypassed (strength 0)")
 
@@ -1510,7 +1510,7 @@ class ArthemyKrea2ResetPatcher(BaseKrea2Node):
     FUNCTION = "reset"
     CATEGORY = "Arthemy/Krea2 Utilities"
 
-    def reset(self, model, clip, reset_model=True, reset_clip=True):
+    def reset(self, model: Any, clip: Any, reset_model: bool = True, reset_clip: bool = True) -> Tuple[Any, Any, str]:
         m = model.clone() if reset_model else model
         c = clip.clone() if reset_clip else clip
         m_p = get_patcher(m)
@@ -1526,7 +1526,7 @@ class ArthemyKrea2ResetPatcher(BaseKrea2Node):
 # ==============================================================================
 # POINT 3 IMPLEMENTATION: MODEL BAKER WITH STREAM GENERATOR
 # ==============================================================================
-def isolate_and_assign_baked_weights(patcher, baked_weights: dict):
+def isolate_and_assign_baked_weights(patcher: Any, baked_weights: Dict[str, torch.Tensor]) -> None:
     """Safely isolates mutated parameters onto a cloned module hierarchy without in-place mutating shared base weights."""
     if not baked_weights or not hasattr(patcher, "model"):
         if hasattr(patcher, "patches"): patcher.patches = {}
@@ -1588,7 +1588,7 @@ class ArthemyKrea2ModelBaker(BaseKrea2Node):
     FUNCTION = "bake"
     CATEGORY = "Arthemy/Krea2 Utilities"
 
-    def bake(self, model, clip):
+    def bake(self, model: Any, clip: Any) -> Tuple[Any, Any, str]:
         m_baked = model.clone()
         c_baked = clip.clone()
 
@@ -1643,7 +1643,7 @@ class ArthemyKrea2ModelBaker(BaseKrea2Node):
 # VISUALIZER NODES
 # ==============================================================================
 
-def parse_patch_entry(p):
+def parse_patch_entry(p: Any) -> Tuple[float, bool, bool]:
     """Analyzes a patch entry tuple (strength_patch, diff, strength_model)
     and returns (offset_delta, is_lora, is_chaos)."""
     if not isinstance(p, tuple):
@@ -1695,7 +1695,7 @@ def parse_patch_entry(p):
     return offset_delta, is_lora, is_chaos
 
 
-def render_visualizer_image(graph_data: list, title: str, is_clip: bool, visual_scale: float = 1.0, width: int = 960, height: int = 480) -> torch.Tensor:
+def render_visualizer_image(graph_data: List[Dict[str, Any]], title: str, is_clip: bool = False, visual_scale: float = 1.0, width: int = 960, height: int = 480) -> torch.Tensor:
     """Renders high-quality visualizer HUD image using PIL and converts to PyTorch IMAGE tensor [1, H, W, 3]."""
     img = Image.new("RGB", (width, height), color=(15, 23, 42)) # #0f172a
     draw = ImageDraw.Draw(img)
@@ -1769,7 +1769,7 @@ def render_visualizer_image(graph_data: list, title: str, is_clip: bool, visual_
             else:
                 draw.line([(x1, prev_y), (x1, y_val), (x2, y_val)], fill=current_color, width=3 if is_lora else 2)
 
-    # 6. X-Axis Section Labels
+    # 6. X-Axis Section Labels (derived dynamically from graph_data points)
     axis_y = top_y + chart_h + 4
     groups = [
         {"label": "B1", "endIdx": 4}, {"label": "B2", "endIdx": 9},
@@ -1783,7 +1783,8 @@ def render_visualizer_image(graph_data: list, title: str, is_clip: bool, visual_
         {"label": "L7", "endIdx": 35}, {"label": "EM", "endIdx": 36}
     ]
 
-    step_x = chart_w / (31 if not is_clip else 37)
+    num_points = max(len(graph_data), 1) if graph_data else (31 if not is_clip else 37)
+    step_x = chart_w / num_points
     start_idx = 0
     for g in groups:
         end_x = padding_x + int((g["endIdx"] + 1) * step_x)
@@ -1824,7 +1825,7 @@ class ArthemyKrea2ModelVisualizer(BaseKrea2Node):
     FUNCTION = "visualize"
     CATEGORY = "Arthemy/Visualizers"
 
-    def visualize(self, model, scale=1.0, image_width=960, image_height=480):
+    def visualize(self, model: Any, scale: float = 1.0, image_width: int = 960, image_height: int = 480) -> Dict[str, Any]:
         m_patcher = get_patcher(model)
         patches = getattr(m_patcher, "patches", {}) if m_patcher else {}
 
@@ -1908,7 +1909,7 @@ class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
     FUNCTION = "visualize"
     CATEGORY = "Arthemy/Visualizers"
 
-    def visualize(self, clip, scale=1.0, image_width=960, image_height=480):
+    def visualize(self, clip: Any, scale: float = 1.0, image_width: int = 960, image_height: int = 480) -> Dict[str, Any]:
         c_patcher = get_patcher(clip)
         patches = getattr(c_patcher, "patches", {}) if c_patcher else {}
 
@@ -1960,7 +1961,7 @@ class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
 # PRESET NODES (SAVER & LOADER)
 # ==============================================================================
 
-def extract_patch_multipliers(patcher) -> Tuple[Dict[str, float], int, int]:
+def extract_patch_multipliers(patcher: Any) -> Tuple[Dict[str, float], int, int]:
     """Extracts pure scalar offset multipliers from active patches in a ModelPatcher.
     Returns (scalar_offsets_dict, lora_patches_count, chaos_patches_count)."""
     if patcher is None or not hasattr(patcher, "patches"):
@@ -2008,7 +2009,7 @@ class ArthemyKrea2PresetSaver(BaseKrea2Node):
     FUNCTION = "save_preset"
     CATEGORY = "Arthemy/Presets"
 
-    def save_preset(self, model, clip, preset_name="my_arthemy_preset", author="Arthemy"):
+    def save_preset(self, model: Any, clip: Any, preset_name: str = "my_arthemy_preset", author: str = "Arthemy") -> Tuple[str, str]:
         m_p = get_patcher(model)
         c_p = get_patcher(clip)
 
@@ -2088,7 +2089,7 @@ class ArthemyKrea2PresetLoader(BaseKrea2Node):
     FUNCTION = "load_preset"
     CATEGORY = "Arthemy/Presets"
 
-    def load_preset(self, model, clip, preset, strength_model=1.0, strength_clip=1.0):
+    def load_preset(self, model: Any, clip: Any, preset: str, strength_model: float = 1.0, strength_clip: float = 1.0) -> Tuple[Any, Any, str]:
         if not preset or preset == "None":
             return (model, clip, "No preset selected.")
 
