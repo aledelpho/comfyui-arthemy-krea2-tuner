@@ -569,6 +569,26 @@ class BaseSurgeonTuner(BaseKrea2Node):
         if patches_to_add:
             t_start = time.time()
             add_patches_to_front(clone_obj, patches_to_add, 1.0)
+
+            # Record deterministic Chaos recipe for preset persistence
+            if chaos_params is not None:
+                clone_patcher = get_patcher(clone_obj)
+                if hasattr(clone_patcher, "model_options"):
+                    if "arthemy_chaos_recipes" not in clone_patcher.model_options:
+                        clone_patcher.model_options["arthemy_chaos_recipes"] = []
+                    else:
+                        clone_patcher.model_options["arthemy_chaos_recipes"] = list(clone_patcher.model_options["arthemy_chaos_recipes"])
+                    
+                    recipe_entry = {
+                        "domain": "clip" if is_clip else "model",
+                        "selected_indices": sorted(list(selected_indices)),
+                        "tune_mode": chaos_params.get("tune_mode", "Block-Level"),
+                        "seed": chaos_params.get("seed", 42),
+                        "chaos_strength": chaos_params.get("chaos_strength", 0.1),
+                        "chances": {k: v for k, v in kwargs.items() if v > 0.0}
+                    }
+                    clone_patcher.model_options["arthemy_chaos_recipes"].append(recipe_entry)
+
             logger.info(f"[Arthemy Profiler] {'CLIP' if is_clip else 'Model'} Surgeon | "
                         f"{time.time()-t_start:.4f}s | {active_count} patches | selected: {sorted(selected_indices)}")
 
@@ -1907,22 +1927,33 @@ class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
 # PRESET NODES (SAVER & LOADER)
 # ==============================================================================
 
-def extract_patch_multipliers(patcher) -> dict:
-    """Extracts scalar offset multipliers from active patches in a ModelPatcher."""
+def extract_patch_multipliers(patcher) -> Tuple[Dict[str, float], int, int]:
+    """Extracts pure scalar offset multipliers from active patches in a ModelPatcher.
+    Returns (scalar_offsets_dict, lora_patches_count, chaos_patches_count)."""
     if patcher is None or not hasattr(patcher, "patches"):
-        return {}
+        return {}, 0, 0
     extracted = {}
+    lora_count = 0
+    chaos_count = 0
     for k, patch_list in patcher.patches.items():
         if not patch_list:
             continue
-        total_offset = 0.0
+        total_scalar_offset = 0.0
+        has_scalar = False
         for p in patch_list:
             off, is_lora, is_chaos = parse_patch_entry(p)
-            total_offset += off
-        if round(total_offset, 6) != 0.0:
+            if is_lora:
+                lora_count += 1
+            elif is_chaos:
+                chaos_count += 1
+            else:
+                total_scalar_offset += off
+                has_scalar = True
+
+        if has_scalar and round(total_scalar_offset, 6) != 0.0:
             clean_k = Krea2TensorParser.clean_key(k)
-            extracted[clean_k] = round(total_offset, 6)
-    return extracted
+            extracted[clean_k] = round(total_scalar_offset, 6)
+    return extracted, lora_count, chaos_count
 
 
 class ArthemyKrea2PresetSaver(BaseKrea2Node):
@@ -1949,14 +1980,24 @@ class ArthemyKrea2PresetSaver(BaseKrea2Node):
         m_p = get_patcher(model)
         c_p = get_patcher(clip)
 
-        model_patches = extract_patch_multipliers(m_p)
-        clip_patches = extract_patch_multipliers(c_p)
+        model_patches, m_lora, m_chaos = extract_patch_multipliers(m_p)
+        clip_patches, c_lora, c_chaos = extract_patch_multipliers(c_p)
 
-        if not model_patches and not clip_patches:
-            logger.warning("[ARTHEMY PRESET SAVER] No active patches detected on Model or CLIP.")
+        # Collect deterministic Chaos recipes
+        m_recipes = m_p.model_options.get("arthemy_chaos_recipes", []) if hasattr(m_p, "model_options") else []
+        c_recipes = c_p.model_options.get("arthemy_chaos_recipes", []) if hasattr(c_p, "model_options") else []
+        combined_chaos_recipes = list(m_recipes) + list(c_recipes)
 
-        safe_name = re.sub(r'[^\w\-_\.]', '_', preset_name.strip())
-        if not safe_name.endswith(".json"):
+        total_lora = m_lora + c_lora
+        if total_lora > 0:
+            logger.warning(f"[ARTHEMY PRESET SAVER] Warning: {total_lora} active LoRA patch tensors detected. "
+                           "LoRAs are excluded from lightweight presets. Use Model Saver/Baker to fuse LoRA weights permanently.")
+
+        if not model_patches and not clip_patches and not combined_chaos_recipes:
+            logger.warning("[ARTHEMY PRESET SAVER] No active tunings or chaos recipes detected on Model or CLIP.")
+
+        safe_name = preset_name.strip()
+        if not safe_name.endswith(".json") and not safe_name.endswith(".arthemy"):
             safe_name += ".json"
 
         save_dirs = folder_paths.get_folder_paths("arthemy_presets")
@@ -1965,23 +2006,28 @@ class ArthemyKrea2PresetSaver(BaseKrea2Node):
         file_path = os.path.join(save_dir, safe_name)
 
         preset_data = {
-            "name": preset_name.replace(".json", ""),
+            "name": re.sub(r'\.(json|arthemy)$', '', safe_name),
             "author": author.strip() if author else "Arthemy",
             "description": description.strip() if description else "",
             "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "version": "1.0",
+            "version": "2.0",
             "stats": {
                 "model_patched_layers": len(model_patches),
                 "clip_patched_layers": len(clip_patches),
+                "chaos_recipes_count": len(combined_chaos_recipes),
+                "excluded_lora_tensors": total_lora,
             },
             "model_patches": model_patches,
             "clip_patches": clip_patches,
+            "chaos_recipes": combined_chaos_recipes,
         }
 
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(preset_data, f, indent=2, ensure_ascii=False)
 
-        info = f"Preset saved: '{safe_name}' ({len(model_patches)} model layers, {len(clip_patches)} clip layers)"
+        info = f"Preset saved: '{safe_name}' ({len(model_patches)} model, {len(clip_patches)} clip, {len(combined_chaos_recipes)} chaos recipes)"
+        if total_lora > 0:
+            info += f" | ⚠️ {total_lora} LoRA tensors excluded"
         logger.info(f"[ARTHEMY PRESET SAVER] {info} -> {file_path}")
         return (file_path, info)
 
@@ -2020,37 +2066,92 @@ class ArthemyKrea2PresetLoader(BaseKrea2Node):
 
         m = model.clone()
         c = clip.clone()
+        m_p = get_patcher(m)
+        c_p = get_patcher(c)
+
+        m_sd = m_p.model.state_dict() if hasattr(m_p, 'model') else {}
+        c_sd = c_p.model.state_dict() if hasattr(c_p, 'model') else {}
 
         model_patches = data.get("model_patches", {})
         clip_patches = data.get("clip_patches", {})
+        chaos_recipes = data.get("chaos_recipes", [])
 
-        n_model = 0
-        n_clip = 0
+        n_model_matched = 0
+        n_model_unmatched = 0
+        n_clip_matched = 0
+        n_clip_unmatched = 0
 
+        # 1. Apply scalar model patches with state-dict key resolution
         if model_patches and strength_model != 0.0:
             m_patches_to_add = {}
             for k, off in model_patches.items():
-                scaled_off = off * strength_model
-                if scaled_off != 0.0:
-                    patch_k = f"diffusion_model.{k}" if not k.startswith("diffusion_model.") else k
-                    m_patches_to_add[patch_k] = (1.0 + scaled_off,)
-                    n_model += 1
+                target_k = resolve_target_key(m_p, k, model_sd=m_sd)
+                if target_k in m_sd:
+                    scaled_off = off * strength_model
+                    if scaled_off != 0.0:
+                        m_patches_to_add[target_k] = (1.0 + scaled_off,)
+                        n_model_matched += 1
+                else:
+                    n_model_unmatched += 1
             if m_patches_to_add:
                 add_patches_to_front(m, m_patches_to_add, 1.0)
 
+        # 2. Apply scalar CLIP patches with state-dict key resolution
         if clip_patches and strength_clip != 0.0:
             c_patches_to_add = {}
             for k, off in clip_patches.items():
-                scaled_off = off * strength_clip
-                if scaled_off != 0.0:
-                    c_patches_to_add[k] = (1.0 + scaled_off,)
-                    n_clip += 1
+                target_k = resolve_target_key(c_p, k, model_sd=c_sd)
+                if target_k in c_sd:
+                    scaled_off = off * strength_clip
+                    if scaled_off != 0.0:
+                        c_patches_to_add[target_k] = (1.0 + scaled_off,)
+                        n_clip_matched += 1
+                else:
+                    n_clip_unmatched += 1
             if c_patches_to_add:
                 add_patches_to_front(c, c_patches_to_add, 1.0)
 
+        # 3. Deterministically regenerate Chaos recipes
+        n_chaos_applied = 0
+        for r in chaos_recipes:
+            domain = r.get("domain", "model")
+            selected_indices = set(r.get("selected_indices", []))
+            tune_mode = r.get("tune_mode", "Block-Level")
+            seed = r.get("seed", 42)
+            base_strength = r.get("chaos_strength", 0.1)
+            chances = r.get("chances", {})
+
+            if domain == "model" and strength_model != 0.0:
+                effective_strength = base_strength * strength_model
+                chaos_p = {"tune_mode": tune_mode, "seed": seed, "chaos_strength": effective_strength}
+                m, _ = BaseSurgeonTuner()._execute_surgeon_tuning(
+                    m, is_clip=False, selected_indices=selected_indices,
+                    surgeon_map=Krea2TensorParser.MODEL_SURGEON_MAP,
+                    kwargs=chances, chaos_params=chaos_p
+                )
+                n_chaos_applied += 1
+            elif domain == "clip" and strength_clip != 0.0:
+                effective_strength = base_strength * strength_clip
+                chaos_p = {"tune_mode": tune_mode, "seed": seed, "chaos_strength": effective_strength}
+                c, _ = BaseSurgeonTuner()._execute_surgeon_tuning(
+                    c, is_clip=True, selected_indices=selected_indices,
+                    surgeon_map=Krea2TensorParser.CLIP_SURGEON_MAP,
+                    kwargs=chances, chaos_params=chaos_p
+                )
+                n_chaos_applied += 1
+
         preset_name = data.get("name", preset)
         author = data.get("author", "Unknown")
-        info = f"Loaded Preset '{preset_name}' by {author} | Model: {n_model} layers (x{strength_model:.2f}), CLIP: {n_clip} layers (x{strength_clip:.2f})"
+
+        info_parts = [f"Loaded Preset '{preset_name}' by {author}"]
+        info_parts.append(f"Model: {n_model_matched} scalar layers (x{strength_model:.2f})")
+        info_parts.append(f"CLIP: {n_clip_matched} scalar layers (x{strength_clip:.2f})")
+        if n_chaos_applied > 0:
+            info_parts.append(f"Chaos: {n_chaos_applied} deterministic recipes")
+        if n_model_unmatched > 0 or n_clip_unmatched > 0:
+            info_parts.append(f"⚠️ Unmatched keys: {n_model_unmatched} model, {n_clip_unmatched} clip")
+
+        info = " | ".join(info_parts)
         logger.info(f"[ARTHEMY PRESET LOADER] {info}")
         return (m, c, info)
 
