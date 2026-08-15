@@ -49,20 +49,63 @@ All tuner sliders operate as **offsets from baseline** (`0.00 = 1.0x / no change
 - **Vectors Override**: Pass comma-separated float strings to configure all layer weights in a single string (34 values for Model, 8 values for CLIP).
 - **Granular JSON**: Pass custom JSON key-value maps to target specific sub-tensor prefixes with custom weights.
 
-## 💾 Preset System (Lightweight Sharing)
+## 💾 Preset System (Lightweight Sharing & Reproduction)
 
-The suite includes a lightweight (~1–2 KB), deterministic preset system that allows saving, sharing, and reloading complex Model & CLIP tuning setups without exporting multi-gigabyte model weights.
+The suite includes a high-performance, deterministic preset system designed to save, share, and reload complex Model, CLIP, and Chaos tuning configurations without exporting multi-gigabyte safetensors files. Presets are stored as lightweight **`.json`** files (~1–2 KB).
 
-### 🌟 Key Features
-- **Deterministic Chaos Preservation (Bit-Exact)**: Rather than lossy weight averaging, presets store the exact pseudo-random generation recipes (`seed`, `chaos_strength`, `tune_mode`, and component probability rolls). When loaded, the exact identical mathematical perturbation tensor is deterministically reproduced bit-by-bit (`diff = 0.0`).
-- **Independent Scaling Multipliers**: The `Preset Loader` provides `strength_model` and `strength_clip` controls to freely scale the preset's intensity (e.g. `0.5` = 50%, `1.2` = amplified).
-- **Full Visualizer Fidelity & Stacking**: Loaded presets immediately render on `Model Visualizer` and `CLIP Visualizer`. Additional tuners can be chained downstream to further customize the loaded preset.
-- **LoRA Transparency**: Presets focus exclusively on Model, CLIP, and Chaos tunings. If active LoRAs are present on the graph during preset saving, an informative warning is logged and the user is guided to use `Model Baker` or `Model Saver` to bake LoRA weights permanently.
+```
+[ Model / CLIP Loaders ] ──> [ Tuners / Chaos Nodes ] ──> [ 🟦🟨💾 Preset Saver ] ──> exports .json preset
+                                                                    │
+[ Model / CLIP Loaders ] ──> [ 🟦🟨📂 Preset Loader ] ──> [ Visualizers / KSampler ]
+```
 
-### 📂 Preset Storage Locations
-Presets (`.json`) can be placed in either:
-- `ComfyUI/models/arthemy_presets/`
-- `ComfyUI/custom_nodes/comfyui-arthemy-krea2-tuner/presets/`
+---
+
+### 🟦🟨💾 Preset Saver (`ArthemyKrea2PresetSaver`)
+Captures all active tuning states across the Model and CLIP patchers and serializes them into a clean JSON recipe.
+
+* **Inputs**:
+  * `model`: The tuned `MODEL` pipeline.
+  * `clip`: The tuned `CLIP` pipeline.
+  * `preset_name` (`STRING`): Output filename (e.g. `Cinematic_Comic_Punch.json`). Automatically sanitized against path-traversal.
+  * `author` (`STRING`, optional): Creator credit stored in the preset metadata.
+* **Capabilities**:
+  * **Pure Scalar Extraction**: Isolates layer multipliers and computes net offsets for every modified block and sub-tensor.
+  * **Chaos Recipe Persistence**: Automatically captures active Chaos generator parameters (`seed`, `chaos_strength`, `tune_mode`, `chances`, `selected_indices`) attached to the graph.
+  * **LoRA Isolation & Safety**: Excludes heavy LoRA weight tensors from the preset file to keep it ultra-compact (~1.5 KB), logging a clear notice to use `Model Baker` or `Model Saver` if permanent LoRA baking is desired.
+* **Storage Path**: Presets are automatically saved to `ComfyUI/models/arthemy_presets/`.
+
+---
+
+### 🟦🟨📂 Preset Loader (`ArthemyKrea2PresetLoader`)
+Loads any `.json` preset from disk, dynamically resolves model architecture keys, and reconstructs the exact tuning state.
+
+* **Inputs**:
+  * `model`: Base `MODEL` input.
+  * `clip`: Base `CLIP` input.
+  * `preset` (`COMBO`): Dropdown list of all `.json` presets found in `models/arthemy_presets/` and `custom_nodes/.../presets/`.
+  * `strength_model` (`FLOAT`, default `1.0`): Global scaling multiplier for all model patches in the preset (`0.5` = 50% strength, `1.5` = 150% amplified).
+  * `strength_clip` (`FLOAT`, default `1.0`): Global scaling multiplier for all CLIP text encoder patches.
+* **Key Resolution & Universal Architecture Support**:
+  * Utilizes dynamic suffix matching (`resolve_target_key`) to seamlessly map preset layers to:
+    * Standard Krea-2 DiT blocks (`diffusion_model.blocks.0...` / `blocks.0...`)
+    * Qwen3 0.6B text encoders (`model.layers.0...`)
+    * Qwen3-VL 4B language models (`model.language_model.layers.0...`)
+    * ComfyUI Krea-2 Vision-Language Text Encoders (`qwen3vl_4b.transformer.model.layers.0...` via `Krea2TEModel_`)
+* **Bit-Exact Deterministic Chaos Reproduction**:
+  * Rather than saving lossy weight averages, the Loader re-executes the exact pseudo-random seed equation:
+    $$\text{fast\_seed} = (\text{CRC32}(\text{key}) \oplus \text{base\_seed}) \pmod{2^{31}}$$
+  * Produces an identical mathematical perturbation tensor on any hardware with zero difference ($\Delta = 0.0$).
+* **Stacking & Visualizer Monitoring**:
+  * Presets can be chained with additional downstream Tuner nodes for further customization.
+  * Patches applied by Preset Loader immediately render on both `Model Visualizer` (Cyan) and `CLIP Visualizer` (Gold).
+
+---
+
+### 📂 Preset File Storage
+Presets can be placed in either of the following directories:
+* `ComfyUI/models/arthemy_presets/` (Primary user directory)
+* `ComfyUI/custom_nodes/comfyui-arthemy-krea2-tuner/presets/` (Packaged starter presets)
 
 ---
 
