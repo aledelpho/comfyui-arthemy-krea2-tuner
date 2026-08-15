@@ -439,13 +439,17 @@ def soft_target_weight(delta: float, mode: str = "Soft Value") -> float:
 
 def get_clean_weight(patcher, key: str, current_weight: torch.Tensor) -> torch.Tensor:
     if hasattr(patcher, "backup") and key in patcher.backup:
-        return patcher.backup[key]
+        b = patcher.backup[key]
+        if isinstance(b, tuple) and len(b) > 0:
+            return b[0] if isinstance(b[0], torch.Tensor) else current_weight
+        if isinstance(b, torch.Tensor):
+            return b
     return current_weight
 
-def dequantize_weight(weight: torch.Tensor, scale: Any = None) -> torch.Tensor:
+def dequantize_weight(weight: Any, scale: Any = None) -> torch.Tensor:
     """Converts FP8 tensors to FP32, multiplying by companion scale factor if present."""
-    if weight is None:
-        return None
+    if weight is None or not isinstance(weight, torch.Tensor):
+        return weight
     if weight.dtype in (torch.float8_e4m3fn, torch.float8_e5m2):
         fp32_w = weight.to(torch.float32)
         if scale is not None:
@@ -1166,33 +1170,75 @@ class ArthemyKrea2CLIPSaver(BaseKrea2Node):
 # LORA TRIO (Block Loader, Sub-Block, Sub-Block Chaos) & UTILITIES
 # ==============================================================================
 class ArthemyKrea2LoraBlockLoader(BaseKrea2Node):
-    """Tier 1: Global and standard LoRA loading for Krea-2 and CLIP."""
+    """Tier 1: Block-selective LoRA loading for Krea-2 and CLIP with per-section control."""
+    GROUP_MAP = {
+        "Text_Fusion": ["txtfusion.", "txtmlp."],
+        "Time_Embed": ["tmlp.", "tproj."],
+        "Projection": ["first.", "last."],
+        "Block_1": ["blocks.0.", "blocks.1.", "blocks.2.", "blocks.3.", "blocks.4."],
+        "Block_2": ["blocks.5.", "blocks.6.", "blocks.7.", "blocks.8.", "blocks.9."],
+        "Block_3": ["blocks.10.", "blocks.11.", "blocks.12.", "blocks.13.", "blocks.14."],
+        "Block_4": ["blocks.15.", "blocks.16.", "blocks.17.", "blocks.18.", "blocks.19."],
+        "Block_5": ["blocks.20.", "blocks.21.", "blocks.22.", "blocks.23."],
+        "Block_6": ["blocks.24.", "blocks.25.", "blocks.26.", "blocks.27."],
+    }
+    ORDERED_KEYS = list(GROUP_MAP.keys())
+
     @classmethod
     def INPUT_TYPES(s):
         lora_list = folder_paths.get_filename_list("loras")
-        return {
+        inputs = {
             "required": {
                 "model": ("MODEL",), "clip": ("CLIP",),
                 "lora_name": (lora_list,),
-                "strength_model": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "strength_clip": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
+                "strength_model": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01,
+                                            "tooltip": "Global master multiplier for Model LoRA strength."}),
+                "strength_clip": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01,
+                                           "tooltip": "Global master multiplier for CLIP LoRA strength."}),
             }
         }
+        for name in s.ORDERED_KEYS:
+            inputs["required"][name] = ("FLOAT", {"default": 0.00, "min": -99.00, "max": 99.00, "step": 0.01,
+                                                    "tooltip": f"LoRA multiplier for section {name} (0.00 = off, 1.00 = 100% strength)."})
+        return inputs
 
     RETURN_TYPES = ("MODEL", "CLIP", "STRING")
     RETURN_NAMES = ("MODEL", "CLIP", "info")
     FUNCTION = "load_lora"
     CATEGORY = "Arthemy/Krea2 LoRA"
 
-    def load_lora(self, model, clip, lora_name, strength_model, strength_clip):
+    def load_lora(self, model, clip, lora_name, strength_model, strength_clip, **kwargs):
         if strength_model == 0 and strength_clip == 0:
             return (model, clip, "LoRA bypassed (strength 0)")
         lora_path = folder_paths.get_full_path("loras", lora_name)
         if not lora_path or not os.path.exists(lora_path):
             raise FileNotFoundError(f"Arthemy Suite Error: LoRA '{lora_name}' not found in ComfyUI loras directory.")
+        
         lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
-        m, c = comfy.sd.load_lora_for_models(model, clip, lora, strength_model, strength_clip)
-        return (m, c, f"Loaded LoRA: {lora_name}")
+        filtered_lora = {}
+
+        for k, v in lora.items():
+            clean_k = Krea2TensorParser.clean_key(k)
+            matched_group = None
+            for group_name, prefixes in self.GROUP_MAP.items():
+                if any(clean_k.startswith(pfx) or f".{pfx}" in clean_k for pfx in prefixes):
+                    matched_group = group_name
+                    break
+
+            if matched_group:
+                block_mult = kwargs.get(matched_group, 0.00)
+                if block_mult != 0.00:
+                    filtered_lora[k] = v * block_mult
+            else:
+                filtered_lora[k] = v
+
+        if not filtered_lora:
+            return (model, clip, f"LoRA '{lora_name}' bypassed (all selected block strengths are 0.00)")
+
+        m, c = comfy.sd.load_lora_for_models(model, clip, filtered_lora, strength_model, strength_clip)
+        active_sections = [sec for sec in self.ORDERED_KEYS if kwargs.get(sec, 0.00) != 0.00]
+        sec_str = ", ".join(active_sections) if active_sections else "CLIP/Global"
+        return (m, c, f"Loaded LoRA '{lora_name}' on sections [{sec_str}] ({len(filtered_lora)} keys)")
 
 
 class ArthemyKrea2LoadSubBlockLora(BaseKrea2Node):
@@ -1501,14 +1547,19 @@ def parse_patch_entry(p):
     if strength_model != 1.0:
         offset_delta += (strength_model - 1.0)
 
-    # Only evaluate tensor payload for LoRA or Chaos if strength_patch != 0.0
-    # (strength_patch == 0.0 indicates a scalar tuner patch where the 2D tensor is solely for VBAR memory alignment)
-    if strength_patch != 0.0:
+    # Unwrap nested tuple structures used by ComfyUI LoRA patchers
+    while isinstance(diff, (tuple, list)) and len(diff) == 1 and isinstance(diff[0], (tuple, list, torch.Tensor)):
+        diff = diff[0]
+
+    # Check for modern ComfyUI LoRAAdapter / WeightAdapter object
+    diff_type_name = type(diff).__name__
+    if "LoRA" in diff_type_name or "Lora" in diff_type_name or "Adapter" in diff_type_name or hasattr(diff, "weights") or hasattr(diff, "lora_a"):
+        is_lora = True
+    elif strength_patch != 0.0:
         if isinstance(diff, (tuple, list)):
-            if len(diff) >= 2:
-                if any(isinstance(x, torch.Tensor) and x.ndim >= 2 for x in diff):
-                    is_lora = True
-                    offset_delta += strength_patch * 0.10
+            has_tensors = any(isinstance(x, torch.Tensor) for x in diff)
+            if has_tensors or len(diff) >= 2:
+                is_lora = True
             elif len(diff) == 1:
                 val = diff[0]
                 if isinstance(val, (int, float)):
@@ -1531,7 +1582,6 @@ def parse_patch_entry(p):
     return offset_delta, is_lora, is_chaos
 
 
-
 def render_visualizer_image(graph_data: list, title: str, is_clip: bool, visual_scale: float = 1.0, width: int = 960, height: int = 480) -> torch.Tensor:
     """Renders high-quality visualizer HUD image using PIL and converts to PyTorch IMAGE tensor [1, H, W, 3]."""
     img = Image.new("RGB", (width, height), color=(15, 23, 42)) # #0f172a
@@ -1541,20 +1591,25 @@ def render_visualizer_image(graph_data: list, title: str, is_clip: bool, visual_
     lora_color = (208, 0, 255) # Neon Purple
 
     padding_x = int(width * 0.03)
-    top_y = int(height * 0.22)
+    top_y = int(height * 0.08)
     chart_w = width - (padding_x * 2)
-    chart_h = max(60, height - top_y - int(height * 0.15))
+    chart_h = height - top_y - int(height * 0.12)
     center_y = top_y + (chart_h // 2)
 
     # 1. Outer container box
-    draw.rectangle([padding_x - 4, top_y - 20, padding_x + chart_w + 4, top_y + chart_h + 30], outline=base_color, width=2)
+    draw.rectangle([padding_x - 4, top_y - 20, padding_x + chart_w + 4, top_y + chart_h + 18], outline=base_color, width=2)
 
     # 2. Header title
-    draw.text((padding_x, top_y - 18), title, fill=base_color)
+    draw.text((padding_x + 4, top_y - 18), title, fill=base_color)
 
     # 3. Header legend & scale
+    leg_x = padding_x + 180
+    draw.text((leg_x, top_y - 18), "■ Base", fill=base_color)
+    draw.text((leg_x + 75, top_y - 18), "■ LoRA", fill=lora_color)
+    draw.text((leg_x + 150, top_y - 18), "^ Chaos", fill=(255, 255, 255, 200))
+
     scale_str = f"Scale: {visual_scale:.1f}x"
-    draw.text((width - padding_x - 100, top_y - 18), scale_str, fill=(255, 255, 255, 150))
+    draw.text((width - padding_x - 110, top_y - 18), scale_str, fill=(255, 255, 255, 180))
 
     # 4. Zero baseline axis
     for x in range(padding_x, padding_x + chart_w, 8):
@@ -1602,7 +1657,7 @@ def render_visualizer_image(graph_data: list, title: str, is_clip: bool, visual_
                 draw.line([(x1, prev_y), (x1, y_val), (x2, y_val)], fill=current_color, width=3 if is_lora else 2)
 
     # 6. X-Axis Section Labels
-    axis_y = top_y + chart_h + 8
+    axis_y = top_y + chart_h + 4
     groups = [
         {"label": "B1", "endIdx": 4}, {"label": "B2", "endIdx": 9},
         {"label": "B3", "endIdx": 14}, {"label": "B4", "endIdx": 19},
@@ -1627,6 +1682,17 @@ def render_visualizer_image(graph_data: list, title: str, is_clip: bool, visual_
 
     img_np = np.array(img).astype(np.float32) / 255.0
     return torch.from_numpy(img_np).unsqueeze(0)
+
+import uuid
+
+def save_temp_preview(vis_image_tensor: torch.Tensor, prefix: str = "vis") -> list:
+    """Saves a temporary preview PNG in ComfyUI's temp directory and returns the UI images list."""
+    temp_dir = folder_paths.get_temp_directory()
+    filename = f"{prefix}_{uuid.uuid4().hex[:8]}.png"
+    file_path = os.path.join(temp_dir, filename)
+    img_np = (vis_image_tensor.squeeze(0).cpu().numpy() * 255.0).clip(0, 255).astype(np.uint8)
+    Image.fromarray(img_np).save(file_path)
+    return [{"filename": filename, "subfolder": "", "type": "temp"}]
 
 
 class ArthemyKrea2ModelVisualizer(BaseKrea2Node):
@@ -1704,7 +1770,8 @@ class ArthemyKrea2ModelVisualizer(BaseKrea2Node):
         info = f"Model Visualizer: {modified_sections}/{len(self.SECTION_KEYS)} sections modified."
         logger.info(f"[ARTHEMY MODEL VISUALIZER] {info}")
         vis_image = render_visualizer_image(graph_data, "Krea-2 Model", is_clip=False, visual_scale=scale, width=image_width, height=image_height)
-        return {"ui": {"graph_data": graph_data, "scale": [scale], "title": ["Krea-2 Model"]}, "result": (model, vis_image, info)}
+        preview_ui = save_temp_preview(vis_image, "vis_model")
+        return {"ui": {"images": preview_ui, "graph_data": graph_data, "scale": [scale], "title": ["Krea-2 Model"]}, "result": (model, vis_image, info)}
 
 
 class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
@@ -1777,7 +1844,8 @@ class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
         info = f"CLIP Visualizer: {modified_sections}/{len(self.SECTION_KEYS)} sections modified."
         logger.info(f"[ARTHEMY CLIP VISUALIZER] {info}")
         vis_image = render_visualizer_image(graph_data, "Qwen3 Text Encoder", is_clip=True, visual_scale=scale, width=image_width, height=image_height)
-        return {"ui": {"graph_data": graph_data, "scale": [scale], "title": ["Qwen3 Text Encoder"]}, "result": (clip, vis_image, info)}
+        preview_ui = save_temp_preview(vis_image, "vis_clip")
+        return {"ui": {"images": preview_ui, "graph_data": graph_data, "scale": [scale], "title": ["Qwen3 Text Encoder"]}, "result": (clip, vis_image, info)}
 
 # ==============================================================================
 # NODE MAPPINGS & REGISTRATION (3x3 Grid + Savers & Utilities)
