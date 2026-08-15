@@ -47,11 +47,24 @@ app.registerExtension({
             nodeType.prototype.onExecuted = function (message) {
                 onExecuted?.apply(this, arguments);
                 const payload = message?.detail || message;
-                if (payload && payload.graph_data) {
-                    this.graphData = payload.graph_data;
-                    const scaleVal = Array.isArray(payload.scale) ? payload.scale[0] : payload.scale;
-                    this.visualScale = scaleVal || 1.0;
-                    const titleVal = Array.isArray(payload.title) ? payload.title[0] : payload.title;
+                if (payload) {
+                    let gData = payload.graph_data;
+                    while (Array.isArray(gData) && gData.length > 0 && Array.isArray(gData[0])) {
+                        gData = gData[0];
+                    }
+                    if (gData && Array.isArray(gData)) {
+                        this.graphData = gData;
+                    }
+                    let scaleVal = payload.scale;
+                    while (Array.isArray(scaleVal)) {
+                        scaleVal = scaleVal[0];
+                    }
+                    this.visualScale = (typeof scaleVal === "number") ? scaleVal : 1.0;
+
+                    let titleVal = payload.title;
+                    while (Array.isArray(titleVal)) {
+                        titleVal = titleVal[0];
+                    }
                     this.hudTitle = titleVal || (nodeData.name.includes("CLIP") ? "Qwen3 Text Encoder" : "Krea-2 Model");
                     this.setDirtyCanvas(true, true);
                 }
