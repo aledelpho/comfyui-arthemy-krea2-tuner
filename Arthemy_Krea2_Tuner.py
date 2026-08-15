@@ -130,9 +130,16 @@ class Krea2TensorParser:
 
     @staticmethod
     def clean_key(key: str) -> str:
-        for prefix in ("model.diffusion_model.", "diffusion_model.", "cond_stage_model.", "model."):
+        for prefix in (
+            "model.diffusion_model.", "diffusion_model.", "cond_stage_model.",
+            "model.language_model.", "model.", "transformer.model.", "transformer."
+        ):
             if key.startswith(prefix):
                 key = key[len(prefix):]
+        if ".transformer.model." in key:
+            key = key.split(".transformer.model.", 1)[1]
+        elif ".transformer." in key:
+            key = key.split(".transformer.", 1)[1]
         return key
 
     @classmethod
@@ -318,11 +325,17 @@ def resolve_target_key(patcher, k: str, model_sd: dict = None) -> str:
         f"model.language_model.{clean_k}",
         f"clip_model.{clean_k}",
         f"transformer.{clean_k}",
+        f"transformer.model.{clean_k}",
     )
 
     for cand in candidates:
         if cand in model_sd:
             return cand
+
+    # Dynamic suffix lookup: handles text encoders like "qwen3vl_4b.transformer.model.layers.0..."
+    for sd_k in model_sd.keys():
+        if sd_k.endswith(f".{clean_k}") or sd_k == clean_k:
+            return sd_k
 
     return k
 
