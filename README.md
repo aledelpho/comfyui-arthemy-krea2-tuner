@@ -49,6 +49,21 @@ All tuner sliders operate as **offsets from baseline** (`0.00 = 1.0x / no change
 - **Vectors Override**: Pass comma-separated float strings to configure all layer weights in a single string (34 values for Model, 8 values for CLIP).
 - **Granular JSON**: Pass custom JSON key-value maps to target specific sub-tensor prefixes with custom weights.
 
+## 💾 Preset System (Lightweight Sharing)
+
+The suite includes a lightweight (~1–2 KB), deterministic preset system that allows saving, sharing, and reloading complex Model & CLIP tuning setups without exporting multi-gigabyte model weights.
+
+### 🌟 Key Features
+- **Deterministic Chaos Preservation (Bit-Exact)**: Rather than lossy weight averaging, presets store the exact pseudo-random generation recipes (`seed`, `chaos_strength`, `tune_mode`, and component probability rolls). When loaded, the exact identical mathematical perturbation tensor is deterministically reproduced bit-by-bit (`diff = 0.0`).
+- **Independent Scaling Multipliers**: The `Preset Loader` provides `strength_model` and `strength_clip` controls to freely scale the preset's intensity (e.g. `0.5` = 50%, `1.2` = amplified).
+- **Full Visualizer Fidelity & Stacking**: Loaded presets immediately render on `Model Visualizer` and `CLIP Visualizer`. Additional tuners can be chained downstream to further customize the loaded preset.
+- **LoRA Transparency**: Presets focus exclusively on Model, CLIP, and Chaos tunings. If active LoRAs are present on the graph during preset saving, an informative warning is logged and the user is guided to use `Model Baker` or `Model Saver` to bake LoRA weights permanently.
+
+### 📂 Preset Storage Locations
+Presets (`.json` or `.arthemy`) can be placed in either:
+- `ComfyUI/models/arthemy_presets/`
+- `ComfyUI/custom_nodes/comfyui-arthemy-krea2-tuner/presets/`
+
 ---
 
 ## ⚙️ Architecture & Safety Standards

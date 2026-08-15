@@ -1497,10 +1497,12 @@ class ArthemyKrea2ResetPatcher(BaseKrea2Node):
         c = clip.clone() if reset_clip else clip
         m_p = get_patcher(m)
         c_p = get_patcher(c)
-        if reset_model and m_p and hasattr(m_p, "patches"):
-            m_p.patches = {}
-        if reset_clip and c_p and hasattr(c_p, "patches"):
-            c_p.patches = {}
+        if reset_model and m_p:
+            if hasattr(m_p, "patches"): m_p.patches = {}
+            if hasattr(m_p, "model_options"): m_p.model_options.pop("arthemy_chaos_recipes", None)
+        if reset_clip and c_p:
+            if hasattr(c_p, "patches"): c_p.patches = {}
+            if hasattr(c_p, "model_options"): c_p.model_options.pop("arthemy_chaos_recipes", None)
         return (m, c, "Reset patchers clean.")
 
 # ==============================================================================
@@ -1512,6 +1514,7 @@ def isolate_and_assign_baked_weights(patcher, baked_weights: dict):
         if hasattr(patcher, "patches"): patcher.patches = {}
         if hasattr(patcher, "backup"): patcher.backup = {}
         if hasattr(patcher, "object_patches"): patcher.object_patches = {}
+        if hasattr(patcher, "model_options"): patcher.model_options.pop("arthemy_chaos_recipes", None)
         return
     
     import copy
@@ -1549,6 +1552,8 @@ def isolate_and_assign_baked_weights(patcher, baked_weights: dict):
     patcher.patches = {}
     patcher.backup = {}
     patcher.object_patches = {}
+    if hasattr(patcher, "model_options"):
+        patcher.model_options.pop("arthemy_chaos_recipes", None)
 
 
 class ArthemyKrea2ModelBaker(BaseKrea2Node):
@@ -1996,9 +2001,14 @@ class ArthemyKrea2PresetSaver(BaseKrea2Node):
         if not model_patches and not clip_patches and not combined_chaos_recipes:
             logger.warning("[ARTHEMY PRESET SAVER] No active tunings or chaos recipes detected on Model or CLIP.")
 
-        safe_name = preset_name.strip()
-        if not safe_name.endswith(".json") and not safe_name.endswith(".arthemy"):
-            safe_name += ".json"
+        # Strict basename sanitization against path-traversal while preserving .json or .arthemy
+        raw_name = os.path.basename(preset_name.strip())
+        base_name, ext = os.path.splitext(raw_name)
+        safe_base = re.sub(r'[^\w\-_\.]', '_', base_name)
+        if not safe_base:
+            safe_base = "arthemy_preset"
+        target_ext = ext if ext.lower() in (".json", ".arthemy") else ".json"
+        safe_name = f"{safe_base}{target_ext}"
 
         save_dirs = folder_paths.get_folder_paths("arthemy_presets")
         save_dir = save_dirs[0] if save_dirs else arthemy_presets_dir
