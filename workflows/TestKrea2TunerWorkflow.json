@@ -719,8 +719,8 @@
       "id": 88,
       "type": "ArthemyKrea2ModelSaver",
       "pos": [
-        4950,
-        1390
+        4750,
+        1380
       ],
       "size": [
         280,
@@ -784,8 +784,8 @@
       "id": 89,
       "type": "ArthemyKrea2CLIPSaver",
       "pos": [
-        4950,
-        1530
+        4750,
+        1520
       ],
       "size": [
         280,
@@ -1794,38 +1794,7 @@
       ],
       "widgets_values_named": {
         "text": "WHAT IT DOES:\n• Adjusts the strength of entire block groups in the model (Blocks 1-6, Text Fusion, Time Embed, Projection).\n\nHOW TO USE:\n1. Mode: Use 'Soft Value' for gentle changes or 'Real Value' for direct scaling.\n2. Sliders: 0.00 means no change (1.0x baseline). Move above 0 to strengthen a group, below 0 to weaken it.\n3. Optional: Use 'vectors_override' or 'granular_json' for advanced custom values."
-      },
-      "color": "#432",
-      "bgcolor": "#653"
-    },
-    {
-      "id": 79,
-      "type": "Note",
-      "pos": [
-        1380,
-        2000
-      ],
-      "size": [
-        400,
-        320
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟦🔬 Model Sub-Block Tuner ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Adjusts specific internal parts inside a single model block (Attention Q/K/V/Out, SwiGLU MLP, Norms).\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block' you want to change.\n2. Adjust the sliders for the specific parts you want to tune (0.00 = no change).\n3. Connect multiple nodes in a row if you need to edit more than one sub-block."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Adjusts specific internal parts inside a single model block (Attention Q/K/V/Out, SwiGLU MLP, Norms).\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block' you want to change.\n2. Adjust the sliders for the specific parts you want to tune (0.00 = no change).\n3. Connect multiple nodes in a row if you need to edit more than one sub-block."
-      },
-      "color": "#432",
-      "bgcolor": "#653"
+      }
     },
     {
       "id": 80,
@@ -1852,9 +1821,7 @@
       ],
       "widgets_values_named": {
         "text": "WHAT IT DOES:\n• Adds random changes to specific parts of a block to discover new styles, textures, and details.\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block'.\n2. 'chaos_strength': Sets how strong the random effect is.\n3. Sliders (0.0 to 1.0): Set the chance that each part receives random changes.\n4. Change the 'seed' to generate different variations."
-      },
-      "color": "#432",
-      "bgcolor": "#653"
+      }
     },
     {
       "id": 81,
@@ -1881,9 +1848,7 @@
       ],
       "widgets_values_named": {
         "text": "WHAT IT DOES:\n• Adjusts the strength of the text encoder layers (Embedding, Layers 1 to 7).\n\nHOW TO USE:\n1. Mode: 'Soft Value' is recommended for text stability.\n2. Layers 1-2 affect basic words and syntax.\n3. Layers 3-5 affect relationships and attributes.\n4. Layers 6-7 affect overall style and composition.\n5. Sliders: 0.00 = no change. Move above 0 to boost, below 0 to reduce."
-      },
-      "color": "#432",
-      "bgcolor": "#653"
+      }
     },
     {
       "id": 82,
@@ -1910,9 +1875,7 @@
       ],
       "widgets_values_named": {
         "text": "WHAT IT DOES:\n• Adjusts specific Attention and MLP parts inside a single CLIP layer.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Move the slider for the specific part you want to tune (e.g. ATTN_q_proj, MLP_gate_proj).\n3. 0.00 = no change."
-      },
-      "color": "#432",
-      "bgcolor": "#653"
+      }
     },
     {
       "id": 83,
@@ -1939,38 +1902,7 @@
       ],
       "widgets_values_named": {
         "text": "WHAT IT DOES:\n• Adds small random changes to text encoder layers to get alternative interpretations of your prompt.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Keep 'chaos_strength' low (0.05 to 0.15) so prompts stay readable.\n3. Set the chance sliders (0.0 to 1.0) for the parts you want to randomize.\n4. Change the 'seed' to try different prompt interpretations."
-      },
-      "color": "#432",
-      "bgcolor": "#653"
-    },
-    {
-      "id": 71,
-      "type": "Note",
-      "pos": [
-        1070,
-        620
-      ],
-      "size": [
-        290,
-        320
-      ],
-      "flags": {},
-      "order": 16,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟦🟨🔄 Reset Patcher  ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Clears all active patches and LoRAs from the model and CLIP.\n• Gives you a clean starting point for your tuning nodes.\n\nHOW TO USE:\n1. Place this right after your Model and CLIP loaders.\n2. Keep both 'reset_model' and 'reset_clip' set to True.\n3. Connect its outputs to your first tuner or visualizer node."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Clears all active patches and LoRAs from the model and CLIP.\n• Gives you a clean starting point for your tuning nodes.\n\nHOW TO USE:\n1. Place this right after your Model and CLIP loaders.\n2. Keep both 'reset_model' and 'reset_clip' set to True.\n3. Connect its outputs to your first tuner or visualizer node."
-      },
-      "color": "#432",
-      "bgcolor": "#653"
+      }
     },
     {
       "id": 40,
@@ -2338,7 +2270,7 @@
         280
       ],
       "flags": {},
-      "order": 18,
+      "order": 17,
       "mode": 0,
       "inputs": [
         {
@@ -2381,15 +2313,15 @@
       "id": 87,
       "type": "ArthemyKrea2ModelBaker",
       "pos": [
-        4770,
-        1390
+        4570,
+        1380
       ],
       "size": [
         170,
         230
       ],
       "flags": {},
-      "order": 19,
+      "order": 18,
       "mode": 2,
       "inputs": [
         {
@@ -2448,7 +2380,7 @@
         430
       ],
       "flags": {},
-      "order": 20,
+      "order": 19,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -2461,9 +2393,7 @@
       ],
       "widgets_values_named": {
         "text": "WHAT IT DOES:\n• Loads a LoRA and lets you turn it on or off for whole block groups.\n\nHOW TO USE:\n1. Select your LoRA file and set the main Model / CLIP strength.\n2. Set block sliders to 1.0 for full LoRA strength, or 0.0 to completely disable the LoRA on that block."
-      },
-      "color": "#432",
-      "bgcolor": "#653"
+      }
     },
     {
       "id": 65,
@@ -2477,7 +2407,7 @@
         370
       ],
       "flags": {},
-      "order": 21,
+      "order": 20,
       "mode": 0,
       "inputs": [
         {
@@ -2668,7 +2598,7 @@
         460
       ],
       "flags": {},
-      "order": 22,
+      "order": 21,
       "mode": 0,
       "inputs": [
         {
@@ -2881,35 +2811,6 @@
       "bgcolor": "#535"
     },
     {
-      "id": 85,
-      "type": "Note",
-      "pos": [
-        3810,
-        1950
-      ],
-      "size": [
-        320,
-        360
-      ],
-      "flags": {},
-      "order": 23,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟪🔬 Load Sub-Block LoRA ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Loads a LoRA only on specific internal parts of a single block (e.g. keep only Attention, or only MLP).\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. Set sliders to 1.0 for parts you want to keep, or 0.0 for parts you want to disable."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Loads a LoRA only on specific internal parts of a single block (e.g. keep only Attention, or only MLP).\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. Set sliders to 1.0 for parts you want to keep, or 0.0 for parts you want to disable."
-      },
-      "color": "#432",
-      "bgcolor": "#653"
-    },
-    {
       "id": 67,
       "type": "ArthemyKrea2LoadChaosLoraBlockSurgeon",
       "pos": [
@@ -2921,7 +2822,7 @@
         530
       ],
       "flags": {},
-      "order": 24,
+      "order": 23,
       "mode": 0,
       "inputs": [
         {
@@ -3158,47 +3059,18 @@
       "bgcolor": "#535"
     },
     {
-      "id": 86,
-      "type": "Note",
-      "pos": [
-        4150,
-        2020
-      ],
-      "size": [
-        360,
-        290
-      ],
-      "flags": {},
-      "order": 25,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟪🌪️ Load Sub-Block Chaos LoRA ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Randomly applies parts of a LoRA to create blended styles without typical LoRA artifacts.\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. 'base_chance': Sets the default chance (0.0 to 1.0) for all parts.\n3. Use component sliders to customize chances for specific parts.\n4. Change the 'seed' to test different random combinations."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Randomly applies parts of a LoRA to create blended styles without typical LoRA artifacts.\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. 'base_chance': Sets the default chance (0.0 to 1.0) for all parts.\n3. Use component sliders to customize chances for specific parts.\n4. Change the 'seed' to test different random combinations."
-      },
-      "color": "#432",
-      "bgcolor": "#653"
-    },
-    {
       "id": 102,
       "type": "ArthemyKrea2PresetLoader",
       "pos": [
-        4770,
-        1790
+        4960,
+        1780
       ],
       "size": [
         270,
         150
       ],
       "flags": {},
-      "order": 26,
+      "order": 25,
       "mode": 0,
       "inputs": [
         {
@@ -3262,8 +3134,8 @@
         }
       ],
       "properties": {
-        "widget_ue_connectable": {},
-        "Node name for S&R": "ArthemyKrea2PresetLoader"
+        "Node name for S&R": "ArthemyKrea2PresetLoader",
+        "widget_ue_connectable": {}
       },
       "widgets_values": [
         "Cinematic_Comic_Punch.json",
@@ -3282,15 +3154,15 @@
       "id": 103,
       "type": "Note",
       "pos": [
-        4770,
-        1990
+        4960,
+        1980
       ],
       "size": [
         360,
         270
       ],
       "flags": {},
-      "order": 27,
+      "order": 26,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -3303,23 +3175,50 @@
       ],
       "widgets_values_named": {
         "text": "WHAT IT DOES:\n• Loads and applies a lightweight (.json) tuning preset onto your Model and CLIP.\n• Restores scalar layer offsets and deterministically reproduces bit-exact Chaos perturbation masks.\n\nHOW TO USE:\n1. 'preset': Select the .json preset file from the dropdown.\n2. 'strength_model': Global scaling multiplier for Model patches (1.0 = 100%, 0.5 = 50%, 1.5 = amplified).\n3. 'strength_clip': Global scaling multiplier for CLIP text encoder patches.\n4. Presets can be stacked with other tuners downstream or monitored on Visualizers."
+      }
+    },
+    {
+      "id": 94,
+      "type": "Note",
+      "pos": [
+        2160,
+        300
+      ],
+      "size": [
+        360,
+        160
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "❓What to do? - YOU CAN DELETE THIS",
+      "properties": {
+        "widget_ue_connectable": {}
       },
-      "color": "#432",
-      "bgcolor": "#653"
+      "widgets_values": [
+        "Place in this area any combination of the Custom Nodes below.\n\nINPUT\n- Attach the very first \"Model\" or \"CLIP\" INPUT from the Reset Patcher\n\nOUTPUT\n- Attach the very last \"Model\" or \"CLIP\" OUTPUT to the Visualizers at the beginning of the \"Image Generation\" Zone."
+      ],
+      "widgets_values_named": {
+        "text": "Place in this area any combination of the Custom Nodes below.\n\nINPUT\n- Attach the very first \"Model\" or \"CLIP\" INPUT from the Reset Patcher\n\nOUTPUT\n- Attach the very last \"Model\" or \"CLIP\" OUTPUT to the Visualizers at the beginning of the \"Image Generation\" Zone."
+      },
+      "color": "#322",
+      "bgcolor": "#533"
     },
     {
       "id": 101,
       "type": "ArthemyKrea2PresetSaver",
       "pos": [
-        5160,
-        1790
+        4580,
+        1780
       ],
       "size": [
         300,
         150
       ],
       "flags": {},
-      "order": 28,
+      "order": 27,
       "mode": 0,
       "inputs": [
         {
@@ -3369,8 +3268,8 @@
         }
       ],
       "properties": {
-        "widget_ue_connectable": {},
-        "Node name for S&R": "ArthemyKrea2PresetSaver"
+        "Node name for S&R": "ArthemyKrea2PresetSaver",
+        "widget_ue_connectable": {}
       },
       "widgets_values": [
         "my_arthemy_preset",
@@ -3387,15 +3286,15 @@
       "id": 104,
       "type": "Note",
       "pos": [
-        5160,
-        1990
+        4580,
+        1980
       ],
       "size": [
         360,
         270
       ],
       "flags": {},
-      "order": 29,
+      "order": 28,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -3408,38 +3307,115 @@
       ],
       "widgets_values_named": {
         "text": "WHAT IT DOES:\n• Exports all active Model, CLIP, and Chaos tunings into a lightweight (~1-2 KB) .json preset file.\n• Allows instant sharing and reloading of complex tuning setups without saving multi-gigabyte models.\n\nHOW TO USE:\n1. Connect your tuned Model and CLIP outputs to this node.\n2. 'preset_name': Name of the preset (saved to 'models/arthemy_presets/').\n3. 'author': Your creator name or handle.\n4. Active LoRAs are excluded from presets; use Model Baker / Saver to bake LoRA weights permanently."
-      },
-      "color": "#432",
-      "bgcolor": "#653"
+      }
     },
     {
-      "id": 94,
+      "id": 79,
       "type": "Note",
       "pos": [
-        2160,
-        300
+        1380,
+        2000
       ],
       "size": [
-        360,
-        160
+        400,
+        320
       ],
       "flags": {},
-      "order": 17,
+      "order": 11,
       "mode": 0,
       "inputs": [],
       "outputs": [],
-      "title": "❓What to do? - YOU CAN DELETE THIS",
+      "title": "🟦🔬 Model Sub-Block Tuner ___ README",
       "properties": {
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Place in this area any combination of the Custom Nodes below.\n\nINPUT\n- Attach the very first \"Model\" or \"CLIP\" INPUT from the Reset Patcher\n\nOUTPUT\n- Attach the very last \"Model\" or \"CLIP\" OUTPUT to the Visualizers at the beginning of the \"Image Generation\" Zone."
+        "WHAT IT DOES:\n• Adjusts specific internal parts inside a single model block (Attention Q/K/V/Out, SwiGLU MLP, Norms).\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block' you want to change.\n2. Adjust the sliders for the specific parts you want to tune (0.00 = no change).\n3. Connect multiple nodes in a row if you need to edit more than one sub-block."
       ],
       "widgets_values_named": {
-        "text": "Place in this area any combination of the Custom Nodes below.\n\nINPUT\n- Attach the very first \"Model\" or \"CLIP\" INPUT from the Reset Patcher\n\nOUTPUT\n- Attach the very last \"Model\" or \"CLIP\" OUTPUT to the Visualizers at the beginning of the \"Image Generation\" Zone."
+        "text": "WHAT IT DOES:\n• Adjusts specific internal parts inside a single model block (Attention Q/K/V/Out, SwiGLU MLP, Norms).\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block' you want to change.\n2. Adjust the sliders for the specific parts you want to tune (0.00 = no change).\n3. Connect multiple nodes in a row if you need to edit more than one sub-block."
+      }
+    },
+    {
+      "id": 85,
+      "type": "Note",
+      "pos": [
+        3810,
+        1950
+      ],
+      "size": [
+        320,
+        340
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟪🔬 Load Sub-Block LoRA ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
       },
-      "color": "#322",
-      "bgcolor": "#533"
+      "widgets_values": [
+        "WHAT IT DOES:\n• Loads a LoRA only on specific internal parts of a single block (e.g. keep only Attention, or only MLP).\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. Set sliders to 1.0 for parts you want to keep, or 0.0 for parts you want to disable."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Loads a LoRA only on specific internal parts of a single block (e.g. keep only Attention, or only MLP).\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. Set sliders to 1.0 for parts you want to keep, or 0.0 for parts you want to disable."
+      }
+    },
+    {
+      "id": 86,
+      "type": "Note",
+      "pos": [
+        4150,
+        2020
+      ],
+      "size": [
+        360,
+        270
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟪🌪️ Load Sub-Block Chaos LoRA ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Randomly applies parts of a LoRA to create blended styles without typical LoRA artifacts.\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. 'base_chance': Sets the default chance (0.0 to 1.0) for all parts.\n3. Use component sliders to customize chances for specific parts.\n4. Change the 'seed' to test different random combinations."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Randomly applies parts of a LoRA to create blended styles without typical LoRA artifacts.\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. 'base_chance': Sets the default chance (0.0 to 1.0) for all parts.\n3. Use component sliders to customize chances for specific parts.\n4. Change the 'seed' to test different random combinations."
+      }
+    },
+    {
+      "id": 71,
+      "type": "Note",
+      "pos": [
+        1070,
+        620
+      ],
+      "size": [
+        290,
+        320
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟦🟨🔄 Reset Patcher  ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Clears all active patches and LoRAs from the model and CLIP.\n• Gives you a clean starting point for your tuning nodes.\n\nHOW TO USE:\n1. Place this right after your Model and CLIP loaders.\n2. Keep both 'reset_model' and 'reset_clip' set to True.\n3. Connect its outputs to your first tuner or visualizer node."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Clears all active patches and LoRAs from the model and CLIP.\n• Gives you a clean starting point for your tuning nodes.\n\nHOW TO USE:\n1. Place this right after your Model and CLIP loaders.\n2. Keep both 'reset_model' and 'reset_clip' set to True.\n3. Connect its outputs to your first tuner or visualizer node."
+      }
     }
   ],
   "links": [
@@ -3625,12 +3601,12 @@
       "id": 6,
       "title": "Save Model | CLIP",
       "bounding": [
-        4760,
-        1320,
+        4560,
+        1310,
         480,
         310
       ],
-      "color": "#8A8",
+      "color": "#b06634",
       "flags": {}
     },
     {
@@ -3673,9 +3649,9 @@
       "id": 10,
       "title": "Preset Loader | Saver",
       "bounding": [
-        4760,
-        1660,
-        630,
+        4560,
+        1650,
+        780,
         80
       ],
       "color": "#3f789e",
@@ -3685,10 +3661,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.9057308098299122,
+      "scale": 0.5202287289390115,
       "offset": [
-        -1725.7532439493118,
-        -80.04718165313653
+        -739.4350638102201,
+        590.1921435867162
       ]
     },
     "anomalous_hashes": {
