@@ -24,6 +24,8 @@ import torch
 import safetensors.torch
 import comfy.lora
 import comfy.model_patcher
+import comfy.sd
+import comfy.utils
 import folder_paths
 
 class Krea2Config:
@@ -180,7 +182,10 @@ class Krea2TensorParser:
     def match_model_sub_tensor(cls, sub_key: str):
         for widget_key, target_suffixes in cls.MODEL_SURGEON_MAP.items():
             for target_suffix in target_suffixes:
-                if sub_key == target_suffix or sub_key.endswith(f".{target_suffix}") or target_suffix in sub_key:
+                if (sub_key == target_suffix 
+                    or sub_key.endswith(f".{target_suffix}") 
+                    or sub_key.startswith(f"{target_suffix}.") 
+                    or f".{target_suffix}." in sub_key):
                     return widget_key
         return None
 
@@ -188,7 +193,10 @@ class Krea2TensorParser:
     def match_clip_sub_tensor(cls, sub_key: str):
         for widget_key, target_suffixes in cls.CLIP_SURGEON_MAP.items():
             for target_suffix in target_suffixes:
-                if sub_key == target_suffix or sub_key.endswith(f".{target_suffix}") or target_suffix in sub_key:
+                if (sub_key == target_suffix 
+                    or sub_key.endswith(f".{target_suffix}") 
+                    or sub_key.startswith(f"{target_suffix}.") 
+                    or f".{target_suffix}." in sub_key):
                     return widget_key
         return None
 
@@ -214,12 +222,32 @@ class ComfyPatcherAdapter:
 
     @staticmethod
     def calculate_safe_weight(model_or_clip, key: str, base_weight: torch.Tensor) -> torch.Tensor:
-        """Calculates active weight safely without mutating model state or accessing private attributes."""
+        """Calculates active weight safely without mutating model state or accessing private attributes.
+        Resolves exact internal state_dict key name so diffusion_model. prefixes never cause patch lookup misses."""
         patcher = get_patcher(model_or_clip)
-        current_patches = patcher.patches.get(key, [])
-        clean_base = dequantize_weight(get_clean_weight(patcher, key, base_weight))
+        resolved_key = resolve_target_key(patcher, key)
+        
+        current_patches = []
+        if hasattr(patcher, "patches"):
+            if resolved_key in patcher.patches:
+                current_patches = patcher.patches[resolved_key]
+            elif key in patcher.patches:
+                current_patches = patcher.patches[key]
+
+        scale = None
+        if hasattr(patcher, "model") and hasattr(patcher.model, "state_dict"):
+            try:
+                model_sd = patcher.model.state_dict()
+                for scale_cand in (f"{resolved_key}_scale", f"{resolved_key}.weight_scale", f"{key}_scale", f"{key}.weight_scale"):
+                    if scale_cand in model_sd:
+                        scale = model_sd[scale_cand]
+                        break
+            except Exception:
+                pass
+
+        clean_base = dequantize_weight(get_clean_weight(patcher, resolved_key, base_weight), scale=scale)
         if current_patches:
-            return comfy.lora.calculate_weight(current_patches, clean_base.clone(), key).to(torch.bfloat16)
+            return comfy.lora.calculate_weight(current_patches, clean_base.clone(), resolved_key).to(torch.bfloat16)
         return clean_base
 
 # Pre-compiled regular expressions for high-frequency state-dict iterations
@@ -233,25 +261,25 @@ RE_GENERAL_BLOCKS = re.compile(r"blocks\.(\d+)\.")
 DUMMY_PATCH_TENSOR = torch.zeros((1, 1), dtype=torch.bfloat16)
 
 def sanitize_patch_tensor(tensor: torch.Tensor, target_dtype: torch.dtype = None, target_device: torch.device = None) -> torch.Tensor:
-    """REGOLA 1, 2, 3: Memory Safety, Dtype/Device Preservation & Sanity Check.
+    """Rules 1, 2, 3: Memory Safety, Dtype/Device Preservation & Empty Buffer Guard.
     
-    1. Memory Safety: Forzatura contiguità e distacco con .clone().detach().contiguous()
-    2. Dtype & Device: Casting rigoroso al dtype (bf16) e device del modello di destinazione
-    3. Sanity Check: Prevenzione buffer vuoti (nelement == 0) per evitare il crash di torch.frombuffer
+    1. Memory Safety: Enforce contiguous memory layout and detachment via .clone().detach().contiguous()
+    2. Dtype & Device: Strict casting to target model dtype (bf16) and device
+    3. Sanity Check: Prevent empty buffers (nelement == 0) to avoid torch.frombuffer memory crashes
     """
     if tensor is None or not isinstance(tensor, torch.Tensor):
         return None
 
-    # Regola 3: Sanity check prevenzione buffer vuoti
+    # Rule 3: Sanity check to prevent empty buffers
     if tensor.nelement() == 0:
-        logger.warning("[Arthemy Patch Guard] Rilevato tensore vuoto (nelement == 0). Patch ignorata per prevenire crash di memoria.")
+        logger.warning("[Arthemy Patch Guard] Detected empty tensor (nelement == 0). Patch ignored to prevent memory crash.")
         return None
 
-    # Regola 2: Controllo e conservazione del dtype/device originale
+    # Rule 2: Preserve and cast to target dtype and device
     dtype = target_dtype if target_dtype is not None else tensor.dtype
     device = target_device if target_device is not None else tensor.device
 
-    # Eseguiamo il cast se necessario ed applichiamo la Regola 1 (contiguità e distacco)
+    # Apply Rule 1: Contiguity and detachment
     return tensor.to(dtype=dtype, device=device).clone().detach().contiguous()
 
 def resolve_target_key(patcher, k: str) -> str:
@@ -412,9 +440,19 @@ def get_clean_weight(patcher, key: str, current_weight: torch.Tensor) -> torch.T
         return patcher.backup[key]
     return current_weight
 
-def dequantize_weight(weight: torch.Tensor) -> torch.Tensor:
+def dequantize_weight(weight: torch.Tensor, scale: Any = None) -> torch.Tensor:
+    """Converts FP8 tensors to FP32, multiplying by companion scale factor if present."""
+    if weight is None:
+        return None
     if weight.dtype in (torch.float8_e4m3fn, torch.float8_e5m2):
-        return weight.to(torch.float32)
+        fp32_w = weight.to(torch.float32)
+        if scale is not None:
+            if isinstance(scale, torch.Tensor):
+                scale_val = scale.to(device=weight.device, dtype=torch.float32)
+            else:
+                scale_val = float(scale)
+            return fp32_w * scale_val
+        return fp32_w
     return weight
 
 def resolve_granular_weight(clean_key: str, granular_map: dict, default_val: float) -> float:
@@ -452,13 +490,7 @@ class BaseSurgeonTuner(BaseKrea2Node):
         base_sd = patcher.model.state_dict() if hasattr(patcher, "model") else {}
         valid_keys = getattr(patcher, "model_keys", None)
 
-        granular_map = {}
-        if granular_json and granular_json.strip():
-            try:
-                parsed = json.loads(granular_json)
-                if isinstance(parsed, dict): granular_map = parsed
-            except Exception as e:
-                logger.error(f"[Arthemy Surgeon] JSON parse error: {e}")
+        granular_map = parse_granular_json(granular_json)
 
         slider_map = {w_key: kwargs.get(w_key, 0.0) for w_key in surgeon_map.keys()}
         patches_to_add = {}
@@ -519,7 +551,7 @@ class BaseSurgeonTuner(BaseKrea2Node):
                     active_count += 1
 
         if patches_to_add:
-            import time; t_start = time.time()
+            t_start = time.time()
             add_patches_to_front(clone_obj, patches_to_add, 1.0)
             logger.info(f"[Arthemy Profiler] {'CLIP' if is_clip else 'Model'} Surgeon | "
                         f"{time.time()-t_start:.4f}s | {active_count} patches | selected: {sorted(selected_indices)}")
@@ -615,7 +647,10 @@ class ArthemyKrea2ModelTuner(BaseKrea2Node):
                 if len(v_vals) == 34:
                     final_weights = [get_target_weight(v) for v in v_vals]
                     use_vector = True
-            except ValueError: pass
+                else:
+                    logger.warning(f"[Arthemy Model Tuner] vectors_override dimension mismatch: expected 34 values, got {len(v_vals)}. Override ignored.")
+            except ValueError as e:
+                logger.warning(f"[Arthemy Model Tuner] vectors_override parse error: {e}. Override ignored.")
 
         granular_map = parse_granular_json(granular_json)
 
@@ -717,7 +752,10 @@ class ArthemyKrea2CLIPTuner(BaseKrea2Node):
                 if len(v_vals) == 8:
                     final_weights = [get_target_weight(v) for v in v_vals]
                     use_vector = True
-            except ValueError: pass
+                else:
+                    logger.warning(f"[Arthemy CLIP Tuner] vectors_override dimension mismatch: expected 8 values, got {len(v_vals)}. Override ignored.")
+            except ValueError as e:
+                logger.warning(f"[Arthemy CLIP Tuner] vectors_override parse error: {e}. Override ignored.")
 
         granular_map = parse_granular_json(granular_json)
 
@@ -992,16 +1030,28 @@ class ArthemyKrea2ModelSaver(BaseKrea2Node):
     CATEGORY = "Arthemy/Krea2 Savers"
 
     def save(self, model, output_checkpoint, precision="BF16", prompt=None, extra_pnginfo=None):
+        clean_name = output_checkpoint.strip()
+        if clean_name.endswith(".safetensors"):
+            clean_name = clean_name[:-len(".safetensors")]
+
         full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(
-            output_checkpoint, folder_paths.get_output_directory(), 0, 0
+            clean_name, folder_paths.get_output_directory(), 0, 0
         )
-        if not output_checkpoint.endswith(".safetensors"):
-            output_checkpoint += ".safetensors"
-        output_path = os.path.join(full_output_folder, output_checkpoint)
+        
+        # Support auto-incrementing counter if format string or existing files exist
+        if "%count%" in clean_name:
+            file_name_out = clean_name.replace("%count%", f"{counter:05}") + ".safetensors"
+        else:
+            file_name_out = f"{filename}_{counter:05}_.safetensors"
+
+        output_path = os.path.join(full_output_folder, file_name_out)
         os.makedirs(full_output_folder, exist_ok=True)
-        logger.info(f"[ARTHEMY KREA2 MODEL SAVER] Stream-saving model: {output_checkpoint}")
+        logger.info(f"[ARTHEMY KREA2 MODEL SAVER] Stream-saving model: {file_name_out}")
 
         sd = model.model.state_dict()
+        arch_info = Krea2TensorParser.probe_architecture(sd)
+        logger.info(f"[ARTHEMY KREA2 MODEL SAVER] Topology validated: {arch_info['num_model_blocks']} blocks detected.")
+
         target_dtype = torch.float8_e4m3fn if precision == "FP8_E4M3" else torch.bfloat16
         final_sd = {}
         quant_layers = {}
@@ -1015,7 +1065,14 @@ class ArthemyKrea2ModelSaver(BaseKrea2Node):
                 except (json.JSONDecodeError, UnicodeDecodeError, ValueError, AttributeError) as e:
                     logger.warning(f"[ARTHEMY KREA2 MODEL SAVER] Quantization metadata skip for '{k}': {type(e).__name__} - {e}")
                 return None
-            return dequantize_weight(v)
+            
+            # Lookup scale if present
+            scale = None
+            for s_cand in (f"{k}_scale", f"{k}.weight_scale", f"{clean_k}_scale", f"{clean_k}.weight_scale"):
+                if s_cand in sd:
+                    scale = sd[s_cand]
+                    break
+            return dequantize_weight(v, scale=scale)
 
         for clean_key, tensor in process_tensor_stream(sd, process_tensor, target_dtype=target_dtype, memory_threshold_mb=Krea2Config.DEFAULT_GC_THRESHOLD_MB):
             if tensor is not None:
@@ -1030,7 +1087,7 @@ class ArthemyKrea2ModelSaver(BaseKrea2Node):
         safetensors.torch.save_file(final_sd, output_path, metadata=metadata)
         del final_sd
         gc.collect()
-        logger.info(f"[ARTHEMY KREA2 MODEL SAVER] ✨ SUCCESSO: {output_path}")
+        logger.info(f"[ARTHEMY KREA2 MODEL SAVER] ✨ SUCCESS: {output_path}")
         return (output_path,)
 
 
@@ -1053,21 +1110,38 @@ class ArthemyKrea2CLIPSaver(BaseKrea2Node):
     CATEGORY = "Arthemy/Krea2 Savers"
 
     def save(self, clip, output_checkpoint, precision="BF16", prompt=None, extra_pnginfo=None):
+        clean_name = output_checkpoint.strip()
+        if clean_name.endswith(".safetensors"):
+            clean_name = clean_name[:-len(".safetensors")]
+
         full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(
-            output_checkpoint, folder_paths.get_output_directory(), 0, 0
+            clean_name, folder_paths.get_output_directory(), 0, 0
         )
-        if not output_checkpoint.endswith(".safetensors"):
-            output_checkpoint += ".safetensors"
-        output_path = os.path.join(full_output_folder, output_checkpoint)
+        
+        if "%count%" in clean_name:
+            file_name_out = clean_name.replace("%count%", f"{counter:05}") + ".safetensors"
+        else:
+            file_name_out = f"{filename}_{counter:05}_.safetensors"
+
+        output_path = os.path.join(full_output_folder, file_name_out)
         os.makedirs(full_output_folder, exist_ok=True)
-        logger.info(f"[ARTHEMY KREA2 CLIP SAVER] Stream-saving CLIP: {output_checkpoint}")
+        logger.info(f"[ARTHEMY KREA2 CLIP SAVER] Stream-saving CLIP: {file_name_out}")
 
         clip_sd = clip.get_sd()
+        arch_info = Krea2TensorParser.probe_architecture(clip_sd)
+        logger.info(f"[ARTHEMY KREA2 CLIP SAVER] Topology validated: {arch_info['num_clip_layers']} layers detected.")
+
         target_dtype = torch.float8_e4m3fn if precision == "FP8_E4M3" else torch.bfloat16
         final_sd = {}
 
         def process_clip_tensor(k, v):
-            return dequantize_weight(v)
+            scale = None
+            clean_k = Krea2TensorParser.clean_key(k)
+            for s_cand in (f"{k}_scale", f"{k}.weight_scale", f"{clean_k}_scale", f"{clean_k}.weight_scale"):
+                if s_cand in clip_sd:
+                    scale = clip_sd[s_cand]
+                    break
+            return dequantize_weight(v, scale=scale)
 
         for clean_key, tensor in process_tensor_stream(clip_sd, process_clip_tensor, target_dtype=target_dtype, memory_threshold_mb=Krea2Config.DEFAULT_GC_THRESHOLD_MB):
             if tensor is not None:
@@ -1077,7 +1151,7 @@ class ArthemyKrea2CLIPSaver(BaseKrea2Node):
         safetensors.torch.save_file(final_sd, output_path, metadata=metadata)
         del final_sd
         gc.collect()
-        logger.info(f"[ARTHEMY KREA2 CLIP SAVER] ✨ SUCCESSO: {output_path}")
+        logger.info(f"[ARTHEMY KREA2 CLIP SAVER] ✨ SUCCESS: {output_path}")
         return (output_path,)
 
 # ==============================================================================
@@ -1106,6 +1180,8 @@ class ArthemyKrea2LoraBlockLoader(BaseKrea2Node):
         if strength_model == 0 and strength_clip == 0:
             return (model, clip, "LoRA bypassed (strength 0)")
         lora_path = folder_paths.get_full_path("loras", lora_name)
+        if not lora_path or not os.path.exists(lora_path):
+            raise FileNotFoundError(f"Arthemy Suite Error: LoRA '{lora_name}' not found in ComfyUI loras directory.")
         lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
         m, c = comfy.sd.load_lora_for_models(model, clip, lora, strength_model, strength_clip)
         return (m, c, f"Loaded LoRA: {lora_name}")
@@ -1151,6 +1227,8 @@ class ArthemyKrea2LoadSubBlockLora(BaseKrea2Node):
             return (model, clip, "LoRA bypassed (strength 0)")
 
         lora_path = folder_paths.get_full_path("loras", lora_name)
+        if not lora_path or not os.path.exists(lora_path):
+            raise FileNotFoundError(f"Arthemy Suite Error: LoRA '{lora_name}' not found in ComfyUI loras directory.")
         lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
 
         if sub_block != "All Sub-Blocks (*)":
@@ -1219,6 +1297,8 @@ class ArthemyKrea2LoadChaosLoraBlockSurgeon(BaseSurgeonTuner):
             return (model, clip, "LoRA bypassed (strength 0)")
 
         lora_path = folder_paths.get_full_path("loras", lora_name)
+        if not lora_path or not os.path.exists(lora_path):
+            raise FileNotFoundError(f"Arthemy Suite Error: LoRA '{lora_name}' not found in ComfyUI loras directory.")
         lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
 
         if sub_block != "All Sub-Blocks (*)":
@@ -1300,7 +1380,6 @@ class ArthemyKrea2ModelBaker(BaseKrea2Node):
         m_baked = model.clone()
         c_baked = clip.clone()
 
-        m_sd = m_baked.model.state_dict()
         c_p = get_patcher(c_baked)
         m_p = get_patcher(m_baked)
         c_sd = c_p.model.state_dict() if hasattr(c_p, "model") else {}
@@ -1312,10 +1391,14 @@ class ArthemyKrea2ModelBaker(BaseKrea2Node):
         # Stream process model tensors
         def bake_model_tensor(k, v):
             nonlocal n_model_patched
-            pk = f"diffusion_model.{k}" if not k.startswith("diffusion_model.") else k
-            if pk in getattr(m_p, "patches", {}):
+            target_k = resolve_target_key(m_p, k)
+            patches = getattr(m_p, "patches", {})
+            if target_k in patches or k in patches:
                 n_model_patched += 1
-                return ComfyPatcherAdapter.calculate_safe_weight(m_baked, pk, v)
+                patched_weight = ComfyPatcherAdapter.calculate_safe_weight(m_baked, target_k, v)
+                if target_k in m_sd and isinstance(m_sd[target_k], torch.Tensor):
+                    m_sd[target_k].data.copy_(patched_weight.data)
+                return patched_weight
             return v
 
         for _, _ in process_tensor_stream(m_sd, bake_model_tensor, memory_threshold_mb=Krea2Config.DEFAULT_GC_THRESHOLD_MB):
@@ -1323,21 +1406,30 @@ class ArthemyKrea2ModelBaker(BaseKrea2Node):
 
         def bake_clip_tensor(k, v):
             nonlocal n_clip_patched
-            if k in getattr(c_p, "patches", {}):
+            target_k = resolve_target_key(c_p, k)
+            patches = getattr(c_p, "patches", {})
+            if target_k in patches or k in patches:
                 n_clip_patched += 1
-                return ComfyPatcherAdapter.calculate_safe_weight(c_baked, k, v)
+                patched_weight = ComfyPatcherAdapter.calculate_safe_weight(c_baked, target_k, v)
+                if target_k in c_sd and isinstance(c_sd[target_k], torch.Tensor):
+                    c_sd[target_k].data.copy_(patched_weight.data)
+                return patched_weight
             return v
 
         for _, _ in process_tensor_stream(c_sd, bake_clip_tensor, memory_threshold_mb=Krea2Config.DEFAULT_GC_THRESHOLD_MB):
             pass
 
-        # Clear patches after baking
+        # Clear patches and backups after in-place baking
         if hasattr(m_p, "patches"): m_p.patches = {}
+        if hasattr(m_p, "backup"): m_p.backup = {}
+        if hasattr(m_p, "object_patches"): m_p.object_patches = {}
         if hasattr(c_p, "patches"): c_p.patches = {}
-        
+        if hasattr(c_p, "backup"): c_p.backup = {}
+        if hasattr(c_p, "object_patches"): c_p.object_patches = {}
 
         info = f"Arthemy Krea-2 Model Baker: baked {n_model_patched} model parameters, {n_clip_patched} clip parameters."
         logger.info(f"[ARTHEMY KREA2 MODEL BAKER] {info}")
+        return (m_baked, c_baked, info)
         return (m_baked, c_baked, info)
 
 # ==============================================================================
