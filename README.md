@@ -4,7 +4,9 @@ Custom ComfyUI nodes for editing Krea-2 diffusion models and their Qwen3 text en
 
 If you've ever wanted to customize the shape of a model and its TextEncoder in order for it to represent exactly what you want — whether by tweaking its internal values, boosting only the layers in specific sections, randomly perturbing a LoRA to see what falls out, or saving a calibration you like without exporting a whole new checkpoint — this suite is built for that.
 
-![Arthemy Krea-2 Tuner Generation Pipeline](assets/Generation.png)
+<p align="center">
+  <img src="assets/Generation.png" width="900" alt="Arthemy Krea-2 Tuner Generation Pipeline" />
+</p>
 
 ---
 
@@ -30,8 +32,12 @@ Three domains (what you're editing) × three precision levels (how targeted you 
 | **🟨 CLIP** | `🟨✨ CLIP Tuner` | `🟨🔬 CLIP Sub-Block Tuner` | `🟨🌪️ CLIP Sub-Block Chaos Tuner` |
 | **🟪 LoRA** | `🟪🔮 LoRA Block Loader` | `🟪🔬 Load Sub-Block LoRA` | `🟪🌪️ Load Sub-Block Chaos LoRA` |
 
-![Model Tuner Nodes](assets/ModelTuner.png)
-![CLIP Tuner Nodes](assets/ClipTuner.png)
+<p align="center">
+  <img src="assets/ModelTuner.png" width="650" alt="Model Tuner Nodes" />
+</p>
+<p align="center">
+  <img src="assets/ClipTuner.png" width="650" alt="CLIP Tuner Nodes" />
+</p>
 
 ### 🟦 Tier 1 — Tuner (whole groups)
 One slider per group of blocks:
@@ -57,7 +63,9 @@ Same targeting as Tier 2, but instead of a fixed multiplier, each matched tensor
 
 ## 🟪 LoRA loaders — same logic, applied to a LoRA file
 
-![LoRA Loader Nodes](assets/LoraTuner.png)
+<p align="center">
+  <img src="assets/LoraTuner.png" width="650" alt="LoRA Loader Nodes" />
+</p>
 
 - **`🟪🔮 LoRA Block Loader`** — Drop-in replacement for the standard loader, plus per-section strength multipliers (`Text_Fusion`, `Time_Embed`, `Projection`, `Block_1`–`Block_6`).
 - **`🟪🔬 Load Sub-Block LoRA`** — Targets one block and one tensor type at a time, so you can keep only, say, the attention layers of a LoRA and drop the rest.
@@ -91,14 +99,18 @@ Tuning happens live in memory and doesn't touch your original checkpoint file. T
 - **`🟦🟨📂 Preset Loader`** — Pick a saved preset from the dropdown, apply it to a fresh `MODEL`/`CLIP`, with `strength_model` / `strength_clip` dials to scale the whole preset up or down on reload.
 - *Note on LoRAs:* Presets only capture Tuner-style and Chaos-style adjustments — not active LoRAs. If a LoRA is loaded on the model when you save a preset, you'll get a warning and it will be excluded; fuse it permanently first (see below) if you want it included.
 
-![Preset System](assets/Preset.png)
+<p align="center">
+  <img src="assets/Preset.png" width="550" alt="Preset System" />
+</p>
 
 ### 💿 Permanent export (full checkpoint)
 - **`🟦🟨 Model Baker`** — Folds all active patches permanently into the weights and clears the patch list in memory. Use this once you're done experimenting, or want to "commit" a result before stacking more changes on top.
 - **`🟦💾 Model Saver` / `🟨💾 CLIP Saver`** — Exports to `.safetensors` (BF16 or FP8), streamed to disk to keep memory use down on large checkpoints.
 - **`🟦🟨🔄 Reset Patcher`** — Clears all pending patches (including saved Chaos state) without exporting anything, if you want to start over with a clean baseline.
 
-![Model and CLIP Savers](assets/Saver.png)
+<p align="center">
+  <img src="assets/Saver.png" width="450" alt="Model and CLIP Savers" />
+</p>
 
 ---
 
@@ -130,36 +142,64 @@ Built for **Krea-2** diffusion checkpoints and their paired **Qwen3** text encod
 
 ## 🎨 Visual Tuning Showcase & Effects
 
-Here is a visual breakdown demonstrating the direct stylistic and structural effect of modulating individual Model block groups and CLIP text encoder layers:
+Here is a visual breakdown demonstrating the direct stylistic and structural effect of modulating individual Model block groups and CLIP text encoder layers *(click on any image to open in full resolution)*:
 
 ### 🟦 Model Tuning Effects
 
-| Component | Visual Effect & Comparison |
-|---|---|
-| **Block 1** | ![Block 1 Effect](assets/examples/Block_1.png) |
-| **Block 2** | ![Block 2 Effect](assets/examples/Block_2.png) |
-| **Block 3** | ![Block 3 Effect](assets/examples/Block_3.png) |
-| **Block 4** | ![Block 4 Effect](assets/examples/Block_4.png) |
-| **Block 5** | ![Block 5 Effect](assets/examples/Block_5.png) |
-| **Block 6** | ![Block 6 Effect](assets/examples/Block_6.png) |
-| **Text Fusion** | ![Text Fusion Effect](assets/examples/TextFusion.png) |
-| **Time Embed** | ![Time Embed Effect](assets/examples/Time_Embed.png) |
-| **Projection** | ![Projection Effect](assets/examples/Projection.png) |
+#### 🔹 Block 1 (`Block_1`)
+<a href="assets/examples/Block_1.png"><img src="assets/examples/Block_1.png" width="100%" alt="Block 1 Effect" /></a>
+
+#### 🔹 Block 2 (`Block_2`)
+<a href="assets/examples/Block_2.png"><img src="assets/examples/Block_2.png" width="100%" alt="Block 2 Effect" /></a>
+
+#### 🔹 Block 3 (`Block_3`)
+<a href="assets/examples/Block_3.png"><img src="assets/examples/Block_3.png" width="100%" alt="Block 3 Effect" /></a>
+
+#### 🔹 Block 4 (`Block_4`)
+<a href="assets/examples/Block_4.png"><img src="assets/examples/Block_4.png" width="100%" alt="Block 4 Effect" /></a>
+
+#### 🔹 Block 5 (`Block_5`)
+<a href="assets/examples/Block_5.png"><img src="assets/examples/Block_5.png" width="100%" alt="Block 5 Effect" /></a>
+
+#### 🔹 Block 6 (`Block_6`)
+<a href="assets/examples/Block_6.png"><img src="assets/examples/Block_6.png" width="100%" alt="Block 6 Effect" /></a>
+
+#### 🔹 Text Fusion (`Text_Fusion`)
+<a href="assets/examples/TextFusion.png"><img src="assets/examples/TextFusion.png" width="100%" alt="Text Fusion Effect" /></a>
+
+#### 🔹 Time Embed (`Time_Embed`)
+<a href="assets/examples/Time_Embed.png"><img src="assets/examples/Time_Embed.png" width="100%" alt="Time Embed Effect" /></a>
+
+#### 🔹 Projection (`Projection`)
+<a href="assets/examples/Projection.png"><img src="assets/examples/Projection.png" width="100%" alt="Projection Effect" /></a>
 
 ---
 
 ### 🟨 CLIP Text Encoder Tuning Effects
 
-| Component | Visual Effect & Comparison |
-|---|---|
-| **Layer 1** | ![Layer 1 Effect](assets/examples/Layer_1.png) |
-| **Layer 2** | ![Layer 2 Effect](assets/examples/Layer_2.png) |
-| **Layer 3** | ![Layer 3 Effect](assets/examples/Layer_3.png) |
-| **Layer 4** | ![Layer 4 Effect](assets/examples/Layer_4.png) |
-| **Layer 5** | ![Layer 5 Effect](assets/examples/Layer_5.png) |
-| **Layer 6** | ![Layer 6 Effect](assets/examples/Layer_6.png) |
-| **Layer 7** | ![Layer 7 Effect](assets/examples/Layer_7.png) |
-| **Embedding** | ![Embedding Effect](assets/examples/Embedding.png) |
+#### 🔸 Layer 1 (`Layer_1`)
+<a href="assets/examples/Layer_1.png"><img src="assets/examples/Layer_1.png" width="100%" alt="Layer 1 Effect" /></a>
+
+#### 🔸 Layer 2 (`Layer_2`)
+<a href="assets/examples/Layer_2.png"><img src="assets/examples/Layer_2.png" width="100%" alt="Layer 2 Effect" /></a>
+
+#### 🔸 Layer 3 (`Layer_3`)
+<a href="assets/examples/Layer_3.png"><img src="assets/examples/Layer_3.png" width="100%" alt="Layer 3 Effect" /></a>
+
+#### 🔸 Layer 4 (`Layer_4`)
+<a href="assets/examples/Layer_4.png"><img src="assets/examples/Layer_4.png" width="100%" alt="Layer 4 Effect" /></a>
+
+#### 🔸 Layer 5 (`Layer_5`)
+<a href="assets/examples/Layer_5.png"><img src="assets/examples/Layer_5.png" width="100%" alt="Layer 5 Effect" /></a>
+
+#### 🔸 Layer 6 (`Layer_6`)
+<a href="assets/examples/Layer_6.png"><img src="assets/examples/Layer_6.png" width="100%" alt="Layer 6 Effect" /></a>
+
+#### 🔸 Layer 7 (`Layer_7`)
+<a href="assets/examples/Layer_7.png"><img src="assets/examples/Layer_7.png" width="100%" alt="Layer 7 Effect" /></a>
+
+#### 🔸 Embedding (`Embedding`)
+<a href="assets/examples/Embedding.png"><img src="assets/examples/Embedding.png" width="100%" alt="Embedding Effect" /></a>
 
 ---
 
