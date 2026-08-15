@@ -146,59 +146,59 @@ Here is a visual breakdown demonstrating the direct stylistic and structural eff
 
 ### 🟦 Model Tuning Effects
 
-#### 🔹 Block 1 (`Block_1`)
+#### 🔹 Block 1
 <a href="assets/examples/Block_1.png"><img src="assets/examples/Block_1.png" width="100%" alt="Block 1 Effect" /></a>
 
-#### 🔹 Block 2 (`Block_2`)
+#### 🔹 Block 2
 <a href="assets/examples/Block_2.png"><img src="assets/examples/Block_2.png" width="100%" alt="Block 2 Effect" /></a>
 
-#### 🔹 Block 3 (`Block_3`)
+#### 🔹 Block 3
 <a href="assets/examples/Block_3.png"><img src="assets/examples/Block_3.png" width="100%" alt="Block 3 Effect" /></a>
 
-#### 🔹 Block 4 (`Block_4`)
+#### 🔹 Block 4
 <a href="assets/examples/Block_4.png"><img src="assets/examples/Block_4.png" width="100%" alt="Block 4 Effect" /></a>
 
-#### 🔹 Block 5 (`Block_5`)
+#### 🔹 Block 5
 <a href="assets/examples/Block_5.png"><img src="assets/examples/Block_5.png" width="100%" alt="Block 5 Effect" /></a>
 
-#### 🔹 Block 6 (`Block_6`)
+#### 🔹 Block 6
 <a href="assets/examples/Block_6.png"><img src="assets/examples/Block_6.png" width="100%" alt="Block 6 Effect" /></a>
 
-#### 🔹 Text Fusion (`Text_Fusion`)
+#### 🔹 Text Fusion
 <a href="assets/examples/TextFusion.png"><img src="assets/examples/TextFusion.png" width="100%" alt="Text Fusion Effect" /></a>
 
-#### 🔹 Time Embed (`Time_Embed`)
+#### 🔹 Time Embed
 <a href="assets/examples/Time_Embed.png"><img src="assets/examples/Time_Embed.png" width="100%" alt="Time Embed Effect" /></a>
 
-#### 🔹 Projection (`Projection`)
+#### 🔹 Projection
 <a href="assets/examples/Projection.png"><img src="assets/examples/Projection.png" width="100%" alt="Projection Effect" /></a>
 
 ---
 
 ### 🟨 CLIP Text Encoder Tuning Effects
 
-#### 🔸 Layer 1 (`Layer_1`)
+#### 🔸 Layer 1
 <a href="assets/examples/Layer_1.png"><img src="assets/examples/Layer_1.png" width="100%" alt="Layer 1 Effect" /></a>
 
-#### 🔸 Layer 2 (`Layer_2`)
+#### 🔸 Layer 2
 <a href="assets/examples/Layer_2.png"><img src="assets/examples/Layer_2.png" width="100%" alt="Layer 2 Effect" /></a>
 
-#### 🔸 Layer 3 (`Layer_3`)
+#### 🔸 Layer 3
 <a href="assets/examples/Layer_3.png"><img src="assets/examples/Layer_3.png" width="100%" alt="Layer 3 Effect" /></a>
 
-#### 🔸 Layer 4 (`Layer_4`)
+#### 🔸 Layer 4
 <a href="assets/examples/Layer_4.png"><img src="assets/examples/Layer_4.png" width="100%" alt="Layer 4 Effect" /></a>
 
-#### 🔸 Layer 5 (`Layer_5`)
+#### 🔸 Layer 5
 <a href="assets/examples/Layer_5.png"><img src="assets/examples/Layer_5.png" width="100%" alt="Layer 5 Effect" /></a>
 
-#### 🔸 Layer 6 (`Layer_6`)
+#### 🔸 Layer 6
 <a href="assets/examples/Layer_6.png"><img src="assets/examples/Layer_6.png" width="100%" alt="Layer 6 Effect" /></a>
 
-#### 🔸 Layer 7 (`Layer_7`)
+#### 🔸 Layer 7
 <a href="assets/examples/Layer_7.png"><img src="assets/examples/Layer_7.png" width="100%" alt="Layer 7 Effect" /></a>
 
-#### 🔸 Embedding (`Embedding`)
+#### 🔸 Embedding
 <a href="assets/examples/Embedding.png"><img src="assets/examples/Embedding.png" width="100%" alt="Embedding Effect" /></a>
 
 ---
