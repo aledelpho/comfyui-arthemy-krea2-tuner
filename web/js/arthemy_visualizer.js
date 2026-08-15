@@ -26,11 +26,11 @@ app.registerExtension({
             }
             nodeType.prototype._arthemy_hud_installed = true;
 
-            // Set minimum node size for optimal HUD rendering (480x480)
+            // Set minimum node size for optimal HUD rendering (480x240)
             const onNodeCreated = nodeType.prototype.onNodeCreated;
             nodeType.prototype.onNodeCreated = function () {
                 onNodeCreated?.apply(this, arguments);
-                this.size = [480, 480];
+                this.size = [480, 240];
             };
 
             // Override computeSize to ensure LiteGraph reserves space for HUD canvas
@@ -38,7 +38,7 @@ app.registerExtension({
             nodeType.prototype.computeSize = function (out) {
                 const sz = computeSize ? computeSize.apply(this, arguments) : [300, 80];
                 sz[0] = Math.max(sz[0], 480);
-                sz[1] = Math.max(sz[1], 480);
+                sz[1] = Math.max(sz[1], 240);
                 return sz;
             };
 
@@ -67,8 +67,8 @@ app.registerExtension({
                 if (this.flags?.collapsed) return;
 
                 // Ensure node size is expanded if too short
-                if (this.size[1] < 470) {
-                    this.size[1] = 480;
+                if (this.size[1] < 230) {
+                    this.size[1] = 240;
                     this.size[0] = Math.max(this.size[0], 480);
                     this.setDirtyCanvas(true, true);
                 }
@@ -79,7 +79,7 @@ app.registerExtension({
                 const axisColor = "rgba(255, 255, 255, 0.25)";
 
                 const paddingX = 14;
-                const topY = 180; // Offset comfortably below LiteGraph widgets (scale, image_width, image_height)
+                const topY = 80; // Offset comfortably below LiteGraph widgets (scale, image_width, image_height)
                 const nodeW = this.size[0];
                 const nodeH = this.size[1];
                 const chartW = nodeW - (paddingX * 2);

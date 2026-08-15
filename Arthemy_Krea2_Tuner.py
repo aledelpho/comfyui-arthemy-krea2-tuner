@@ -1683,18 +1683,6 @@ def render_visualizer_image(graph_data: list, title: str, is_clip: bool, visual_
     img_np = np.array(img).astype(np.float32) / 255.0
     return torch.from_numpy(img_np).unsqueeze(0)
 
-import uuid
-
-def save_temp_preview(vis_image_tensor: torch.Tensor, prefix: str = "vis") -> list:
-    """Saves a temporary preview PNG in ComfyUI's temp directory and returns the UI images list."""
-    temp_dir = folder_paths.get_temp_directory()
-    filename = f"{prefix}_{uuid.uuid4().hex[:8]}.png"
-    file_path = os.path.join(temp_dir, filename)
-    img_np = (vis_image_tensor.squeeze(0).cpu().numpy() * 255.0).clip(0, 255).astype(np.uint8)
-    Image.fromarray(img_np).save(file_path)
-    return [{"filename": filename, "subfolder": "", "type": "temp"}]
-
-
 class ArthemyKrea2ModelVisualizer(BaseKrea2Node):
     SECTION_KEYS = [
         "Block_1A", "Block_1B", "Block_1C", "Block_1D", "Block_1E",
@@ -1770,8 +1758,7 @@ class ArthemyKrea2ModelVisualizer(BaseKrea2Node):
         info = f"Model Visualizer: {modified_sections}/{len(self.SECTION_KEYS)} sections modified."
         logger.info(f"[ARTHEMY MODEL VISUALIZER] {info}")
         vis_image = render_visualizer_image(graph_data, "Krea-2 Model", is_clip=False, visual_scale=scale, width=image_width, height=image_height)
-        preview_ui = save_temp_preview(vis_image, "vis_model")
-        return {"ui": {"images": preview_ui, "graph_data": graph_data, "scale": [scale], "title": ["Krea-2 Model"]}, "result": (model, vis_image, info)}
+        return {"ui": {"graph_data": graph_data, "scale": [scale], "title": ["Krea-2 Model"]}, "result": (model, vis_image, info)}
 
 
 class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
@@ -1844,8 +1831,7 @@ class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
         info = f"CLIP Visualizer: {modified_sections}/{len(self.SECTION_KEYS)} sections modified."
         logger.info(f"[ARTHEMY CLIP VISUALIZER] {info}")
         vis_image = render_visualizer_image(graph_data, "Qwen3 Text Encoder", is_clip=True, visual_scale=scale, width=image_width, height=image_height)
-        preview_ui = save_temp_preview(vis_image, "vis_clip")
-        return {"ui": {"images": preview_ui, "graph_data": graph_data, "scale": [scale], "title": ["Qwen3 Text Encoder"]}, "result": (clip, vis_image, info)}
+        return {"ui": {"graph_data": graph_data, "scale": [scale], "title": ["Qwen3 Text Encoder"]}, "result": (clip, vis_image, info)}
 
 # ==============================================================================
 # NODE MAPPINGS & REGISTRATION (3x3 Grid + Savers & Utilities)
