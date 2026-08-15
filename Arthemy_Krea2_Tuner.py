@@ -1972,7 +1972,6 @@ class ArthemyKrea2PresetSaver(BaseKrea2Node):
             },
             "optional": {
                 "author": ("STRING", {"default": "Arthemy"}),
-                "description": ("STRING", {"default": "Krea-2 tuning preset", "multiline": True}),
             }
         }
 
@@ -1981,7 +1980,7 @@ class ArthemyKrea2PresetSaver(BaseKrea2Node):
     FUNCTION = "save_preset"
     CATEGORY = "Arthemy/Presets"
 
-    def save_preset(self, model, clip, preset_name="my_arthemy_preset", author="Arthemy", description="Krea-2 tuning preset"):
+    def save_preset(self, model, clip, preset_name="my_arthemy_preset", author="Arthemy", **kwargs):
         m_p = get_patcher(model)
         c_p = get_patcher(clip)
 
@@ -2018,7 +2017,6 @@ class ArthemyKrea2PresetSaver(BaseKrea2Node):
         preset_data = {
             "name": re.sub(r'\.(json|arthemy)$', '', safe_name),
             "author": author.strip() if author else "Arthemy",
-            "description": description.strip() if description else "",
             "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
             "version": "2.0",
             "stats": {
