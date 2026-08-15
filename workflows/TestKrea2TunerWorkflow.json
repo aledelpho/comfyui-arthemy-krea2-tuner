@@ -1175,10 +1175,10 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "WHAT IT DOES:\n• Surgical micro-tuning for individual layers and sub-components of the Qwen3 Text Encoder.\n• Targets Attention projections (Q, K, V, Out, Q-Norm), SwiGLU MLP projections (Gate, Up, Down), and LayerNorms.\n\nHOW TO USE:\n1. Pick 'target_layer' (Layer_1 to Layer_7) and 'sub_layer' (A to F).\n2. Adjust specific projection sliders (e.g. MLP_gate_proj, ATTN_q_proj).\n3. Fine-tune semantic attention weights without affecting the rest of the text encoder."
+        "WHAT IT DOES:\n• Adjusts specific Attention and MLP parts inside a single CLIP layer.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Move the slider for the specific part you want to tune (e.g. ATTN_q_proj, MLP_gate_proj).\n3. 0.00 = no change."
       ],
       "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Surgical micro-tuning for individual layers and sub-components of the Qwen3 Text Encoder.\n• Targets Attention projections (Q, K, V, Out, Q-Norm), SwiGLU MLP projections (Gate, Up, Down), and LayerNorms.\n\nHOW TO USE:\n1. Pick 'target_layer' (Layer_1 to Layer_7) and 'sub_layer' (A to F).\n2. Adjust specific projection sliders (e.g. MLP_gate_proj, ATTN_q_proj).\n3. Fine-tune semantic attention weights without affecting the rest of the text encoder."
+        "text": "WHAT IT DOES:\n• Adjusts specific Attention and MLP parts inside a single CLIP layer.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Move the slider for the specific part you want to tune (e.g. ATTN_q_proj, MLP_gate_proj).\n3. 0.00 = no change."
       },
       "color": "#432",
       "bgcolor": "#653"
@@ -1204,10 +1204,10 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "WHAT IT DOES:\n• Stochastic perturbation engine for Qwen3 Text Encoder sub-layers.\n• Injects controlled mathematical noise into semantic layers to unlock unexpected text associations and prompt interpretations.\n\nHOW TO USE:\n1. Select 'target_layer' and 'sub_layer'.\n2. 'chaos_strength': Amplitude of perturbation (keep low, e.g. 0.05–0.15 for coherence).\n3. Set probability chance sliders for target projections (e.g. ATTN_k_proj_chance).\n4. Cycle 'seed' to generate diverse semantic interpretations."
+        "WHAT IT DOES:\n• Adds small random changes to text encoder layers to get alternative interpretations of your prompt.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Keep 'chaos_strength' low (0.05 to 0.15) so prompts stay readable.\n3. Set the chance sliders (0.0 to 1.0) for the parts you want to randomize.\n4. Change the 'seed' to try different prompt interpretations."
       ],
       "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Stochastic perturbation engine for Qwen3 Text Encoder sub-layers.\n• Injects controlled mathematical noise into semantic layers to unlock unexpected text associations and prompt interpretations.\n\nHOW TO USE:\n1. Select 'target_layer' and 'sub_layer'.\n2. 'chaos_strength': Amplitude of perturbation (keep low, e.g. 0.05–0.15 for coherence).\n3. Set probability chance sliders for target projections (e.g. ATTN_k_proj_chance).\n4. Cycle 'seed' to generate diverse semantic interpretations."
+        "text": "WHAT IT DOES:\n• Adds small random changes to text encoder layers to get alternative interpretations of your prompt.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Keep 'chaos_strength' low (0.05 to 0.15) so prompts stay readable.\n3. Set the chance sliders (0.0 to 1.0) for the parts you want to randomize.\n4. Change the 'seed' to try different prompt interpretations."
       },
       "color": "#432",
       "bgcolor": "#653"
@@ -1918,10 +1918,10 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "WHAT IT DOES:\n• Loads standard LoRAs and applies block-level weight filtering across Krea-2 model blocks.\n• Isolates or filters out LoRA influence from specific sections (e.g. keep style in Block_4–6 while removing face distortion from Block_1–2).\n\nHOW TO USE:\n1. Select your 'lora_name' and set overall 'strength_model' & 'strength_clip'.\n2. Adjust block sliders (Block_1 to Block_6, Text_Fusion, Time_Embed):\n   • 1.00 = Full LoRA strength in this block.\n   • 0.00 = Zero LoRA influence (completely stripped from this block)."
+        "WHAT IT DOES:\n• Loads a LoRA and lets you turn it on or off for whole block groups.\n\nHOW TO USE:\n1. Select your LoRA file and set the main Model / CLIP strength.\n2. Set block sliders to 1.0 for full LoRA strength, or 0.0 to completely disable the LoRA on that block."
       ],
       "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Loads standard LoRAs and applies block-level weight filtering across Krea-2 model blocks.\n• Isolates or filters out LoRA influence from specific sections (e.g. keep style in Block_4–6 while removing face distortion from Block_1–2).\n\nHOW TO USE:\n1. Select your 'lora_name' and set overall 'strength_model' & 'strength_clip'.\n2. Adjust block sliders (Block_1 to Block_6, Text_Fusion, Time_Embed):\n   • 1.00 = Full LoRA strength in this block.\n   • 0.00 = Zero LoRA influence (completely stripped from this block)."
+        "text": "WHAT IT DOES:\n• Loads a LoRA and lets you turn it on or off for whole block groups.\n\nHOW TO USE:\n1. Select your LoRA file and set the main Model / CLIP strength.\n2. Set block sliders to 1.0 for full LoRA strength, or 0.0 to completely disable the LoRA on that block."
       },
       "color": "#323",
       "bgcolor": "#535"
@@ -1947,10 +1947,10 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "WHAT IT DOES:\n• Surgical LoRA loader that applies sub-tensor component filtering within target blocks.\n• Enables loading only Attention Q/K/V deltas or only MLP weights of a LoRA while zeroing out unwanted components.\n\nHOW TO USE:\n1. Choose 'lora_name', 'target_block', and 'sub_block'.\n2. Set individual component multipliers (1.00 = full LoRA delta, 0.00 = disabled).\n3. Ideal for isolating high-frequency details (Attention) from bulk semantic transformations (MLP)."
+        "WHAT IT DOES:\n• Loads a LoRA only on specific internal parts of a single block (e.g. keep only Attention, or only MLP).\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. Set sliders to 1.0 for parts you want to keep, or 0.0 for parts you want to disable."
       ],
       "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Surgical LoRA loader that applies sub-tensor component filtering within target blocks.\n• Enables loading only Attention Q/K/V deltas or only MLP weights of a LoRA while zeroing out unwanted components.\n\nHOW TO USE:\n1. Choose 'lora_name', 'target_block', and 'sub_block'.\n2. Set individual component multipliers (1.00 = full LoRA delta, 0.00 = disabled).\n3. Ideal for isolating high-frequency details (Attention) from bulk semantic transformations (MLP)."
+        "text": "WHAT IT DOES:\n• Loads a LoRA only on specific internal parts of a single block (e.g. keep only Attention, or only MLP).\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. Set sliders to 1.0 for parts you want to keep, or 0.0 for parts you want to disable."
       },
       "color": "#323",
       "bgcolor": "#535"
@@ -1976,10 +1976,10 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "WHAT IT DOES:\n• Stochastic LoRA loader that probabilistically filters LoRA weight tensors per sub-component.\n• Blends LoRA weights randomly into the base model, creating unique hybridized styles and preventing overfitting artifacts.\n\nHOW TO USE:\n1. Choose 'lora_name', 'target_block', and 'sub_block'.\n2. 'base_chance': Default probability threshold for all layers.\n3. Component chance sliders: Override probability for specific sub-tensors (e.g. ATTN_wq_query_chance).\n4. Change 'seed' to roll new LoRA patch combinations."
+        "WHAT IT DOES:\n• Randomly applies parts of a LoRA to create blended styles without typical LoRA artifacts.\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. 'base_chance': Sets the default chance (0.0 to 1.0) for all parts.\n3. Use component sliders to customize chances for specific parts.\n4. Change the 'seed' to test different random combinations."
       ],
       "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Stochastic LoRA loader that probabilistically filters LoRA weight tensors per sub-component.\n• Blends LoRA weights randomly into the base model, creating unique hybridized styles and preventing overfitting artifacts.\n\nHOW TO USE:\n1. Choose 'lora_name', 'target_block', and 'sub_block'.\n2. 'base_chance': Default probability threshold for all layers.\n3. Component chance sliders: Override probability for specific sub-tensors (e.g. ATTN_wq_query_chance).\n4. Change 'seed' to roll new LoRA patch combinations."
+        "text": "WHAT IT DOES:\n• Randomly applies parts of a LoRA to create blended styles without typical LoRA artifacts.\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. 'base_chance': Sets the default chance (0.0 to 1.0) for all parts.\n3. Use component sliders to customize chances for specific parts.\n4. Change the 'seed' to test different random combinations."
       },
       "color": "#323",
       "bgcolor": "#535"
@@ -2005,10 +2005,10 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "WHAT IT DOES:\n• Macro-level block group tuning for the Krea-2 diffusion transformer.\n• Scales entire block groups (Block_1 to Block_6), Text_Fusion adapters, Time_Embed, and Projections.\n\nHOW TO USE:\n1. Mode: 'Soft Value' for subtle micro-tuning (10% dampening) or 'Real Value' for direct 1:1 scaling.\n2. Sliders: 0.00 = baseline (1.0x). Positive values amplify feature depth; negative values attenuate.\n3. Advanced: Paste comma-separated values in 'vectors_override' or JSON in 'granular_json'."
+        "WHAT IT DOES:\n• Adjusts the strength of entire block groups in the model (Blocks 1-6, Text Fusion, Time Embed, Projection).\n\nHOW TO USE:\n1. Mode: Use 'Soft Value' for gentle changes or 'Real Value' for direct scaling.\n2. Sliders: 0.00 means no change (1.0x baseline). Move above 0 to strengthen a group, below 0 to weaken it.\n3. Optional: Use 'vectors_override' or 'granular_json' for advanced custom values."
       ],
       "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Macro-level block group tuning for the Krea-2 diffusion transformer.\n• Scales entire block groups (Block_1 to Block_6), Text_Fusion adapters, Time_Embed, and Projections.\n\nHOW TO USE:\n1. Mode: 'Soft Value' for subtle micro-tuning (10% dampening) or 'Real Value' for direct 1:1 scaling.\n2. Sliders: 0.00 = baseline (1.0x). Positive values amplify feature depth; negative values attenuate.\n3. Advanced: Paste comma-separated values in 'vectors_override' or JSON in 'granular_json'."
+        "text": "WHAT IT DOES:\n• Adjusts the strength of entire block groups in the model (Blocks 1-6, Text Fusion, Time Embed, Projection).\n\nHOW TO USE:\n1. Mode: Use 'Soft Value' for gentle changes or 'Real Value' for direct scaling.\n2. Sliders: 0.00 means no change (1.0x baseline). Move above 0 to strengthen a group, below 0 to weaken it.\n3. Optional: Use 'vectors_override' or 'granular_json' for advanced custom values."
       },
       "color": "#223",
       "bgcolor": "#335"
@@ -2034,10 +2034,10 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "WHAT IT DOES:\n• Surgical precision tuning for specific sub-tensor components within individual Krea-2 transformer blocks (Block_1A to Block_6D).\n• Targets exact layers: Attention (Q, K, V, Out, Norms), SwiGLU MLP (Gate, Up, Down), Linear Time, and LayerNorms.\n\nHOW TO USE:\n1. Select 'target_block' (e.g. Block_1) and specific 'sub_block' (e.g. Block_1A).\n2. Adjust component sliders (e.g. boost MLP_gate_swiglu or damp ATTN_wq_query).\n3. Connect multiple Sub-Block Tuners in series to sculpt different blocks independently."
+        "WHAT IT DOES:\n• Adjusts specific internal parts inside a single model block (Attention Q/K/V/Out, SwiGLU MLP, Norms).\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block' you want to change.\n2. Adjust the sliders for the specific parts you want to tune (0.00 = no change).\n3. Connect multiple nodes in a row if you need to edit more than one sub-block."
       ],
       "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Surgical precision tuning for specific sub-tensor components within individual Krea-2 transformer blocks (Block_1A to Block_6D).\n• Targets exact layers: Attention (Q, K, V, Out, Norms), SwiGLU MLP (Gate, Up, Down), Linear Time, and LayerNorms.\n\nHOW TO USE:\n1. Select 'target_block' (e.g. Block_1) and specific 'sub_block' (e.g. Block_1A).\n2. Adjust component sliders (e.g. boost MLP_gate_swiglu or damp ATTN_wq_query).\n3. Connect multiple Sub-Block Tuners in series to sculpt different blocks independently."
+        "text": "WHAT IT DOES:\n• Adjusts specific internal parts inside a single model block (Attention Q/K/V/Out, SwiGLU MLP, Norms).\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block' you want to change.\n2. Adjust the sliders for the specific parts you want to tune (0.00 = no change).\n3. Connect multiple nodes in a row if you need to edit more than one sub-block."
       },
       "color": "#223",
       "bgcolor": "#335"
@@ -2063,10 +2063,10 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "WHAT IT DOES:\n• Stochastic discovery engine that injects randomized perturbation deltas into specific sub-tensor components.\n• Discovers novel aesthetic styles, texture dynamics, and architectural nuances.\n\nHOW TO USE:\n1. Set 'target_block' and 'sub_block' to target specific layers.\n2. 'chaos_strength': Controls the amplitude of the random perturbation.\n3. Component sliders (0.00 to 1.00): Set probability chance that each component receives a chaos delta.\n4. 'seed': Change or randomize seed to roll different variations."
+        "WHAT IT DOES:\n• Adds random changes to specific parts of a block to discover new styles, textures, and details.\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block'.\n2. 'chaos_strength': Sets how strong the random effect is.\n3. Sliders (0.0 to 1.0): Set the chance that each part receives random changes.\n4. Change the 'seed' to generate different variations."
       ],
       "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Stochastic discovery engine that injects randomized perturbation deltas into specific sub-tensor components.\n• Discovers novel aesthetic styles, texture dynamics, and architectural nuances.\n\nHOW TO USE:\n1. Set 'target_block' and 'sub_block' to target specific layers.\n2. 'chaos_strength': Controls the amplitude of the random perturbation.\n3. Component sliders (0.00 to 1.00): Set probability chance that each component receives a chaos delta.\n4. 'seed': Change or randomize seed to roll different variations."
+        "text": "WHAT IT DOES:\n• Adds random changes to specific parts of a block to discover new styles, textures, and details.\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block'.\n2. 'chaos_strength': Sets how strong the random effect is.\n3. Sliders (0.0 to 1.0): Set the chance that each part receives random changes.\n4. Change the 'seed' to generate different variations."
       },
       "color": "#223",
       "bgcolor": "#335"
@@ -3043,10 +3043,10 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "WHAT IT DOES:\n• Creates a clean, isolated Model/CLIP patcher wrapper and strips away all previous patches/LoRAs.\n• Ensures that downstream tuning nodes start from a fresh, pristine baseline.\n\nHOW TO USE:\n1. Connect directly after UNETLoader and CLIPLoader.\n2. Toggle 'reset_model' / 'reset_clip' to True.\n3. Pipe the clean MODEL/CLIP outputs into your first tuning or visualizer node."
+        "WHAT IT DOES:\n• Clears all active patches and LoRAs from the model and CLIP.\n• Gives you a clean starting point for your tuning nodes.\n\nHOW TO USE:\n1. Place this right after your Model and CLIP loaders.\n2. Keep both 'reset_model' and 'reset_clip' set to True.\n3. Connect its outputs to your first tuner or visualizer node."
       ],
       "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Creates a clean, isolated Model/CLIP patcher wrapper and strips away all previous patches/LoRAs.\n• Ensures that downstream tuning nodes start from a fresh, pristine baseline.\n\nHOW TO USE:\n1. Connect directly after UNETLoader and CLIPLoader.\n2. Toggle 'reset_model' / 'reset_clip' to True.\n3. Pipe the clean MODEL/CLIP outputs into your first tuning or visualizer node."
+        "text": "WHAT IT DOES:\n• Clears all active patches and LoRAs from the model and CLIP.\n• Gives you a clean starting point for your tuning nodes.\n\nHOW TO USE:\n1. Place this right after your Model and CLIP loaders.\n2. Keep both 'reset_model' and 'reset_clip' set to True.\n3. Connect its outputs to your first tuner or visualizer node."
       },
       "color": "#432",
       "bgcolor": "#653"
@@ -3164,10 +3164,10 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "WHAT IT DOES:\n• Macro-level weight scaling across the 36 layers of the Qwen3 / Qwen3-VL text encoder.\n• Controls prompt adherence, semantic depth, and concept binding across early, middle, and late layers.\n\nHOW TO USE:\n1. Mode: 'Soft Value' (recommended for text stability) or 'Real Value'.\n2. Sliders (Layer_1 to Layer_7 + Embedding):\n   • Early layers (1-2): Syntax & low-level token embeddings.\n   • Mid layers (3-5): Semantic relation & attribute binding.\n   • Late layers (6-7): Complex concept synthesis & composition.\n3. 0.00 = baseline (1.0x)."
+        "WHAT IT DOES:\n• Adjusts the strength of the text encoder layers (Embedding, Layers 1 to 7).\n\nHOW TO USE:\n1. Mode: 'Soft Value' is recommended for text stability.\n2. Layers 1-2 affect basic words and syntax.\n3. Layers 3-5 affect relationships and attributes.\n4. Layers 6-7 affect overall style and composition.\n5. Sliders: 0.00 = no change. Move above 0 to boost, below 0 to reduce."
       ],
       "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Macro-level weight scaling across the 36 layers of the Qwen3 / Qwen3-VL text encoder.\n• Controls prompt adherence, semantic depth, and concept binding across early, middle, and late layers.\n\nHOW TO USE:\n1. Mode: 'Soft Value' (recommended for text stability) or 'Real Value'.\n2. Sliders (Layer_1 to Layer_7 + Embedding):\n   • Early layers (1-2): Syntax & low-level token embeddings.\n   • Mid layers (3-5): Semantic relation & attribute binding.\n   • Late layers (6-7): Complex concept synthesis & composition.\n3. 0.00 = baseline (1.0x)."
+        "text": "WHAT IT DOES:\n• Adjusts the strength of the text encoder layers (Embedding, Layers 1 to 7).\n\nHOW TO USE:\n1. Mode: 'Soft Value' is recommended for text stability.\n2. Layers 1-2 affect basic words and syntax.\n3. Layers 3-5 affect relationships and attributes.\n4. Layers 6-7 affect overall style and composition.\n5. Sliders: 0.00 = no change. Move above 0 to boost, below 0 to reduce."
       },
       "color": "#432",
       "bgcolor": "#653"
