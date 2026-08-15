@@ -4,6 +4,8 @@ Custom ComfyUI nodes for editing Krea-2 diffusion models and their Qwen3 text en
 
 If you've ever wanted to customize the shape of a model and its TextEncoder in order for it to represent exactly what you want — whether by tweaking its internal values, boosting only the layers in specific sections, randomly perturbing a LoRA to see what falls out, or saving a calibration you like without exporting a whole new checkpoint — this suite is built for that.
 
+![Arthemy Krea-2 Tuner Generation Pipeline](assets/Generation.png)
+
 ---
 
 ## 🚀 Quick start
@@ -28,6 +30,8 @@ Three domains (what you're editing) × three precision levels (how targeted you 
 | **🟨 CLIP** | `🟨✨ CLIP Tuner` | `🟨🔬 CLIP Sub-Block Tuner` | `🟨🌪️ CLIP Sub-Block Chaos Tuner` |
 | **🟪 LoRA** | `🟪🔮 LoRA Block Loader` | `🟪🔬 Load Sub-Block LoRA` | `🟪🌪️ Load Sub-Block Chaos LoRA` |
 
+![Model Tuner Nodes](assets/ModelTuner.png)
+
 ### 🟦 Tier 1 — Tuner (whole groups)
 One slider per group of blocks:
 - **`🟦✨ Model Tuner`**: `Text_Fusion`, `Time_Embed`, `Projection`, `Block_1` to `Block_6`.
@@ -48,9 +52,13 @@ Same targeting as Tier 2, but instead of a fixed multiplier, each matched tensor
 
 > *Use when there is no other way — "Let’s see if by changing this sub-slice in a random way I can get exactly what I’m looking for. When I find it, I can fix the seed!"*
 
+![CLIP Tuner Nodes](assets/ClipTuner.png)
+
 ---
 
 ## 🟪 LoRA loaders — same logic, applied to a LoRA file
+
+![LoRA Loader Nodes](assets/LoraTuner.png)
 
 - **`🟪🔮 LoRA Block Loader`** — Drop-in replacement for the standard loader, plus per-section strength multipliers (`Text_Fusion`, `Time_Embed`, `Projection`, `Block_1`–`Block_6`).
 - **`🟪🔬 Load Sub-Block LoRA`** — Targets one block and one tensor type at a time, so you can keep only, say, the attention layers of a LoRA and drop the rest.
@@ -84,10 +92,14 @@ Tuning happens live in memory and doesn't touch your original checkpoint file. T
 - **`🟦🟨📂 Preset Loader`** — Pick a saved preset from the dropdown, apply it to a fresh `MODEL`/`CLIP`, with `strength_model` / `strength_clip` dials to scale the whole preset up or down on reload.
 - *Note on LoRAs:* Presets only capture Tuner-style and Chaos-style adjustments — not active LoRAs. If a LoRA is loaded on the model when you save a preset, you'll get a warning and it will be excluded; fuse it permanently first (see below) if you want it included.
 
+![Preset System](assets/Preset.png)
+
 ### 💿 Permanent export (full checkpoint)
 - **`🟦🟨 Model Baker`** — Folds all active patches permanently into the weights and clears the patch list in memory. Use this once you're done experimenting, or want to "commit" a result before stacking more changes on top.
 - **`🟦💾 Model Saver` / `🟨💾 CLIP Saver`** — Exports to `.safetensors` (BF16 or FP8), streamed to disk to keep memory use down on large checkpoints.
 - **`🟦🟨🔄 Reset Patcher`** — Clears all pending patches (including saved Chaos state) without exporting anything, if you want to start over with a clean baseline.
+
+![Model and CLIP Savers](assets/Saver.png)
 
 ---
 
