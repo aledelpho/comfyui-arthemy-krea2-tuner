@@ -1833,7 +1833,7 @@ class ArthemyKrea2ModelVisualizer(BaseKrea2Node):
                     f"Patcher: {type(m_patcher).__name__ if m_patcher else 'None'} | "
                     f"Active Patch Keys ({len(patches)}): {list(patches.keys())}")
 
-        sec_data = {s: {"block": s, "offset": 0.0, "is_lora": False, "is_chaos": False, "count": 0} for s in self.SECTION_KEYS}
+        sec_data = {s: {"block": s, "offset": 0.0, "is_lora": False, "is_chaos": False, "scalar_count": 0} for s in self.SECTION_KEYS}
 
         for pk, patch_list in patches.items():
             ck = Krea2TensorParser.clean_key(pk)
@@ -1854,20 +1854,25 @@ class ArthemyKrea2ModelVisualizer(BaseKrea2Node):
 
             if not sec_name or sec_name not in sec_data: continue
             sec = sec_data[sec_name]
-            sec["count"] += 1
 
             for p in patch_list:
                 off, is_l, is_c = parse_patch_entry(p)
-                if is_l: sec["is_lora"] = True
-                if is_c: sec["is_chaos"] = True
-                sec["offset"] += off
+                if is_l:
+                    sec["is_lora"] = True
+                if is_c:
+                    sec["is_chaos"] = True
+                if not is_l:
+                    sec["offset"] += off
+                    sec["scalar_count"] += 1
 
         graph_data = []
         modified_sections = 0
         for s in self.SECTION_KEYS:
             d = sec_data[s]
-            if d["count"] > 0:
-                d["offset"] /= max(1, d["count"])
+            if d["scalar_count"] > 0:
+                d["offset"] /= max(1, d["scalar_count"])
+                modified_sections += 1
+            elif d["is_lora"]:
                 modified_sections += 1
             graph_data.append({
                 "block": d["block"], "offset": round(d["offset"], 4),
@@ -1917,7 +1922,7 @@ class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
                     f"Patcher: {type(c_patcher).__name__ if c_patcher else 'None'} | "
                     f"Active Patch Keys ({len(patches)}): {list(patches.keys())}")
 
-        sec_data = {s: {"block": s, "offset": 0.0, "is_lora": False, "is_chaos": False, "count": 0} for s in self.SECTION_KEYS}
+        sec_data = {s: {"block": s, "offset": 0.0, "is_lora": False, "is_chaos": False, "scalar_count": 0} for s in self.SECTION_KEYS}
 
         for pk, patch_list in patches.items():
             ck = Krea2TensorParser.clean_key(pk)
@@ -1932,20 +1937,25 @@ class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
 
             if not sec_name or sec_name not in sec_data: continue
             sec = sec_data[sec_name]
-            sec["count"] += 1
 
             for p in patch_list:
                 off, is_l, is_c = parse_patch_entry(p)
-                if is_l: sec["is_lora"] = True
-                if is_c: sec["is_chaos"] = True
-                sec["offset"] += off
+                if is_l:
+                    sec["is_lora"] = True
+                if is_c:
+                    sec["is_chaos"] = True
+                if not is_l:
+                    sec["offset"] += off
+                    sec["scalar_count"] += 1
 
         graph_data = []
         modified_sections = 0
         for s in self.SECTION_KEYS:
             d = sec_data[s]
-            if d["count"] > 0:
-                d["offset"] /= max(1, d["count"])
+            if d["scalar_count"] > 0:
+                d["offset"] /= max(1, d["scalar_count"])
+                modified_sections += 1
+            elif d["is_lora"]:
                 modified_sections += 1
             graph_data.append({
                 "block": d["block"], "offset": round(d["offset"], 4),
