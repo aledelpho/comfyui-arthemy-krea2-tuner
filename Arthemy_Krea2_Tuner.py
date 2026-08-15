@@ -1808,8 +1808,12 @@ class ArthemyKrea2ModelVisualizer(BaseKrea2Node):
     CATEGORY = "Arthemy/Visualizers"
 
     def visualize(self, model, scale=1.0, image_width=960, image_height=480):
-        m_patcher = model.patcher if hasattr(model, "patcher") else model
-        patches = getattr(m_patcher, "patches", {})
+        m_patcher = get_patcher(model)
+        patches = getattr(m_patcher, "patches", {}) if m_patcher else {}
+
+        logger.info(f"[ARTHEMY MODEL VISUALIZER] Inspecting model input | Type: {type(model).__name__} | "
+                    f"Patcher: {type(m_patcher).__name__ if m_patcher else 'None'} | "
+                    f"Active Patch Keys ({len(patches)}): {list(patches.keys())}")
 
         sec_data = {s: {"block": s, "offset": 0.0, "is_lora": False, "is_chaos": False, "count": 0} for s in self.SECTION_KEYS}
 
@@ -1888,8 +1892,12 @@ class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
     CATEGORY = "Arthemy/Visualizers"
 
     def visualize(self, clip, scale=1.0, image_width=960, image_height=480):
-        c_patcher = clip.patcher if hasattr(clip, "patcher") else clip
-        patches = getattr(c_patcher, "patches", {})
+        c_patcher = get_patcher(clip)
+        patches = getattr(c_patcher, "patches", {}) if c_patcher else {}
+
+        logger.info(f"[ARTHEMY CLIP VISUALIZER] Inspecting clip input | Type: {type(clip).__name__} | "
+                    f"Patcher: {type(c_patcher).__name__ if c_patcher else 'None'} | "
+                    f"Active Patch Keys ({len(patches)}): {list(patches.keys())}")
 
         sec_data = {s: {"block": s, "offset": 0.0, "is_lora": False, "is_chaos": False, "count": 0} for s in self.SECTION_KEYS}
 
