@@ -221,11 +221,17 @@ class ComfyPatcherAdapter:
         return patcher.clone()
 
     @staticmethod
-    def calculate_safe_weight(model_or_clip, key: str, base_weight: torch.Tensor) -> torch.Tensor:
+    def calculate_safe_weight(model_or_clip, key: str, base_weight: torch.Tensor, model_sd: dict = None) -> torch.Tensor:
         """Calculates active weight safely without mutating model state or accessing private attributes.
-        Resolves exact internal state_dict key name so diffusion_model. prefixes never cause patch lookup misses."""
+        Resolves exact internal state_dict key name and reuses pre-computed model_sd to guarantee O(1) performance."""
         patcher = get_patcher(model_or_clip)
-        resolved_key = resolve_target_key(patcher, key)
+        if model_sd is None and hasattr(patcher, "model") and hasattr(patcher.model, "state_dict"):
+            try:
+                model_sd = patcher.model.state_dict()
+            except Exception:
+                model_sd = {}
+
+        resolved_key = resolve_target_key(patcher, key, model_sd=model_sd)
         
         current_patches = []
         if hasattr(patcher, "patches"):
@@ -235,15 +241,11 @@ class ComfyPatcherAdapter:
                 current_patches = patcher.patches[key]
 
         scale = None
-        if hasattr(patcher, "model") and hasattr(patcher.model, "state_dict"):
-            try:
-                model_sd = patcher.model.state_dict()
-                for scale_cand in (f"{resolved_key}_scale", f"{resolved_key}.weight_scale", f"{key}_scale", f"{key}.weight_scale"):
-                    if scale_cand in model_sd:
-                        scale = model_sd[scale_cand]
-                        break
-            except Exception:
-                pass
+        if model_sd:
+            for scale_cand in (f"{resolved_key}_scale", f"{resolved_key}.weight_scale", f"{key}_scale", f"{key}.weight_scale"):
+                if scale_cand in model_sd:
+                    scale = model_sd[scale_cand]
+                    break
 
         clean_base = dequantize_weight(get_clean_weight(patcher, resolved_key, base_weight), scale=scale)
         if current_patches:
@@ -328,7 +330,7 @@ def add_patches_to_front(model_patcher, patches: dict, strength_patch: float = 1
     p_keys = set()
 
     for k, val in patches.items():
-        target_k = resolve_target_key(patcher, k)
+        target_k = resolve_target_key(patcher, k, model_sd=model_sd)
         base_w = model_sd.get(target_k, None)
         target_dtype = base_w.dtype if isinstance(base_w, torch.Tensor) else torch.bfloat16
         target_device = base_w.device if isinstance(base_w, torch.Tensor) else torch.device("cpu")
@@ -535,7 +537,7 @@ class BaseSurgeonTuner(BaseKrea2Node):
 
                 if not torch.any(mask): continue
 
-                w_active = ComfyPatcherAdapter.calculate_safe_weight(model_or_clip, target_patch_key, base_weight)
+                w_active = ComfyPatcherAdapter.calculate_safe_weight(model_or_clip, target_patch_key, base_weight, model_sd=base_sd)
                 delta = (w_active.to("cpu") * chaos_strength) * mask.to("cpu").to(torch.bfloat16)
                 patches_to_add[target_patch_key] = (delta.to(torch.bfloat16),)
                 active_count += 1
@@ -1448,7 +1450,7 @@ class ArthemyKrea2ModelBaker(BaseKrea2Node):
             patches = getattr(m_p, "patches", {})
             if target_k in patches or k in patches:
                 n_model_patched += 1
-                patched_weight = ComfyPatcherAdapter.calculate_safe_weight(m_baked, target_k, v)
+                patched_weight = ComfyPatcherAdapter.calculate_safe_weight(m_baked, target_k, v, model_sd=m_sd)
                 baked_model_weights[target_k] = patched_weight
                 return patched_weight
             return v
@@ -1462,7 +1464,7 @@ class ArthemyKrea2ModelBaker(BaseKrea2Node):
             patches = getattr(c_p, "patches", {})
             if target_k in patches or k in patches:
                 n_clip_patched += 1
-                patched_weight = ComfyPatcherAdapter.calculate_safe_weight(c_baked, target_k, v)
+                patched_weight = ComfyPatcherAdapter.calculate_safe_weight(c_baked, target_k, v, model_sd=c_sd)
                 baked_clip_weights[target_k] = patched_weight
                 return patched_weight
             return v
