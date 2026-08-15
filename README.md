@@ -1,44 +1,44 @@
 # ✨ Arthemy Krea-2 Tuner — ComfyUI Custom Node Suite
 
-A high-precision model and CLIP tuning suite for **Krea-2** diffusion models inside [ComfyUI](https://github.com/comfyanonymous/ComfyUI).
+A high-precision model, CLIP, and LoRA tuning suite for **Krea-2** diffusion models inside [ComfyUI](https://github.com/comfyanonymous/ComfyUI).
 
 ---
 
-## Features
+## 📐 The 3×3 Precision Grid
+
+The suite is structured around 3 core domains across 3 levels of granularity:
+
+| Domain | Tier 1: Tuner (Coarse Group/Block) | Tier 2: Sub-Block (Surgical Precision) | Tier 3: Sub-Block Chaos (Stochastic Discovery) |
+|---|---|---|---|
+| **🟦 Model** | `🟦✨ Model Tuner` | `🟦🔬 Model Sub-Block Tuner` | `🟦🌪️ Model Sub-Block Chaos Tuner` |
+| **🟨 CLIP** | `🟨✨ CLIP Tuner` | `🟨🔬 CLIP Sub-Block Tuner` | `🟨🌪️ CLIP Sub-Block Chaos Tuner` |
+| **🟪 LoRA** | `🟪🔮 LoRA Block Loader` | `🟪🔬 Load Sub-Block LoRA` | `🟪🌪️ Load Sub-Block Chaos LoRA` |
+
+---
+
+## 🛠️ Savers, Bakers & Utilities
 
 | Node | Description |
 |---|---|
-| ✨ **Model Tuner** | Group-level weight scaling for all 28 Krea-2 blocks + text fusion layers |
-| ✨ **CLIP Tuner** | Per-group layer scaling for the Qwen3 text encoder (embedding + 7 groups) |
-| 🌪️ **Model Chaos Block Tuner** | Stochastic weight perturbation at Block-Level or Element-Level (sub-atomic) |
-| 🌪️ **CLIP Chaos Block Tuner** | Same chaos engine applied to the CLIP text encoder |
-| 🔬 **Model Block Surgeon Tuner** | Fine-grained sub-tensor targeting per attention/MLP component type per block |
-| 🔬 **CLIP Block Surgeon Tuner** | Same surgeon precision for CLIP layers |
-| 🌪️🔬 **Model/CLIP Chaos Block Surgeon** | Chaos tuning with surgeon-level sub-tensor targeting |
-| 🔮 **LoRA Block Loader** | Block-level LoRA loading with per-block strength sliders |
-| 🔮 **Isolated LoRA Block Loader** | Isolated LoRA loading: clones the patcher before applying so patches don't accumulate from upstream nodes |
-| 🎲 **Load Chaos LoRA** | Stochastic LoRA application with chance and strength controls |
-| 🎲🔬 **Load Chaos LoRA Block Surgeon** | Chaos LoRA with surgeon-level targeting |
-| 💾 **Model Saver** | Memory-safe BF16 model baker & saver with streaming tensor processing |
-| 💾 **CLIP Saver** | Same safe saver for CLIP/text encoder checkpoints |
-| **Model Baker** | In-place CPU BF16 patch baking into model weights |
-| 📊 **Model Visualizer** | Real-time visual graph of per-block weight offsets and LoRA presence |
-| 📊 **CLIP Visualizer** | Same visual graph for the Qwen3 text encoder |
-| 🔄 **Reset Patcher** | Clears all active patches from a model or CLIP patcher |
+| `🟦💾 Model Saver` | Memory-safe BF16 model baker & safetensors saver with streaming tensor processing |
+| `🟨💾 CLIP Saver` | Memory-safe BF16 Qwen3 / Qwen3-VL text encoder saver |
+| `🟦🟨 Model Baker` | In-place CPU BF16 patch baking directly into live model weights |
+| `🟦📊 Model Visualizer` | Real-time visual graph rendering of per-block weight offsets, LoRA presence, and chaos modifications |
+| `🟨📊 CLIP Visualizer` | Real-time visual graph for the Qwen3 text encoder layers |
+| `🟦🟨🔄 Reset Patcher` | Clears all active patches from model and CLIP patchers |
 
 ---
 
-## Architecture
+## ⚙️ Architecture & Safety Standards
 
-- **Native ComfyUI Patcher Integration** — uses `add_patches` / `calculate_weight` officially, no monkey-patching.
-- **Dynamic Probing Engine** (`Krea2TensorParser`) — programmatic state-dict architecture discovery with regex fallback.
-- **Memory-Safe Streaming** (`process_tensor_stream`) — GC-aware generator for OOM-safe baking and saving.
-- **DRY BaseSurgeonTuner** — unified engine shared by all Surgeon and Chaos Surgeon tuners.
-- **In-place mutation prevention** — all patch tensors are `.clone().detach().contiguous()` before injection.
+- **Native ComfyUI Patcher Integration** — Uses standard `add_patches` / `calculate_weight` without monkey-patching or unsafe cache overrides.
+- **Dynamic Probing Engine** (`Krea2TensorParser`) — Programmatic state-dict architecture discovery with regex fallback.
+- **Memory-Safe Streaming** (`process_tensor_stream`) — Memory threshold & GC-aware streaming generator for OOM-safe model baking and saving.
+- **In-place Mutation Guard** — All patch tensors undergo strict `.clone().detach().contiguous()` to prevent VRAM buffer corruption.
 
 ---
 
-## Installation
+## 🚀 Installation
 
 ### Manual
 1. Clone or download this repository into your ComfyUI `custom_nodes` folder:
@@ -52,26 +52,17 @@ Search for **"Arthemy Krea-2 Tuner"** in the Manager's custom node browser.
 
 ---
 
-## Compatibility
-
-- ComfyUI (latest)
-- Krea-2 BF16 and FP8-scaled models
-- Qwen3 (0.6B) and Qwen3-VL (4B) text encoders
-- Python ≥ 3.10, PyTorch ≥ 2.1
-
----
-
-## Soft Value vs. Real Value Mode
+## 🎛️ Soft Value vs. Real Value Mode
 
 All tuner sliders operate as **offsets from baseline** (`0.00 = no change`).
 
-| Mode | Formula | Use case |
+| Mode | Formula | Use Case |
 |---|---|---|
-| **Soft Value** | `1.0 + delta × 0.10` | Precision micro-tuning (10% dampening) |
-| **Real Value** | `1.0 + delta` | Direct 1-to-1 linear scaling |
+| **Soft Value** | `1.0 + delta × 0.10` | Precision micro-tuning (10% dampening factor) |
+| **Real Value** | `1.0 + delta` | Direct 1-to-1 linear multiplier scaling |
 
 ---
 
-## Author
+## 👤 Author
 
 **Arthemy** · [@aledelpho](https://github.com/aledelpho)

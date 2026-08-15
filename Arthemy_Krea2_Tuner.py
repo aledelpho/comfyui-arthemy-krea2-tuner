@@ -779,171 +779,7 @@ class ArthemyKrea2CLIPTuner(BaseKrea2Node):
             add_patches_to_front(c, patches_to_add, 1.0)
         return (c, f"Krea-2 CLIP Tuned | Patches: {active_patches}")
 
-# ==============================================================================
-# 3. ARTHEMY KREA2 MODEL CHAOS BLOCK TUNER
-# ==============================================================================
-class ArthemyKrea2ModelChaosBlockTuner(BaseKrea2Node):
-    @classmethod
-    def INPUT_TYPES(s):
-        return {
-            "required": {
-                "model": ("MODEL",),
-                "tune_mode": (["Block-Level", "Element-Level (Sub-atomic)"],),
-                "seed": ("INT", {"default": 42, "min": 0, "max": 0xffffffffffffffff}),
-                "chaos_strength": ("FLOAT", {"default": 0.1, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "base_chance": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Block_1_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Block_2_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Block_3_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Block_4_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Block_5_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Block_6_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Text_Fusion_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Time_Embed_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Projection_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-            }
-        }
 
-    RETURN_TYPES = ("MODEL", "STRING")
-    RETURN_NAMES = ("MODEL", "info")
-    FUNCTION = "chaos_tune_model"
-    CATEGORY = "Arthemy/Krea2 Tuners"
-
-    def chaos_tune_model(self, model, tune_mode, seed, chaos_strength, base_chance=0.5,
-                         Block_1_chance=0.0, Block_2_chance=0.0, Block_3_chance=0.0,
-                         Block_4_chance=0.0, Block_5_chance=0.0, Block_6_chance=0.0,
-                         Text_Fusion_chance=0.0, Time_Embed_chance=0.0, Projection_chance=0.0):
-        m = model.clone()
-        base_sd = m.model.state_dict()
-        patches_to_add = {}
-        active = 0
-        valid_keys = m.model_keys if hasattr(m, "model_keys") else None
-
-        def get_chance(prefix):
-            if prefix.startswith("blocks."):
-                idx = int(prefix.split(".")[1])
-                if idx < 5:  return Block_1_chance or base_chance
-                if idx < 10: return Block_2_chance or base_chance
-                if idx < 15: return Block_3_chance or base_chance
-                if idx < 20: return Block_4_chance or base_chance
-                if idx < 24: return Block_5_chance or base_chance
-                return Block_6_chance or base_chance
-            elif "txtfusion" in prefix or "txtmlp" in prefix: return Text_Fusion_chance or base_chance
-            elif "tmlp" in prefix or "tproj" in prefix: return Time_Embed_chance or base_chance
-            elif "first" in prefix or "last" in prefix: return Projection_chance or base_chance
-            return base_chance
-
-        for k, base_weight in base_sd.items():
-            if k.endswith(".comfy_quant") or f"{k}_scale" in base_sd: continue
-            if valid_keys is not None and k not in valid_keys: continue
-
-            ck = Krea2TensorParser.clean_key(k)
-            target_chance = get_chance(ck)
-            if target_chance <= 0.0: continue
-
-            fast_seed = generate_fast_seed(k, seed)
-            rng = torch.Generator(device=base_weight.device)
-            rng.manual_seed(fast_seed)
-
-            if tune_mode == "Element-Level (Sub-atomic)":
-                mask = torch.rand(base_weight.shape, generator=rng, device=base_weight.device) < target_chance
-            else:
-                v_rand = torch.rand(1, generator=rng, device=base_weight.device).item()
-                mask = torch.ones_like(base_weight, dtype=torch.bool) if v_rand < target_chance else torch.zeros_like(base_weight, dtype=torch.bool)
-
-            if not torch.any(mask): continue
-
-            pk = f"diffusion_model.{ck}" if not ck.startswith("diffusion_model.") else ck
-            w = ComfyPatcherAdapter.calculate_safe_weight(m, pk, base_weight)
-            delta = (w.to("cpu") * chaos_strength) * mask.to("cpu").to(torch.bfloat16)
-            patches_to_add[pk] = (delta.to(torch.bfloat16),)
-            active += 1
-
-        if patches_to_add:
-            add_patches_to_front(m, patches_to_add, 1.0)
-        return (m, f"Krea-2 Model Chaos Block Tuner ({tune_mode}) | Patches: {active}")
-
-# ==============================================================================
-# 4. ARTHEMY KREA2 CLIP CHAOS BLOCK TUNER
-# ==============================================================================
-class ArthemyKrea2CLIPChaosBlockTuner(BaseKrea2Node):
-    @classmethod
-    def INPUT_TYPES(s):
-        return {
-            "required": {
-                "clip": ("CLIP",),
-                "tune_mode": (["Block-Level", "Element-Level (Sub-atomic)"],),
-                "seed": ("INT", {"default": 42, "min": 0, "max": 0xffffffffffffffff}),
-                "chaos_strength": ("FLOAT", {"default": 0.1, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "base_chance": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Embedding_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Layer_1_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Layer_2_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Layer_3_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Layer_4_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Layer_5_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Layer_6_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Layer_7_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "Final_Projection_chance": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-            }
-        }
-
-    RETURN_TYPES = ("CLIP", "STRING")
-    RETURN_NAMES = ("CLIP", "info")
-    FUNCTION = "chaos_tune_clip"
-    CATEGORY = "Arthemy/Krea2 Tuners"
-
-    def chaos_tune_clip(self, clip, tune_mode, seed, chaos_strength, base_chance=0.5,
-                        Embedding_chance=0.0, Layer_1_chance=0.0, Layer_2_chance=0.0,
-                        Layer_3_chance=0.0, Layer_4_chance=0.0, Layer_5_chance=0.0,
-                        Layer_6_chance=0.0, Layer_7_chance=0.0, Final_Projection_chance=0.0):
-        c = clip.clone()
-        c_p = get_patcher(c)
-        base_sd = c_p.model.state_dict() if hasattr(c_p, 'model') else getattr(c, 'get_sd', lambda: {})()
-        patches_to_add = {}
-        active = 0
-        valid_keys = getattr(c_p, 'model_keys', None)
-
-        for k, base_weight in base_sd.items():
-            if k.endswith(".position_ids") or k.endswith(".logit_scale") or f"{k}_scale" in base_sd: continue
-            if valid_keys is not None and k not in valid_keys: continue
-
-            target_chance = base_chance
-            if "embed_tokens" in k: target_chance = Embedding_chance or base_chance
-            elif "norm.weight" in k or "final_layer_norm" in k: target_chance = Final_Projection_chance or base_chance
-            else:
-                idx, _ = Krea2TensorParser.extract_clip_layer_idx(Krea2TensorParser.clean_key(k))
-                if idx is not None:
-                    if idx < 5:   target_chance = Layer_1_chance or base_chance
-                    elif idx < 10: target_chance = Layer_2_chance or base_chance
-                    elif idx < 15: target_chance = Layer_3_chance or base_chance
-                    elif idx < 20: target_chance = Layer_4_chance or base_chance
-                    elif idx < 25: target_chance = Layer_5_chance or base_chance
-                    elif idx < 30: target_chance = Layer_6_chance or base_chance
-                    else:          target_chance = Layer_7_chance or base_chance
-
-            if target_chance <= 0.0: continue
-
-            fast_seed = generate_fast_seed(k, seed)
-            rng = torch.Generator(device=base_weight.device)
-            rng.manual_seed(fast_seed)
-
-            if tune_mode == "Element-Level (Sub-atomic)":
-                mask = torch.rand(base_weight.shape, generator=rng, device=base_weight.device) < target_chance
-            else:
-                v_rand = torch.rand(1, generator=rng, device=base_weight.device).item()
-                mask = torch.ones_like(base_weight, dtype=torch.bool) if v_rand < target_chance else torch.zeros_like(base_weight, dtype=torch.bool)
-
-            if not torch.any(mask): continue
-
-            w_active = ComfyPatcherAdapter.calculate_safe_weight(c, k, base_weight)
-            delta = (w_active.to("cpu") * chaos_strength) * mask.to("cpu").to(torch.bfloat16)
-            patches_to_add[k] = (delta.to(torch.bfloat16),)
-            active += 1
-
-        if patches_to_add:
-            add_patches_to_front(c, patches_to_add, 1.0)
-        return (c, f"Krea-2 CLIP Chaos Block Tuner ({tune_mode}) | Patches: {active}")
 
 # ==============================================================================
 # POINT 4 IMPLEMENTATIONS: SURGEON NODES DERIVED FROM BaseSurgeonTuner
@@ -1245,9 +1081,10 @@ class ArthemyKrea2CLIPSaver(BaseKrea2Node):
         return (output_path,)
 
 # ==============================================================================
-# LORA BLOCK LOADERS (Isolated & Chaos)
+# LORA TRIO (Block Loader, Sub-Block, Sub-Block Chaos) & UTILITIES
 # ==============================================================================
 class ArthemyKrea2LoraBlockLoader(BaseKrea2Node):
+    """Tier 1: Global and standard LoRA loading for Krea-2 and CLIP."""
     @classmethod
     def INPUT_TYPES(s):
         lora_list = folder_paths.get_filename_list("loras")
@@ -1255,8 +1092,8 @@ class ArthemyKrea2LoraBlockLoader(BaseKrea2Node):
             "required": {
                 "model": ("MODEL",), "clip": ("CLIP",),
                 "lora_name": (lora_list,),
-                "strength_model": ("FLOAT", {"default": 0.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "strength_clip": ("FLOAT", {"default": 0.0, "min": -99.00, "max": 99.00, "step": 0.01}),
+                "strength_model": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
+                "strength_clip": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
             }
         }
 
@@ -1272,6 +1109,147 @@ class ArthemyKrea2LoraBlockLoader(BaseKrea2Node):
         lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
         m, c = comfy.sd.load_lora_for_models(model, clip, lora, strength_model, strength_clip)
         return (m, c, f"Loaded LoRA: {lora_name}")
+
+
+class ArthemyKrea2LoadSubBlockLora(BaseKrea2Node):
+    """Tier 2: High-precision deterministic Sub-Block LoRA filtering and weighting.
+    Allows targeting specific transformer blocks and individual component types
+    (e.g., query/key attention, MLP down-projection) within the LoRA."""
+    MODEL_BLOCK_RANGES = ArthemyKrea2ModelBlockSurgeonTuner.MODEL_BLOCK_RANGES
+    SURGEON_MAP = Krea2TensorParser.get_descriptive_model_surgeon_map()
+
+    @classmethod
+    def INPUT_TYPES(s):
+        lora_list = folder_paths.get_filename_list("loras")
+        inputs = {
+            "required": {
+                "model": ("MODEL",), "clip": ("CLIP",), "lora_name": (lora_list,),
+                "strength_model": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
+                "strength_clip": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
+                "target_block": (list(s.MODEL_BLOCK_RANGES.keys()),),
+                "sub_block": (["Block_1A (0)", "Block_1B (1)", "Block_1C (2)", "Block_1D (3)", "Block_1E (4)",
+                               "Block_2A (5)", "Block_2B (6)", "Block_2C (7)", "Block_2D (8)", "Block_2E (9)",
+                               "Block_3A (10)", "Block_3B (11)", "Block_3C (12)", "Block_3D (13)", "Block_3E (14)",
+                               "Block_4A (15)", "Block_4B (16)", "Block_4C (17)", "Block_4D (18)", "Block_4E (19)",
+                               "Block_5A (20)", "Block_5B (21)", "Block_5C (22)", "Block_5D (23)",
+                               "Block_6A (24)", "Block_6B (25)", "Block_6C (26)", "Block_6D (27)",
+                               "All Sub-Blocks (*)"],),
+            }
+        }
+        for name in s.SURGEON_MAP.keys():
+            inputs["required"][name] = ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.05,
+                                                  "tooltip": "Sub-tensor multiplier (0.0 = filter out entirely)."})
+        return inputs
+
+    RETURN_TYPES = ("MODEL", "CLIP", "STRING")
+    RETURN_NAMES = ("MODEL", "CLIP", "info")
+    FUNCTION = "load_sub_block_lora"
+    CATEGORY = "Arthemy/Krea2 LoRA"
+
+    def load_sub_block_lora(self, model, clip, lora_name, strength_model, strength_clip, target_block, sub_block, **kwargs):
+        if strength_model == 0 and strength_clip == 0:
+            return (model, clip, "LoRA bypassed (strength 0)")
+
+        lora_path = folder_paths.get_full_path("loras", lora_name)
+        lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
+
+        if sub_block != "All Sub-Blocks (*)":
+            selected_blocks = {MODEL_BLOCK_LABEL_TO_IDX[sub_block.split(" ")[0]]}
+        else:
+            selected_blocks = self.MODEL_BLOCK_RANGES.get(target_block, set(range(0, Krea2Config.MAX_UNET_BLOCKS)))
+
+        filtered_lora = {}
+        for k, v in lora.items():
+            clean_k = Krea2TensorParser.clean_key(k)
+            idx, sub_key = Krea2TensorParser.extract_model_block_idx(clean_k)
+            if idx is not None:
+                if idx not in selected_blocks:
+                    continue
+                matched_widget = Krea2TensorParser.match_model_sub_tensor(sub_key)
+                if matched_widget:
+                    weight_mult = kwargs.get(matched_widget, 1.0)
+                    if weight_mult <= 0.0:
+                        continue
+                    elif weight_mult != 1.0:
+                        filtered_lora[k] = v * weight_mult
+                        continue
+            filtered_lora[k] = v
+
+        m, c = comfy.sd.load_lora_for_models(model, clip, filtered_lora, strength_model, strength_clip)
+        return (m, c, f"Sub-Block LoRA ({len(filtered_lora)} keys)")
+
+
+class ArthemyKrea2LoadChaosLoraBlockSurgeon(BaseSurgeonTuner):
+    """Tier 3: Stochastic Sub-Block Chaos LoRA filtering.
+    Selectively and randomly activates LoRA key components according to per-sub-tensor chance rolls."""
+    MODEL_BLOCK_RANGES = ArthemyKrea2ModelBlockSurgeonTuner.MODEL_BLOCK_RANGES
+    SURGEON_MAP = Krea2TensorParser.get_descriptive_model_surgeon_map()
+
+    @classmethod
+    def INPUT_TYPES(s):
+        lora_list = folder_paths.get_filename_list("loras")
+        inputs = {
+            "required": {
+                "model": ("MODEL",), "clip": ("CLIP",), "lora_name": (lora_list,),
+                "strength_model": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
+                "strength_clip": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
+                "target_block": (list(s.MODEL_BLOCK_RANGES.keys()),),
+                "sub_block": (["Block_1A (0)", "Block_1B (1)", "Block_1C (2)", "Block_1D (3)", "Block_1E (4)",
+                               "Block_2A (5)", "Block_2B (6)", "Block_2C (7)", "Block_2D (8)", "Block_2E (9)",
+                               "Block_3A (10)", "Block_3B (11)", "Block_3C (12)", "Block_3D (13)", "Block_3E (14)",
+                               "Block_4A (15)", "Block_4B (16)", "Block_4C (17)", "Block_4D (18)", "Block_4E (19)",
+                               "Block_5A (20)", "Block_5B (21)", "Block_5C (22)", "Block_5D (23)",
+                               "Block_6A (24)", "Block_6B (25)", "Block_6C (26)", "Block_6D (27)",
+                               "All Sub-Blocks (*)"],),
+                "seed": ("INT", {"default": 42, "min": 0, "max": 0xffffffffffffffff}),
+                "base_chance": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01}),
+            }
+        }
+        for name in s.SURGEON_MAP.keys():
+            inputs["required"][f"{name}_chance"] = ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01})
+        return inputs
+
+    RETURN_TYPES = ("MODEL", "CLIP", "STRING")
+    RETURN_NAMES = ("MODEL", "CLIP", "info")
+    FUNCTION = "load_chaos_lora_surgeon"
+    CATEGORY = "Arthemy/Krea2 LoRA"
+
+    def load_chaos_lora_surgeon(self, model, clip, lora_name, strength_model, strength_clip, target_block, sub_block, seed, base_chance, **kwargs):
+        if strength_model == 0 and strength_clip == 0:
+            return (model, clip, "LoRA bypassed (strength 0)")
+
+        lora_path = folder_paths.get_full_path("loras", lora_name)
+        lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
+
+        if sub_block != "All Sub-Blocks (*)":
+            selected_blocks = {MODEL_BLOCK_LABEL_TO_IDX[sub_block.split(" ")[0]]}
+        else:
+            selected_blocks = self.MODEL_BLOCK_RANGES.get(target_block, set(range(0, Krea2Config.MAX_UNET_BLOCKS)))
+
+        filtered_lora = {}
+        for k, v in lora.items():
+            clean_k = Krea2TensorParser.clean_key(k)
+            idx, sub_key = Krea2TensorParser.extract_model_block_idx(clean_k)
+            if idx is not None:
+                if idx not in selected_blocks:
+                    continue
+                matched_widget = Krea2TensorParser.match_model_sub_tensor(sub_key)
+                chance = kwargs.get(f"{matched_widget}_chance", 0.0) if matched_widget else 0.0
+                if chance <= 0.0:
+                    chance = base_chance
+            else:
+                chance = base_chance
+
+            if chance <= 0.0:
+                continue
+
+            fast_seed = generate_fast_seed(k, seed)
+            rng = torch.Generator().manual_seed(fast_seed)
+            if torch.rand(1, generator=rng).item() < chance:
+                filtered_lora[k] = v
+
+        m, c = comfy.sd.load_lora_for_models(model, clip, filtered_lora, strength_model, strength_clip)
+        return (m, c, f"Sub-Block Chaos LoRA ({len(filtered_lora)} keys)")
 
 
 class ArthemyKrea2ResetPatcher(BaseKrea2Node):
@@ -1300,111 +1278,6 @@ class ArthemyKrea2ResetPatcher(BaseKrea2Node):
         if reset_clip and c_p and hasattr(c_p, "patches"):
             c_p.patches = {}
         return (m, c, "Reset patchers clean.")
-
-
-class ArthemyKrea2IsolatedLoraBlockLoader(BaseKrea2Node):
-    """Isolated LoRA loader: clones the patcher before applying so the LoRA
-    does not accumulate on top of any previously active patches from upstream nodes.
-    Produces standard ComfyUI 2-tensor (lora_down, lora_up) patch entries, which
-    are correctly detected as is_lora=True by the Visualizer's parse_patch_entry."""
-
-    @classmethod
-    def INPUT_TYPES(s):
-        lora_list = folder_paths.get_filename_list("loras")
-        return {
-            "required": {
-                "model": ("MODEL",), "clip": ("CLIP",), "lora_name": (lora_list,),
-                "strength_model": ("FLOAT", {"default": 0.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "strength_clip": ("FLOAT", {"default": 0.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-            }
-        }
-
-    RETURN_TYPES = ("MODEL", "CLIP", "STRING")
-    RETURN_NAMES = ("MODEL", "CLIP", "info")
-    FUNCTION = "load_lora"
-    CATEGORY = "Arthemy/Krea2 LoRA"
-
-    def load_lora(self, model, clip, lora_name, strength_model, strength_clip):
-        if strength_model == 0 and strength_clip == 0:
-            return (model, clip, "Bypassed")
-        m = ComfyPatcherAdapter.isolate_patcher(model)
-        c = ComfyPatcherAdapter.isolate_patcher(clip)
-        lora_path = folder_paths.get_full_path("loras", lora_name)
-        lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
-        res_m, res_c = comfy.sd.load_lora_for_models(m, c, lora, strength_model, strength_clip)
-        return (res_m, res_c, f"Isolated LoRA: {lora_name}")
-
-
-class ArthemyKrea2LoadChaosLoRA(BaseKrea2Node):
-    @classmethod
-    def INPUT_TYPES(s):
-        lora_list = folder_paths.get_filename_list("loras")
-        return {
-            "required": {
-                "model": ("MODEL",), "clip": ("CLIP",), "lora_name": (lora_list,),
-                "strength_model": ("FLOAT", {"default": 0.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "strength_clip": ("FLOAT", {"default": 0.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "chaos_chance": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "seed": ("INT", {"default": 42, "min": 0, "max": 0xffffffffffffffff}),
-            }
-        }
-
-    RETURN_TYPES = ("MODEL", "CLIP", "STRING")
-    RETURN_NAMES = ("MODEL", "CLIP", "info")
-    FUNCTION = "load_chaos_lora"
-    CATEGORY = "Arthemy/Krea2 LoRA"
-
-    def load_chaos_lora(self, model, clip, lora_name, strength_model, strength_clip, chaos_chance, seed):
-        m = ComfyPatcherAdapter.isolate_patcher(model)
-        c = ComfyPatcherAdapter.isolate_patcher(clip)
-        lora_path = folder_paths.get_full_path("loras", lora_name)
-        lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
-
-        filtered_lora = {}
-        for i, (k, v) in enumerate(lora.items()):
-            key_hash = int(hashlib.md5(k.encode()).hexdigest(), 16) % (2**31)
-            rng = torch.Generator().manual_seed((seed + key_hash) % (2**31))
-            if torch.rand(1, generator=rng).item() < chaos_chance:
-                filtered_lora[k] = v
-
-        res_m, res_c = comfy.sd.load_lora_for_models(m, c, filtered_lora, strength_model, strength_clip)
-        return (res_m, res_c, f"Chaos LoRA Loaded ({len(filtered_lora)} keys)")
-
-
-class ArthemyKrea2LoadChaosLoraBlockSurgeon(BaseSurgeonTuner):
-    @classmethod
-    def INPUT_TYPES(s):
-        lora_list = folder_paths.get_filename_list("loras")
-        return {
-            "required": {
-                "model": ("MODEL",), "clip": ("CLIP",), "lora_name": (lora_list,),
-                "strength_model": ("FLOAT", {"default": 0.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "strength_clip": ("FLOAT", {"default": 0.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "chaos_chance": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "seed": ("INT", {"default": 42, "min": 0, "max": 0xffffffffffffffff}),
-            }
-        }
-
-    RETURN_TYPES = ("MODEL", "CLIP", "STRING")
-    RETURN_NAMES = ("MODEL", "CLIP", "info")
-    FUNCTION = "load_chaos_lora_surgeon"
-    CATEGORY = "Arthemy/Krea2 LoRA"
-
-    def load_chaos_lora_surgeon(self, model, clip, lora_name, strength_model, strength_clip, chaos_chance, seed):
-        m = ComfyPatcherAdapter.isolate_patcher(model)
-        c = ComfyPatcherAdapter.isolate_patcher(clip)
-        lora_path = folder_paths.get_full_path("loras", lora_name)
-        lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
-
-        filtered_lora = {}
-        for k, v in lora.items():
-            key_hash = int(hashlib.md5(k.encode()).hexdigest(), 16) % (2**31)
-            rng = torch.Generator().manual_seed((seed + key_hash) % (2**31))
-            if torch.rand(1, generator=rng).item() < chaos_chance:
-                filtered_lora[k] = v
-
-        res_m, res_c = comfy.sd.load_lora_for_models(m, c, filtered_lora, strength_model, strength_clip)
-        return (res_m, res_c, f"Chaos Surgeon LoRA ({len(filtered_lora)} keys)")
 
 # ==============================================================================
 # POINT 3 IMPLEMENTATION: MODEL BAKER WITH STREAM GENERATOR
@@ -1767,53 +1640,56 @@ class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
         return {"ui": {"graph_data": graph_data, "scale": [scale], "title": ["Qwen3 Text Encoder"]}, "result": (clip, vis_image, info)}
 
 # ==============================================================================
-
-# ==============================================================================
-# NODE MAPPINGS & REGISTRATION
+# NODE MAPPINGS & REGISTRATION (3x3 Grid + Savers & Utilities)
 # ==============================================================================
 NODE_CLASS_MAPPINGS = {
+    # 🟦 Model Trio
     "ArthemyKrea2ModelTuner": ArthemyKrea2ModelTuner,
-    "ArthemyKrea2CLIPTuner": ArthemyKrea2CLIPTuner,
-    "ArthemyKrea2ModelChaosBlockTuner": ArthemyKrea2ModelChaosBlockTuner,
-    "ArthemyKrea2CLIPChaosBlockTuner": ArthemyKrea2CLIPChaosBlockTuner,
     "ArthemyKrea2ModelBlockSurgeonTuner": ArthemyKrea2ModelBlockSurgeonTuner,
-    "ArthemyKrea2CLIPBlockSurgeonTuner": ArthemyKrea2CLIPBlockSurgeonTuner,
     "ArthemyKrea2ModelChaosBlockSurgeonTuner": ArthemyKrea2ModelChaosBlockSurgeonTuner,
+
+    # 🟨 CLIP Trio
+    "ArthemyKrea2CLIPTuner": ArthemyKrea2CLIPTuner,
+    "ArthemyKrea2CLIPBlockSurgeonTuner": ArthemyKrea2CLIPBlockSurgeonTuner,
     "ArthemyKrea2CLIPChaosBlockSurgeonTuner": ArthemyKrea2CLIPChaosBlockSurgeonTuner,
+
+    # 🟪 LoRA Trio
+    "ArthemyKrea2LoraBlockLoader": ArthemyKrea2LoraBlockLoader,
+    "ArthemyKrea2LoadSubBlockLora": ArthemyKrea2LoadSubBlockLora,
+    "ArthemyKrea2LoadChaosLoraBlockSurgeon": ArthemyKrea2LoadChaosLoraBlockSurgeon,
+
+    # Savers & Utilities
     "ArthemyKrea2ModelSaver": ArthemyKrea2ModelSaver,
     "ArthemyKrea2CLIPSaver": ArthemyKrea2CLIPSaver,
-    "ArthemyKrea2LoraBlockLoader": ArthemyKrea2LoraBlockLoader,
-    "ArthemyKrea2ResetPatcher": ArthemyKrea2ResetPatcher,
-    "ArthemyKrea2IsolatedLoraBlockLoader": ArthemyKrea2IsolatedLoraBlockLoader,
-    # Backwards-compatibility alias: old workflows using the Surgeon variant resolve to the merged class
-    "ArthemyKrea2IsolatedLoraBlockSurgeonLoader": ArthemyKrea2IsolatedLoraBlockLoader,
-    "ArthemyKrea2LoadChaosLoRA": ArthemyKrea2LoadChaosLoRA,
-    "ArthemyKrea2LoadChaosLoraBlockSurgeon": ArthemyKrea2LoadChaosLoraBlockSurgeon,
     "ArthemyKrea2ModelBaker": ArthemyKrea2ModelBaker,
     "ArthemyKrea2ModelVisualizer": ArthemyKrea2ModelVisualizer,
     "ArthemyKrea2CLIPVisualizer": ArthemyKrea2CLIPVisualizer,
+    "ArthemyKrea2ResetPatcher": ArthemyKrea2ResetPatcher,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "ArthemyKrea2ModelTuner": "✨ Arthemy Krea-2 Model Tuner",
-    "ArthemyKrea2CLIPTuner": "✨ Arthemy Krea-2 CLIP Tuner",
-    "ArthemyKrea2ModelChaosBlockTuner": "🌪️ Arthemy Krea-2 Model Chaos Block Tuner",
-    "ArthemyKrea2CLIPChaosBlockTuner": "🌪️ Arthemy Krea-2 CLIP Chaos Block Tuner",
-    "ArthemyKrea2ModelBlockSurgeonTuner": "🔬 Arthemy Krea-2 Model Block Surgeon Tuner",
-    "ArthemyKrea2CLIPBlockSurgeonTuner": "🔬 Arthemy Krea-2 CLIP Block Surgeon Tuner",
-    "ArthemyKrea2ModelChaosBlockSurgeonTuner": "🌪️🔬 Arthemy Krea-2 Model Chaos Block Surgeon",
-    "ArthemyKrea2CLIPChaosBlockSurgeonTuner": "🌪️🔬 Arthemy Krea-2 CLIP Chaos Block Surgeon",
-    "ArthemyKrea2ModelSaver": "💾 Arthemy Krea-2 Model Saver",
-    "ArthemyKrea2CLIPSaver": "💾 Arthemy Krea-2 CLIP Saver",
-    "ArthemyKrea2LoraBlockLoader": "🔮 Arthemy Krea-2 LoRA Block Loader",
-    "ArthemyKrea2ResetPatcher": "🔄 Arthemy Krea-2 Reset Patcher",
-    "ArthemyKrea2IsolatedLoraBlockLoader": "🔮 Arthemy Krea-2 Isolated LoRA Block Loader",
-    "ArthemyKrea2IsolatedLoraBlockSurgeonLoader": "🔮 Arthemy Krea-2 Isolated LoRA Block Loader",
-    "ArthemyKrea2LoadChaosLoRA": "🎲 Arthemy Krea-2 Load Chaos LoRA",
-    "ArthemyKrea2LoadChaosLoraBlockSurgeon": "🎲🔬 Arthemy Krea-2 Load Chaos LoRA Block Surgeon",
-    "ArthemyKrea2ModelBaker": "Arthemy Krea-2 Model Baker",
-    "ArthemyKrea2ModelVisualizer": "📊 Arthemy Krea-2 Model Visualizer",
-    "ArthemyKrea2CLIPVisualizer": "📊 Arthemy Krea-2 CLIP Visualizer",
+    # 🟦 Model Trio
+    "ArthemyKrea2ModelTuner": "🟦✨ Model Tuner",
+    "ArthemyKrea2ModelBlockSurgeonTuner": "🟦🔬 Model Sub-Block Tuner",
+    "ArthemyKrea2ModelChaosBlockSurgeonTuner": "🟦🌪️ Model Sub-Block Chaos Tuner",
+
+    # 🟨 CLIP Trio
+    "ArthemyKrea2CLIPTuner": "🟨✨ CLIP Tuner",
+    "ArthemyKrea2CLIPBlockSurgeonTuner": "🟨🔬 CLIP Sub-Block Tuner",
+    "ArthemyKrea2CLIPChaosBlockSurgeonTuner": "🟨🌪️ CLIP Sub-Block Chaos Tuner",
+
+    # 🟪 LoRA Trio
+    "ArthemyKrea2LoraBlockLoader": "🟪🔮 LoRA Block Loader",
+    "ArthemyKrea2LoadSubBlockLora": "🟪🔬 Load Sub-Block LoRA",
+    "ArthemyKrea2LoadChaosLoraBlockSurgeon": "🟪🌪️ Load Sub-Block Chaos LoRA",
+
+    # Savers & Utilities
+    "ArthemyKrea2ModelSaver": "🟦💾 Model Saver",
+    "ArthemyKrea2CLIPSaver": "🟨💾 CLIP Saver",
+    "ArthemyKrea2ModelBaker": "🟦🟨 Model Baker",
+    "ArthemyKrea2ModelVisualizer": "🟦📊 Model Visualizer",
+    "ArthemyKrea2CLIPVisualizer": "🟨📊 CLIP Visualizer",
+    "ArthemyKrea2ResetPatcher": "🟦🟨🔄 Reset Patcher",
 }
 
 WEB_DIRECTORY = "./web"
