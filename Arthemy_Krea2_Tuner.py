@@ -326,15 +326,19 @@ def resolve_target_key(patcher, k: str, model_sd: dict = None) -> str:
         f"clip_model.{clean_k}",
         f"transformer.{clean_k}",
         f"transformer.model.{clean_k}",
+        f"qwen3vl_4b.transformer.model.{clean_k}",
+        f"qwen3vl_8b.transformer.model.{clean_k}",
+        f"qwen3vl_32b.transformer.model.{clean_k}",
     )
 
     for cand in candidates:
         if cand in model_sd:
             return cand
 
-    # Dynamic suffix lookup: handles text encoders like "qwen3vl_4b.transformer.model.layers.0..."
+    # Dynamic suffix lookup: handles rare or unknown text encoder wrappers
+    target_suffix = f".{clean_k}"
     for sd_k in model_sd.keys():
-        if sd_k.endswith(f".{clean_k}") or sd_k == clean_k:
+        if sd_k == clean_k or sd_k.endswith(target_suffix):
             return sd_k
 
     return k
@@ -2004,7 +2008,7 @@ class ArthemyKrea2PresetSaver(BaseKrea2Node):
     FUNCTION = "save_preset"
     CATEGORY = "Arthemy/Presets"
 
-    def save_preset(self, model, clip, preset_name="my_arthemy_preset", author="Arthemy", **kwargs):
+    def save_preset(self, model, clip, preset_name="my_arthemy_preset", author="Arthemy"):
         m_p = get_patcher(model)
         c_p = get_patcher(clip)
 
@@ -2117,12 +2121,13 @@ class ArthemyKrea2PresetLoader(BaseKrea2Node):
             m_patches_to_add = {}
             for k, off in model_patches.items():
                 target_k = resolve_target_key(m_p, k, model_sd=m_sd)
-                scaled_off = off * strength_model
-                if scaled_off != 0.0:
-                    clean_k = Krea2TensorParser.clean_key(target_k)
-                    patch_k = f"diffusion_model.{clean_k}"
-                    m_patches_to_add[patch_k] = (1.0 + scaled_off,)
-                    n_model_matched += 1
+                if target_k in m_sd:
+                    scaled_off = off * strength_model
+                    if scaled_off != 0.0:
+                        m_patches_to_add[target_k] = (1.0 + scaled_off,)
+                        n_model_matched += 1
+                else:
+                    n_model_unmatched += 1
             if m_patches_to_add:
                 add_patches_to_front(m, m_patches_to_add, 1.0)
 
@@ -2131,10 +2136,13 @@ class ArthemyKrea2PresetLoader(BaseKrea2Node):
             c_patches_to_add = {}
             for k, off in clip_patches.items():
                 target_k = resolve_target_key(c_p, k, model_sd=c_sd)
-                scaled_off = off * strength_clip
-                if scaled_off != 0.0:
-                    c_patches_to_add[target_k] = (1.0 + scaled_off,)
-                    n_clip_matched += 1
+                if target_k in c_sd:
+                    scaled_off = off * strength_clip
+                    if scaled_off != 0.0:
+                        c_patches_to_add[target_k] = (1.0 + scaled_off,)
+                        n_clip_matched += 1
+                else:
+                    n_clip_unmatched += 1
             if c_patches_to_add:
                 add_patches_to_front(c, c_patches_to_add, 1.0)
 
