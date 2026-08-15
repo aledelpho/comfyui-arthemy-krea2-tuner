@@ -282,15 +282,15 @@ def sanitize_patch_tensor(tensor: torch.Tensor, target_dtype: torch.dtype = None
     # Apply Rule 1: Contiguity and detachment
     return tensor.to(dtype=dtype, device=device).clone().detach().contiguous()
 
-def resolve_target_key(patcher, k: str) -> str:
-    """Finds the exact state_dict key in patcher.model matching k."""
-    if patcher is None or not hasattr(patcher, "model"):
-        return k
-
-    try:
-        model_sd = patcher.model.state_dict()
-    except Exception:
-        return k
+def resolve_target_key(patcher, k: str, model_sd: dict = None) -> str:
+    """Finds the exact state_dict key in patcher.model matching k with O(1) cached lookup."""
+    if model_sd is None:
+        if patcher is None or not hasattr(patcher, "model"):
+            return k
+        try:
+            model_sd = patcher.model.state_dict()
+        except Exception:
+            return k
 
     if k in model_sd:
         return k
@@ -299,13 +299,13 @@ def resolve_target_key(patcher, k: str) -> str:
     if clean_k in model_sd:
         return clean_k
 
-    candidates = [
+    candidates = (
         f"diffusion_model.{clean_k}",
         f"cond_stage_model.{clean_k}",
         f"model.{clean_k}",
         f"clip_model.{clean_k}",
         f"transformer.{clean_k}",
-    ]
+    )
 
     for cand in candidates:
         if cand in model_sd:
@@ -314,7 +314,7 @@ def resolve_target_key(patcher, k: str) -> str:
     return k
 
 def add_patches_to_front(model_patcher, patches: dict, strength_patch: float = 1.0, strength_model: float = 1.0):
-    """Injects patches into a ModelPatcher using standard ComfyUI add_patches API.
+    """Safely injects patches into a ModelPatcher using standard ComfyUI add_patches API.
     
     Dynamically resolves exact key names in the model/clip state_dict and formats 
     patch entries as a 1-tuple (diff,) so comfy.lora.calculate_weight sees len(v) == 1 and patch_type == 'diff'.
@@ -1050,7 +1050,10 @@ class ArthemyKrea2ModelSaver(BaseKrea2Node):
 
         sd = model.model.state_dict()
         arch_info = Krea2TensorParser.probe_architecture(sd)
-        logger.info(f"[ARTHEMY KREA2 MODEL SAVER] Topology validated: {arch_info['num_model_blocks']} blocks detected.")
+        if arch_info['num_model_blocks'] != Krea2Config.MAX_UNET_BLOCKS:
+            logger.warning(f"[ARTHEMY KREA2 MODEL SAVER] ⚠️ Topology warning: detected {arch_info['num_model_blocks']} blocks (expected baseline: {Krea2Config.MAX_UNET_BLOCKS}).")
+        else:
+            logger.info(f"[ARTHEMY KREA2 MODEL SAVER] Topology validated: {arch_info['num_model_blocks']} blocks detected.")
 
         target_dtype = torch.float8_e4m3fn if precision == "FP8_E4M3" else torch.bfloat16
         final_sd = {}
@@ -1129,7 +1132,10 @@ class ArthemyKrea2CLIPSaver(BaseKrea2Node):
 
         clip_sd = clip.get_sd()
         arch_info = Krea2TensorParser.probe_architecture(clip_sd)
-        logger.info(f"[ARTHEMY KREA2 CLIP SAVER] Topology validated: {arch_info['num_clip_layers']} layers detected.")
+        if arch_info['num_clip_layers'] != Krea2Config.MAX_CLIP_LAYERS:
+            logger.warning(f"[ARTHEMY KREA2 CLIP SAVER] ⚠️ Topology warning: detected {arch_info['num_clip_layers']} layers (expected baseline: {Krea2Config.MAX_CLIP_LAYERS}).")
+        else:
+            logger.info(f"[ARTHEMY KREA2 CLIP SAVER] Topology validated: {arch_info['num_clip_layers']} layers detected.")
 
         target_dtype = torch.float8_e4m3fn if precision == "FP8_E4M3" else torch.bfloat16
         final_sd = {}
@@ -1362,6 +1368,51 @@ class ArthemyKrea2ResetPatcher(BaseKrea2Node):
 # ==============================================================================
 # POINT 3 IMPLEMENTATION: MODEL BAKER WITH STREAM GENERATOR
 # ==============================================================================
+def isolate_and_assign_baked_weights(patcher, baked_weights: dict):
+    """Safely isolates mutated parameters onto a cloned module hierarchy without in-place mutating shared base weights."""
+    if not baked_weights or not hasattr(patcher, "model"):
+        if hasattr(patcher, "patches"): patcher.patches = {}
+        if hasattr(patcher, "backup"): patcher.backup = {}
+        if hasattr(patcher, "object_patches"): patcher.object_patches = {}
+        return
+    
+    import copy
+    base_model = patcher.model
+    cloned_top = copy.copy(base_model)
+    cloned_top._modules = copy.copy(base_model._modules) if hasattr(base_model, "_modules") else {}
+    cloned_top._parameters = copy.copy(base_model._parameters) if hasattr(base_model, "_parameters") else {}
+
+    for k, new_tensor in baked_weights.items():
+        clean_k = Krea2TensorParser.clean_key(k)
+        parts = clean_k.split(".")
+        curr = cloned_top
+        
+        for part in parts[:-1]:
+            if hasattr(curr, part):
+                sub = getattr(curr, part)
+                if isinstance(sub, torch.nn.Module):
+                    cloned_sub = copy.copy(sub)
+                    cloned_sub._modules = copy.copy(sub._modules)
+                    cloned_sub._parameters = copy.copy(sub._parameters)
+                    setattr(curr, part, cloned_sub)
+                    curr = cloned_sub
+                else:
+                    break
+            elif isinstance(curr, (torch.nn.ModuleDict, dict)) and part in curr:
+                curr = curr[part]
+            else:
+                break
+                
+        param_name = parts[-1]
+        if hasattr(curr, param_name):
+            setattr(curr, param_name, torch.nn.Parameter(new_tensor.clone().detach(), requires_grad=False))
+
+    patcher.model = cloned_top
+    patcher.patches = {}
+    patcher.backup = {}
+    patcher.object_patches = {}
+
+
 class ArthemyKrea2ModelBaker(BaseKrea2Node):
     @classmethod
     def INPUT_TYPES(s):
@@ -1387,17 +1438,18 @@ class ArthemyKrea2ModelBaker(BaseKrea2Node):
 
         n_model_patched = 0
         n_clip_patched = 0
+        baked_model_weights = {}
+        baked_clip_weights = {}
 
-        # Stream process model tensors
+        # Stream process model tensors with O(1) key resolution
         def bake_model_tensor(k, v):
             nonlocal n_model_patched
-            target_k = resolve_target_key(m_p, k)
+            target_k = resolve_target_key(m_p, k, model_sd=m_sd)
             patches = getattr(m_p, "patches", {})
             if target_k in patches or k in patches:
                 n_model_patched += 1
                 patched_weight = ComfyPatcherAdapter.calculate_safe_weight(m_baked, target_k, v)
-                if target_k in m_sd and isinstance(m_sd[target_k], torch.Tensor):
-                    m_sd[target_k].data.copy_(patched_weight.data)
+                baked_model_weights[target_k] = patched_weight
                 return patched_weight
             return v
 
@@ -1406,30 +1458,24 @@ class ArthemyKrea2ModelBaker(BaseKrea2Node):
 
         def bake_clip_tensor(k, v):
             nonlocal n_clip_patched
-            target_k = resolve_target_key(c_p, k)
+            target_k = resolve_target_key(c_p, k, model_sd=c_sd)
             patches = getattr(c_p, "patches", {})
             if target_k in patches or k in patches:
                 n_clip_patched += 1
                 patched_weight = ComfyPatcherAdapter.calculate_safe_weight(c_baked, target_k, v)
-                if target_k in c_sd and isinstance(c_sd[target_k], torch.Tensor):
-                    c_sd[target_k].data.copy_(patched_weight.data)
+                baked_clip_weights[target_k] = patched_weight
                 return patched_weight
             return v
 
         for _, _ in process_tensor_stream(c_sd, bake_clip_tensor, memory_threshold_mb=Krea2Config.DEFAULT_GC_THRESHOLD_MB):
             pass
 
-        # Clear patches and backups after in-place baking
-        if hasattr(m_p, "patches"): m_p.patches = {}
-        if hasattr(m_p, "backup"): m_p.backup = {}
-        if hasattr(m_p, "object_patches"): m_p.object_patches = {}
-        if hasattr(c_p, "patches"): c_p.patches = {}
-        if hasattr(c_p, "backup"): c_p.backup = {}
-        if hasattr(c_p, "object_patches"): c_p.object_patches = {}
+        # Apply isolated parameters without mutating original shared module
+        isolate_and_assign_baked_weights(m_p, baked_model_weights)
+        isolate_and_assign_baked_weights(c_p, baked_clip_weights)
 
         info = f"Arthemy Krea-2 Model Baker: baked {n_model_patched} model parameters, {n_clip_patched} clip parameters."
         logger.info(f"[ARTHEMY KREA2 MODEL BAKER] {info}")
-        return (m_baked, c_baked, info)
         return (m_baked, c_baked, info)
 
 # ==============================================================================
