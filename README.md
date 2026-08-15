@@ -16,9 +16,8 @@ A high-precision model and CLIP tuning suite for **Krea-2** diffusion models ins
 | 🔬 **CLIP Block Surgeon Tuner** | Same surgeon precision for CLIP layers |
 | 🌪️🔬 **Model/CLIP Chaos Block Surgeon** | Chaos tuning with surgeon-level sub-tensor targeting |
 | 🔮 **LoRA Block Loader** | Block-level LoRA loading with per-block strength sliders |
-| 🔮 **Isolated LoRA Block Loader** | LoRA loading with per-block isolation |
+| 🔮 **Isolated LoRA Block Loader** | Isolated LoRA loading: clones the patcher before applying so patches don't accumulate from upstream nodes |
 | 🎲 **Load Chaos LoRA** | Stochastic LoRA application with chance and strength controls |
-| 🔮🔬 **Isolated LoRA Block Surgeon** | Isolated LoRA loading with surgeon precision |
 | 🎲🔬 **Load Chaos LoRA Block Surgeon** | Chaos LoRA with surgeon-level targeting |
 | 💾 **Model Saver** | Memory-safe BF16 model baker & saver with streaming tensor processing |
 | 💾 **CLIP Saver** | Same safe saver for CLIP/text encoder checkpoints |
