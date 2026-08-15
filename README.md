@@ -128,5 +128,40 @@ Built for **Krea-2** diffusion checkpoints and their paired **Qwen3** text encod
 
 ---
 
+## 🎨 Visual Tuning Showcase & Effects
+
+Here is a visual breakdown demonstrating the direct stylistic and structural effect of modulating individual Model block groups and CLIP text encoder layers:
+
+### 🟦 Model Tuning Effects
+
+| Component | Visual Effect & Comparison |
+|---|---|
+| **Text Fusion (`Text_Fusion`)** | ![Text Fusion Effect](assets/examples/TextFusion.png) |
+| **Time Embed (`Time_Embed`)** | ![Time Embed Effect](assets/examples/Time_Embed.png) |
+| **Projection (`Projection`)** | ![Projection Effect](assets/examples/Projection.png) |
+| **Block 1 (`Block_1`)** | ![Block 1 Effect](assets/examples/Block_1.png) |
+| **Block 2 (`Block_2`)** | ![Block 2 Effect](assets/examples/Block_2.png) |
+| **Block 3 (`Block_3`)** | ![Block 3 Effect](assets/examples/Block_3.png) |
+| **Block 4 (`Block_4`)** | ![Block 4 Effect](assets/examples/Block_4.png) |
+| **Block 5 (`Block_5`)** | ![Block 5 Effect](assets/examples/Block_5.png) |
+| **Block 6 (`Block_6`)** | ![Block 6 Effect](assets/examples/Block_6.png) |
+
+---
+
+### 🟨 CLIP Text Encoder Tuning Effects
+
+| Component | Visual Effect & Comparison |
+|---|---|
+| **Embedding (`Embedding`)** | ![Embedding Effect](assets/examples/Embedding.png) |
+| **Layer 1 (`Layer_1`)** | ![Layer 1 Effect](assets/examples/Layer_1.png) |
+| **Layer 2 (`Layer_2`)** | ![Layer 2 Effect](assets/examples/Layer_2.png) |
+| **Layer 3 (`Layer_3`)** | ![Layer 3 Effect](assets/examples/Layer_3.png) |
+| **Layer 4 (`Layer_4`)** | ![Layer 4 Effect](assets/examples/Layer_4.png) |
+| **Layer 5 (`Layer_5`)** | ![Layer 5 Effect](assets/examples/Layer_5.png) |
+| **Layer 6 (`Layer_6`)** | ![Layer 6 Effect](assets/examples/Layer_6.png) |
+| **Layer 7 (`Layer_7`)** | ![Layer 7 Effect](assets/examples/Layer_7.png) |
+
+---
+
 ## 👤 Author
 **Arthemy** · [@aledelpho](https://github.com/aledelpho)
