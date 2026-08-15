@@ -60,7 +60,7 @@ The suite includes a lightweight (~1–2 KB), deterministic preset system that a
 - **LoRA Transparency**: Presets focus exclusively on Model, CLIP, and Chaos tunings. If active LoRAs are present on the graph during preset saving, an informative warning is logged and the user is guided to use `Model Baker` or `Model Saver` to bake LoRA weights permanently.
 
 ### 📂 Preset Storage Locations
-Presets (`.json` or `.arthemy`) can be placed in either:
+Presets (`.json`) can be placed in either:
 - `ComfyUI/models/arthemy_presets/`
 - `ComfyUI/custom_nodes/comfyui-arthemy-krea2-tuner/presets/`
 

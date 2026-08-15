@@ -36,7 +36,7 @@ os.makedirs(arthemy_presets_dir, exist_ok=True)
 os.makedirs(local_presets_dir, exist_ok=True)
 
 if "arthemy_presets" not in folder_paths.folder_names_and_paths:
-    folder_paths.folder_names_and_paths["arthemy_presets"] = ([arthemy_presets_dir, local_presets_dir], {".json", ".arthemy"})
+    folder_paths.folder_names_and_paths["arthemy_presets"] = ([arthemy_presets_dir, local_presets_dir], {".json"})
 
 class Krea2Config:
     """Global architecture configuration parameters and defaults."""
@@ -2003,14 +2003,13 @@ class ArthemyKrea2PresetSaver(BaseKrea2Node):
         if not model_patches and not clip_patches and not combined_chaos_recipes:
             logger.warning("[ARTHEMY PRESET SAVER] No active tunings or chaos recipes detected on Model or CLIP.")
 
-        # Strict basename sanitization against path-traversal while preserving .json or .arthemy
+        # Strict basename sanitization against path-traversal enforcing .json
         raw_name = os.path.basename(preset_name.strip())
-        base_name, ext = os.path.splitext(raw_name)
+        base_name, _ = os.path.splitext(raw_name)
         safe_base = re.sub(r'[^\w\-_\.]', '_', base_name)
         if not safe_base:
             safe_base = "arthemy_preset"
-        target_ext = ext if ext.lower() in (".json", ".arthemy") else ".json"
-        safe_name = f"{safe_base}{target_ext}"
+        safe_name = f"{safe_base}.json"
 
         save_dirs = folder_paths.get_folder_paths("arthemy_presets")
         save_dir = save_dirs[0] if save_dirs else arthemy_presets_dir
@@ -2018,7 +2017,7 @@ class ArthemyKrea2PresetSaver(BaseKrea2Node):
         file_path = os.path.join(save_dir, safe_name)
 
         preset_data = {
-            "name": re.sub(r'\.(json|arthemy)$', '', safe_name),
+            "name": safe_base,
             "author": author.strip() if author else "Arthemy",
             "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
             "version": "2.0",
