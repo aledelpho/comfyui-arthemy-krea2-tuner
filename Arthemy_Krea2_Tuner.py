@@ -315,6 +315,7 @@ def resolve_target_key(patcher, k: str, model_sd: dict = None) -> str:
         f"diffusion_model.{clean_k}",
         f"cond_stage_model.{clean_k}",
         f"model.{clean_k}",
+        f"model.language_model.{clean_k}",
         f"clip_model.{clean_k}",
         f"transformer.{clean_k}",
     )
@@ -1779,6 +1780,7 @@ def render_visualizer_image(graph_data: list, title: str, is_clip: bool, visual_
     return torch.from_numpy(img_np).unsqueeze(0)
 
 class ArthemyKrea2ModelVisualizer(BaseKrea2Node):
+    OUTPUT_NODE = True
     SECTION_KEYS = [
         "Block_1A", "Block_1B", "Block_1C", "Block_1D", "Block_1E",
         "Block_2A", "Block_2B", "Block_2C", "Block_2D", "Block_2E",
@@ -1857,6 +1859,7 @@ class ArthemyKrea2ModelVisualizer(BaseKrea2Node):
 
 
 class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
+    OUTPUT_NODE = True
     SECTION_KEYS = [
         "Layer_1A", "Layer_1B", "Layer_1C", "Layer_1D", "Layer_1E",
         "Layer_2A", "Layer_2B", "Layer_2C", "Layer_2D", "Layer_2E",
@@ -2094,13 +2097,12 @@ class ArthemyKrea2PresetLoader(BaseKrea2Node):
             m_patches_to_add = {}
             for k, off in model_patches.items():
                 target_k = resolve_target_key(m_p, k, model_sd=m_sd)
-                if target_k in m_sd:
-                    scaled_off = off * strength_model
-                    if scaled_off != 0.0:
-                        m_patches_to_add[target_k] = (1.0 + scaled_off,)
-                        n_model_matched += 1
-                else:
-                    n_model_unmatched += 1
+                scaled_off = off * strength_model
+                if scaled_off != 0.0:
+                    clean_k = Krea2TensorParser.clean_key(target_k)
+                    patch_k = f"diffusion_model.{clean_k}"
+                    m_patches_to_add[patch_k] = (1.0 + scaled_off,)
+                    n_model_matched += 1
             if m_patches_to_add:
                 add_patches_to_front(m, m_patches_to_add, 1.0)
 
@@ -2109,13 +2111,10 @@ class ArthemyKrea2PresetLoader(BaseKrea2Node):
             c_patches_to_add = {}
             for k, off in clip_patches.items():
                 target_k = resolve_target_key(c_p, k, model_sd=c_sd)
-                if target_k in c_sd:
-                    scaled_off = off * strength_clip
-                    if scaled_off != 0.0:
-                        c_patches_to_add[target_k] = (1.0 + scaled_off,)
-                        n_clip_matched += 1
-                else:
-                    n_clip_unmatched += 1
+                scaled_off = off * strength_clip
+                if scaled_off != 0.0:
+                    c_patches_to_add[target_k] = (1.0 + scaled_off,)
+                    n_clip_matched += 1
             if c_patches_to_add:
                 add_patches_to_front(c, c_patches_to_add, 1.0)
 
