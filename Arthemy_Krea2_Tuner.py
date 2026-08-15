@@ -829,11 +829,42 @@ class ArthemyKrea2CLIPTuner(BaseKrea2Node):
 # POINT 4 IMPLEMENTATIONS: SURGEON NODES DERIVED FROM BaseSurgeonTuner
 # ==============================================================================
 class ArthemyKrea2ModelBlockSurgeonTuner(BaseSurgeonTuner):
-    MODEL_BLOCK_RANGES = {
-        "Block_1 (0-4)": set(range(0, 5)), "Block_2 (5-9)": set(range(5, 10)),
-        "Block_3 (10-14)": set(range(10, 15)), "Block_4 (15-19)": set(range(15, 20)),
-        "Block_5 (20-23)": set(range(20, 24)), "Block_6 (24-27)": set(range(24, 28)),
-        "All Blocks (*)": set(range(0, Krea2Config.MAX_UNET_BLOCKS)),
+    MODEL_TARGET_MAP = {
+        "All Blocks (0-27)": set(range(0, 28)),
+        "Block_1 (All 0-4)": set(range(0, 5)),
+        "  ↳ Block_1A (0)": {0},
+        "  ↳ Block_1B (1)": {1},
+        "  ↳ Block_1C (2)": {2},
+        "  ↳ Block_1D (3)": {3},
+        "  ↳ Block_1E (4)": {4},
+        "Block_2 (All 5-9)": set(range(5, 10)),
+        "  ↳ Block_2A (5)": {5},
+        "  ↳ Block_2B (6)": {6},
+        "  ↳ Block_2C (7)": {7},
+        "  ↳ Block_2D (8)": {8},
+        "  ↳ Block_2E (9)": {9},
+        "Block_3 (All 10-14)": set(range(10, 15)),
+        "  ↳ Block_3A (10)": {10},
+        "  ↳ Block_3B (11)": {11},
+        "  ↳ Block_3C (12)": {12},
+        "  ↳ Block_3D (13)": {13},
+        "  ↳ Block_3E (14)": {14},
+        "Block_4 (All 15-19)": set(range(15, 20)),
+        "  ↳ Block_4A (15)": {15},
+        "  ↳ Block_4B (16)": {16},
+        "  ↳ Block_4C (17)": {17},
+        "  ↳ Block_4D (18)": {18},
+        "  ↳ Block_4E (19)": {19},
+        "Block_5 (All 20-23)": set(range(20, 24)),
+        "  ↳ Block_5A (20)": {20},
+        "  ↳ Block_5B (21)": {21},
+        "  ↳ Block_5C (22)": {22},
+        "  ↳ Block_5D (23)": {23},
+        "Block_6 (All 24-27)": set(range(24, 28)),
+        "  ↳ Block_6A (24)": {24},
+        "  ↳ Block_6B (25)": {25},
+        "  ↳ Block_6C (26)": {26},
+        "  ↳ Block_6D (27)": {27},
     }
     SURGEON_MAP = Krea2TensorParser.get_descriptive_model_surgeon_map()
 
@@ -841,14 +872,8 @@ class ArthemyKrea2ModelBlockSurgeonTuner(BaseSurgeonTuner):
     def INPUT_TYPES(s):
         inputs = {
             "required": {
-                "model": ("MODEL",), "target_block": (list(s.MODEL_BLOCK_RANGES.keys()),),
-                "sub_block": (["Block_1A (0)", "Block_1B (1)", "Block_1C (2)", "Block_1D (3)", "Block_1E (4)",
-                               "Block_2A (5)", "Block_2B (6)", "Block_2C (7)", "Block_2D (8)", "Block_2E (9)",
-                               "Block_3A (10)", "Block_3B (11)", "Block_3C (12)", "Block_3D (13)", "Block_3E (14)",
-                               "Block_4A (15)", "Block_4B (16)", "Block_4C (17)", "Block_4D (18)", "Block_4E (19)",
-                               "Block_5A (20)", "Block_5B (21)", "Block_5C (22)", "Block_5D (23)",
-                               "Block_6A (24)", "Block_6B (25)", "Block_6C (26)", "Block_6D (27)",
-                               "All Sub-Blocks (*)"],),
+                "model": ("MODEL",),
+                "target_block": (list(s.MODEL_TARGET_MAP.keys()), {"default": "Block_1 (All 0-4)"}),
                 "mode": (["Soft Value", "Real Value"],),
                 "vectors_override": ("STRING", {"default": "", "multiline": False}),
                 "granular_json": ("STRING", {"default": "", "multiline": True}),
@@ -863,11 +888,17 @@ class ArthemyKrea2ModelBlockSurgeonTuner(BaseSurgeonTuner):
     FUNCTION = "tune_model_surgeon"
     CATEGORY = "Arthemy/Krea2 Tuners"
 
-    def tune_model_surgeon(self, model, target_block, sub_block, mode, vectors_override, granular_json="", **kwargs):
-        if sub_block != "All Sub-Blocks (*)":
-            selected = {MODEL_BLOCK_LABEL_TO_IDX[sub_block.split(" ")[0]]}
-        else:
-            selected = self.MODEL_BLOCK_RANGES.get(target_block, set(range(0, Krea2Config.MAX_UNET_BLOCKS)))
+    def tune_model_surgeon(self, model, target_block, mode, vectors_override, granular_json="", **kwargs):
+        selected = self.MODEL_TARGET_MAP.get(target_block, None)
+        if selected is None:
+            # Graceful fallback for legacy workflows
+            clean = target_block.strip().lstrip("↳").strip()
+            for k, v in self.MODEL_TARGET_MAP.items():
+                if clean in k:
+                    selected = v
+                    break
+        if selected is None:
+            selected = set(range(0, Krea2Config.MAX_UNET_BLOCKS))
 
         return self._execute_surgeon_tuning(
             model, is_clip=False, selected_indices=selected, surgeon_map=self.SURGEON_MAP,
@@ -876,11 +907,51 @@ class ArthemyKrea2ModelBlockSurgeonTuner(BaseSurgeonTuner):
 
 
 class ArthemyKrea2CLIPBlockSurgeonTuner(BaseSurgeonTuner):
-    CLIP_LAYER_RANGES = {
-        "Layer_1 (0-4)": set(range(0, 5)), "Layer_2 (5-9)": set(range(5, 10)),
-        "Layer_3 (10-14)": set(range(10, 15)), "Layer_4 (15-19)": set(range(15, 20)),
-        "Layer_5 (20-24)": set(range(20, 25)), "Layer_6 (25-29)": set(range(25, 30)),
-        "Layer_7 (30-35)": set(range(30, 36)), "All Layers (*)": set(range(0, Krea2Config.MAX_CLIP_LAYERS)),
+    CLIP_TARGET_MAP = {
+        "All Layers (0-35)": set(range(0, 36)),
+        "Layer_1 (All 0-4)": set(range(0, 5)),
+        "  ↳ Layer_1A (0)": {0},
+        "  ↳ Layer_1B (1)": {1},
+        "  ↳ Layer_1C (2)": {2},
+        "  ↳ Layer_1D (3)": {3},
+        "  ↳ Layer_1E (4)": {4},
+        "Layer_2 (All 5-9)": set(range(5, 10)),
+        "  ↳ Layer_2A (5)": {5},
+        "  ↳ Layer_2B (6)": {6},
+        "  ↳ Layer_2C (7)": {7},
+        "  ↳ Layer_2D (8)": {8},
+        "  ↳ Layer_2E (9)": {9},
+        "Layer_3 (All 10-14)": set(range(10, 15)),
+        "  ↳ Layer_3A (10)": {10},
+        "  ↳ Layer_3B (11)": {11},
+        "  ↳ Layer_3C (12)": {12},
+        "  ↳ Layer_3D (13)": {13},
+        "  ↳ Layer_3E (14)": {14},
+        "Layer_4 (All 15-19)": set(range(15, 20)),
+        "  ↳ Layer_4A (15)": {15},
+        "  ↳ Layer_4B (16)": {16},
+        "  ↳ Layer_4C (17)": {17},
+        "  ↳ Layer_4D (18)": {18},
+        "  ↳ Layer_4E (19)": {19},
+        "Layer_5 (All 20-24)": set(range(20, 25)),
+        "  ↳ Layer_5A (20)": {20},
+        "  ↳ Layer_5B (21)": {21},
+        "  ↳ Layer_5C (22)": {22},
+        "  ↳ Layer_5D (23)": {23},
+        "  ↳ Layer_5E (24)": {24},
+        "Layer_6 (All 25-29)": set(range(25, 30)),
+        "  ↳ Layer_6A (25)": {25},
+        "  ↳ Layer_6B (26)": {26},
+        "  ↳ Layer_6C (27)": {27},
+        "  ↳ Layer_6D (28)": {28},
+        "  ↳ Layer_6E (29)": {29},
+        "Layer_7 (All 30-35)": set(range(30, 36)),
+        "  ↳ Layer_7A (30)": {30},
+        "  ↳ Layer_7B (31)": {31},
+        "  ↳ Layer_7C (32)": {32},
+        "  ↳ Layer_7D (33)": {33},
+        "  ↳ Layer_7E (34)": {34},
+        "  ↳ Layer_7F (35)": {35},
     }
     SURGEON_MAP = Krea2TensorParser.get_descriptive_clip_surgeon_map()
 
@@ -888,15 +959,8 @@ class ArthemyKrea2CLIPBlockSurgeonTuner(BaseSurgeonTuner):
     def INPUT_TYPES(s):
         inputs = {
             "required": {
-                "clip": ("CLIP",), "target_layer": (list(s.CLIP_LAYER_RANGES.keys()),),
-                "sub_layer": (["Layer_1A (0)", "Layer_1B (1)", "Layer_1C (2)", "Layer_1D (3)", "Layer_1E (4)",
-                              "Layer_2A (5)", "Layer_2B (6)", "Layer_2C (7)", "Layer_2D (8)", "Layer_2E (9)",
-                              "Layer_3A (10)", "Layer_3B (11)", "Layer_3C (12)", "Layer_3D (13)", "Layer_3E (14)",
-                              "Layer_4A (15)", "Layer_4B (16)", "Layer_4C (17)", "Layer_4D (18)", "Layer_4E (19)",
-                              "Layer_5A (20)", "Layer_5B (21)", "Layer_5C (22)", "Layer_5D (23)", "Layer_5E (24)",
-                              "Layer_6A (25)", "Layer_6B (26)", "Layer_6C (27)", "Layer_6D (28)", "Layer_6E (29)",
-                              "Layer_7A (30)", "Layer_7B (31)", "Layer_7C (32)", "Layer_7D (33)", "Layer_7E (34)", "Layer_7F (35)",
-                              "All Sub-Layers (*)"],),
+                "clip": ("CLIP",),
+                "target_layer": (list(s.CLIP_TARGET_MAP.keys()), {"default": "Layer_1 (All 0-4)"}),
                 "mode": (["Soft Value", "Real Value"],),
                 "vectors_override": ("STRING", {"default": "", "multiline": False}),
                 "granular_json": ("STRING", {"default": "", "multiline": True}),
@@ -911,11 +975,16 @@ class ArthemyKrea2CLIPBlockSurgeonTuner(BaseSurgeonTuner):
     FUNCTION = "tune_clip_surgeon"
     CATEGORY = "Arthemy/Krea2 Tuners"
 
-    def tune_clip_surgeon(self, clip, target_layer, sub_layer, mode, vectors_override, granular_json="", **kwargs):
-        if sub_layer != "All Sub-Layers (*)":
-            selected = {CLIP_LAYER_LABEL_TO_IDX[sub_layer.split(" ")[0]]}
-        else:
-            selected = self.CLIP_LAYER_RANGES.get(target_layer, set(range(0, Krea2Config.MAX_CLIP_LAYERS)))
+    def tune_clip_surgeon(self, clip, target_layer, mode, vectors_override, granular_json="", **kwargs):
+        selected = self.CLIP_TARGET_MAP.get(target_layer, None)
+        if selected is None:
+            clean = target_layer.strip().lstrip("↳").strip()
+            for k, v in self.CLIP_TARGET_MAP.items():
+                if clean in k:
+                    selected = v
+                    break
+        if selected is None:
+            selected = set(range(0, Krea2Config.MAX_CLIP_LAYERS))
 
         return self._execute_surgeon_tuning(
             clip, is_clip=True, selected_indices=selected, surgeon_map=self.SURGEON_MAP,
@@ -924,21 +993,15 @@ class ArthemyKrea2CLIPBlockSurgeonTuner(BaseSurgeonTuner):
 
 
 class ArthemyKrea2ModelChaosBlockSurgeonTuner(BaseSurgeonTuner):
-    MODEL_BLOCK_RANGES = ArthemyKrea2ModelBlockSurgeonTuner.MODEL_BLOCK_RANGES
+    MODEL_TARGET_MAP = ArthemyKrea2ModelBlockSurgeonTuner.MODEL_TARGET_MAP
     _CHANCE_MAP = {v: f"{k}_chance" for k, v in Krea2TensorParser.MODEL_SURGEON_MAP.items()}
 
     @classmethod
     def INPUT_TYPES(s):
         inputs = {
             "required": {
-                "model": ("MODEL",), "target_block": (list(s.MODEL_BLOCK_RANGES.keys()),),
-                "sub_block": (["Block_1A (0)", "Block_1B (1)", "Block_1C (2)", "Block_1D (3)", "Block_1E (4)",
-                               "Block_2A (5)", "Block_2B (6)", "Block_2C (7)", "Block_2D (8)", "Block_2E (9)",
-                               "Block_3A (10)", "Block_3B (11)", "Block_3C (12)", "Block_3D (13)", "Block_3E (14)",
-                               "Block_4A (15)", "Block_4B (16)", "Block_4C (17)", "Block_4D (18)", "Block_4E (19)",
-                               "Block_5A (20)", "Block_5B (21)", "Block_5C (22)", "Block_5D (23)",
-                               "Block_6A (24)", "Block_6B (25)", "Block_6C (26)", "Block_6D (27)",
-                               "All Sub-Blocks (*)"],),
+                "model": ("MODEL",),
+                "target_block": (list(s.MODEL_TARGET_MAP.keys()), {"default": "Block_1 (All 0-4)"}),
                 "tune_mode": (["Block-Level", "Element-Level (Sub-atomic)"],),
                 "seed": ("INT", {"default": 42, "min": 0, "max": 0xffffffffffffffff}),
                 "chaos_strength": ("FLOAT", {"default": 0.1, "min": -99.00, "max": 99.00, "step": 0.01}),
@@ -953,11 +1016,16 @@ class ArthemyKrea2ModelChaosBlockSurgeonTuner(BaseSurgeonTuner):
     FUNCTION = "chaos_tune_model_surgeon"
     CATEGORY = "Arthemy/Krea2 Tuners"
 
-    def chaos_tune_model_surgeon(self, model, target_block, sub_block, tune_mode, seed, chaos_strength, **kwargs):
-        if sub_block != "All Sub-Blocks (*)":
-            selected = {MODEL_BLOCK_LABEL_TO_IDX[sub_block.split(" ")[0]]}
-        else:
-            selected = self.MODEL_BLOCK_RANGES.get(target_block, set(range(0, Krea2Config.MAX_UNET_BLOCKS)))
+    def chaos_tune_model_surgeon(self, model, target_block, tune_mode, seed, chaos_strength, **kwargs):
+        selected = self.MODEL_TARGET_MAP.get(target_block, None)
+        if selected is None:
+            clean = target_block.strip().lstrip("↳").strip()
+            for k, v in self.MODEL_TARGET_MAP.items():
+                if clean in k:
+                    selected = v
+                    break
+        if selected is None:
+            selected = set(range(0, Krea2Config.MAX_UNET_BLOCKS))
 
         # Remap kwargs chances to standard surgeon_map names
         remapped_kwargs = {k.replace("_chance", ""): v for k, v in kwargs.items() if k.endswith("_chance")}
@@ -970,22 +1038,15 @@ class ArthemyKrea2ModelChaosBlockSurgeonTuner(BaseSurgeonTuner):
 
 
 class ArthemyKrea2CLIPChaosBlockSurgeonTuner(BaseSurgeonTuner):
-    CLIP_LAYER_RANGES = ArthemyKrea2CLIPBlockSurgeonTuner.CLIP_LAYER_RANGES
+    CLIP_TARGET_MAP = ArthemyKrea2CLIPBlockSurgeonTuner.CLIP_TARGET_MAP
     _CHANCE_MAP = {v: f"{k}_chance" for k, v in Krea2TensorParser.CLIP_SURGEON_MAP.items()}
 
     @classmethod
     def INPUT_TYPES(s):
         inputs = {
             "required": {
-                "clip": ("CLIP",), "target_layer": (list(s.CLIP_LAYER_RANGES.keys()),),
-                "sub_layer": (["Layer_1A (0)", "Layer_1B (1)", "Layer_1C (2)", "Layer_1D (3)", "Layer_1E (4)",
-                              "Layer_2A (5)", "Layer_2B (6)", "Layer_2C (7)", "Layer_2D (8)", "Layer_2E (9)",
-                              "Layer_3A (10)", "Layer_3B (11)", "Layer_3C (12)", "Layer_3D (13)", "Layer_3E (14)",
-                              "Layer_4A (15)", "Layer_4B (16)", "Layer_4C (17)", "Layer_4D (18)", "Layer_4E (19)",
-                              "Layer_5A (20)", "Layer_5B (21)", "Layer_5C (22)", "Layer_5D (23)", "Layer_5E (24)",
-                              "Layer_6A (25)", "Layer_6B (26)", "Layer_6C (27)", "Layer_6D (28)", "Layer_6E (29)",
-                              "Layer_7A (30)", "Layer_7B (31)", "Layer_7C (32)", "Layer_7D (33)", "Layer_7E (34)", "Layer_7F (35)",
-                              "All Sub-Layers (*)"],),
+                "clip": ("CLIP",),
+                "target_layer": (list(s.CLIP_TARGET_MAP.keys()), {"default": "Layer_1 (All 0-4)"}),
                 "tune_mode": (["Block-Level", "Element-Level (Sub-atomic)"],),
                 "seed": ("INT", {"default": 42, "min": 0, "max": 0xffffffffffffffff}),
                 "chaos_strength": ("FLOAT", {"default": 0.1, "min": -99.00, "max": 99.00, "step": 0.01}),
@@ -1000,15 +1061,19 @@ class ArthemyKrea2CLIPChaosBlockSurgeonTuner(BaseSurgeonTuner):
     FUNCTION = "chaos_tune_clip_surgeon"
     CATEGORY = "Arthemy/Krea2 Tuners"
 
-    def chaos_tune_clip_surgeon(self, clip, target_layer, sub_layer, tune_mode, seed, chaos_strength, **kwargs):
-        if sub_layer != "All Sub-Layers (*)":
-            selected = {CLIP_LAYER_LABEL_TO_IDX[sub_layer.split(" ")[0]]}
-        else:
-            selected = self.CLIP_LAYER_RANGES.get(target_layer, set(range(0, Krea2Config.MAX_CLIP_LAYERS)))
+    def chaos_tune_clip_surgeon(self, clip, target_layer, tune_mode, seed, chaos_strength, **kwargs):
+        selected = self.CLIP_TARGET_MAP.get(target_layer, None)
+        if selected is None:
+            clean = target_layer.strip().lstrip("↳").strip()
+            for k, v in self.CLIP_TARGET_MAP.items():
+                if clean in k:
+                    selected = v
+                    break
+        if selected is None:
+            selected = set(range(0, Krea2Config.MAX_CLIP_LAYERS))
 
         remapped_kwargs = {k.replace("_chance", ""): v for k, v in kwargs.items() if k.endswith("_chance")}
         chaos_params = {"tune_mode": tune_mode, "seed": seed, "chaos_strength": chaos_strength}
-
         return self._execute_surgeon_tuning(
             clip, is_clip=True, selected_indices=selected, surgeon_map=Krea2TensorParser.CLIP_SURGEON_MAP,
             kwargs=remapped_kwargs, chaos_params=chaos_params
@@ -1245,7 +1310,7 @@ class ArthemyKrea2LoadSubBlockLora(BaseKrea2Node):
     """Tier 2: High-precision deterministic Sub-Block LoRA filtering and weighting.
     Allows targeting specific transformer blocks and individual component types
     (e.g., query/key attention, MLP down-projection) within the LoRA."""
-    MODEL_BLOCK_RANGES = ArthemyKrea2ModelBlockSurgeonTuner.MODEL_BLOCK_RANGES
+    MODEL_TARGET_MAP = ArthemyKrea2ModelBlockSurgeonTuner.MODEL_TARGET_MAP
     SURGEON_MAP = Krea2TensorParser.get_descriptive_model_surgeon_map()
 
     @classmethod
@@ -1256,14 +1321,7 @@ class ArthemyKrea2LoadSubBlockLora(BaseKrea2Node):
                 "model": ("MODEL",), "clip": ("CLIP",), "lora_name": (lora_list,),
                 "strength_model": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
                 "strength_clip": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "target_block": (list(s.MODEL_BLOCK_RANGES.keys()),),
-                "sub_block": (["Block_1A (0)", "Block_1B (1)", "Block_1C (2)", "Block_1D (3)", "Block_1E (4)",
-                               "Block_2A (5)", "Block_2B (6)", "Block_2C (7)", "Block_2D (8)", "Block_2E (9)",
-                               "Block_3A (10)", "Block_3B (11)", "Block_3C (12)", "Block_3D (13)", "Block_3E (14)",
-                               "Block_4A (15)", "Block_4B (16)", "Block_4C (17)", "Block_4D (18)", "Block_4E (19)",
-                               "Block_5A (20)", "Block_5B (21)", "Block_5C (22)", "Block_5D (23)",
-                               "Block_6A (24)", "Block_6B (25)", "Block_6C (26)", "Block_6D (27)",
-                               "All Sub-Blocks (*)"],),
+                "target_block": (list(s.MODEL_TARGET_MAP.keys()), {"default": "Block_1 (All 0-4)"}),
             }
         }
         for name in s.SURGEON_MAP.keys():
@@ -1276,7 +1334,7 @@ class ArthemyKrea2LoadSubBlockLora(BaseKrea2Node):
     FUNCTION = "load_sub_block_lora"
     CATEGORY = "Arthemy/Krea2 LoRA"
 
-    def load_sub_block_lora(self, model, clip, lora_name, strength_model, strength_clip, target_block, sub_block, **kwargs):
+    def load_sub_block_lora(self, model, clip, lora_name, strength_model, strength_clip, target_block, **kwargs):
         if strength_model == 0 and strength_clip == 0:
             return (model, clip, "LoRA bypassed (strength 0)")
 
@@ -1285,10 +1343,15 @@ class ArthemyKrea2LoadSubBlockLora(BaseKrea2Node):
             raise FileNotFoundError(f"Arthemy Suite Error: LoRA '{lora_name}' not found in ComfyUI loras directory.")
         lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
 
-        if sub_block != "All Sub-Blocks (*)":
-            selected_blocks = {MODEL_BLOCK_LABEL_TO_IDX[sub_block.split(" ")[0]]}
-        else:
-            selected_blocks = self.MODEL_BLOCK_RANGES.get(target_block, set(range(0, Krea2Config.MAX_UNET_BLOCKS)))
+        selected_blocks = self.MODEL_TARGET_MAP.get(target_block, None)
+        if selected_blocks is None:
+            clean = target_block.strip().lstrip("↳").strip()
+            for k, v in self.MODEL_TARGET_MAP.items():
+                if clean in k:
+                    selected_blocks = v
+                    break
+        if selected_blocks is None:
+            selected_blocks = set(range(0, Krea2Config.MAX_UNET_BLOCKS))
 
         filtered_lora = {}
         for k, v in lora.items():
@@ -1314,7 +1377,7 @@ class ArthemyKrea2LoadSubBlockLora(BaseKrea2Node):
 class ArthemyKrea2LoadChaosLoraBlockSurgeon(BaseSurgeonTuner):
     """Tier 3: Stochastic Sub-Block Chaos LoRA filtering.
     Selectively and randomly activates LoRA key components according to per-sub-tensor chance rolls."""
-    MODEL_BLOCK_RANGES = ArthemyKrea2ModelBlockSurgeonTuner.MODEL_BLOCK_RANGES
+    MODEL_TARGET_MAP = ArthemyKrea2ModelBlockSurgeonTuner.MODEL_TARGET_MAP
     SURGEON_MAP = Krea2TensorParser.get_descriptive_model_surgeon_map()
 
     @classmethod
@@ -1325,14 +1388,7 @@ class ArthemyKrea2LoadChaosLoraBlockSurgeon(BaseSurgeonTuner):
                 "model": ("MODEL",), "clip": ("CLIP",), "lora_name": (lora_list,),
                 "strength_model": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
                 "strength_clip": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "target_block": (list(s.MODEL_BLOCK_RANGES.keys()),),
-                "sub_block": (["Block_1A (0)", "Block_1B (1)", "Block_1C (2)", "Block_1D (3)", "Block_1E (4)",
-                               "Block_2A (5)", "Block_2B (6)", "Block_2C (7)", "Block_2D (8)", "Block_2E (9)",
-                               "Block_3A (10)", "Block_3B (11)", "Block_3C (12)", "Block_3D (13)", "Block_3E (14)",
-                               "Block_4A (15)", "Block_4B (16)", "Block_4C (17)", "Block_4D (18)", "Block_4E (19)",
-                               "Block_5A (20)", "Block_5B (21)", "Block_5C (22)", "Block_5D (23)",
-                               "Block_6A (24)", "Block_6B (25)", "Block_6C (26)", "Block_6D (27)",
-                               "All Sub-Blocks (*)"],),
+                "target_block": (list(s.MODEL_TARGET_MAP.keys()), {"default": "Block_1 (All 0-4)"}),
                 "seed": ("INT", {"default": 42, "min": 0, "max": 0xffffffffffffffff}),
                 "base_chance": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01}),
             }
@@ -1346,7 +1402,7 @@ class ArthemyKrea2LoadChaosLoraBlockSurgeon(BaseSurgeonTuner):
     FUNCTION = "load_chaos_lora_surgeon"
     CATEGORY = "Arthemy/Krea2 LoRA"
 
-    def load_chaos_lora_surgeon(self, model, clip, lora_name, strength_model, strength_clip, target_block, sub_block, seed, base_chance, **kwargs):
+    def load_chaos_lora_surgeon(self, model, clip, lora_name, strength_model, strength_clip, target_block, seed, base_chance, **kwargs):
         if strength_model == 0 and strength_clip == 0:
             return (model, clip, "LoRA bypassed (strength 0)")
 
@@ -1355,22 +1411,26 @@ class ArthemyKrea2LoadChaosLoraBlockSurgeon(BaseSurgeonTuner):
             raise FileNotFoundError(f"Arthemy Suite Error: LoRA '{lora_name}' not found in ComfyUI loras directory.")
         lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
 
-        if sub_block != "All Sub-Blocks (*)":
-            selected_blocks = {MODEL_BLOCK_LABEL_TO_IDX[sub_block.split(" ")[0]]}
-        else:
-            selected_blocks = self.MODEL_BLOCK_RANGES.get(target_block, set(range(0, Krea2Config.MAX_UNET_BLOCKS)))
+        selected_blocks = self.MODEL_TARGET_MAP.get(target_block, None)
+        if selected_blocks is None:
+            clean = target_block.strip().lstrip("↳").strip()
+            for k, v in self.MODEL_TARGET_MAP.items():
+                if clean in k:
+                    selected_blocks = v
+                    break
+        if selected_blocks is None:
+            selected_blocks = set(range(0, Krea2Config.MAX_UNET_BLOCKS))
 
         filtered_lora = {}
         for k, v in lora.items():
             clean_k = Krea2TensorParser.clean_key(k)
             idx, sub_key = Krea2TensorParser.extract_model_block_idx(clean_k)
-            if idx is not None:
-                if idx not in selected_blocks:
-                    continue
-                matched_widget = Krea2TensorParser.match_model_sub_tensor(sub_key)
-                chance = kwargs.get(f"{matched_widget}_chance", 0.0) if matched_widget else 0.0
-                if chance <= 0.0:
-                    chance = base_chance
+            if idx is not None and idx not in selected_blocks:
+                continue
+
+            matched_widget = Krea2TensorParser.match_model_sub_tensor(sub_key)
+            if matched_widget:
+                chance = kwargs.get(f"{matched_widget}_chance", base_chance)
             else:
                 chance = base_chance
 

@@ -209,15 +209,6 @@
           "link": null
         },
         {
-          "localized_name": "sub_block",
-          "name": "sub_block",
-          "type": "COMBO",
-          "widget": {
-            "name": "sub_block"
-          },
-          "link": null
-        },
-        {
           "localized_name": "tune_mode",
           "name": "tune_mode",
           "type": "COMBO",
@@ -363,8 +354,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Block_1 (0-4)",
-        "Block_1A (0)",
+        "Block_1 (All 0-4)",
         "Block-Level",
         852931341732214,
         "randomize",
@@ -382,8 +372,7 @@
         0
       ],
       "widgets_values_named": {
-        "target_block": "Block_1 (0-4)",
-        "sub_block": "Block_1A (0)",
+        "target_block": "Block_1 (All 0-4)",
         "tune_mode": "Block-Level",
         "seed": 852931341732214,
         "control_after_generate": "randomize",
@@ -613,15 +602,6 @@
           "link": null
         },
         {
-          "localized_name": "sub_layer",
-          "name": "sub_layer",
-          "type": "COMBO",
-          "widget": {
-            "name": "sub_layer"
-          },
-          "link": null
-        },
-        {
           "localized_name": "tune_mode",
           "name": "tune_mode",
           "type": "COMBO",
@@ -749,8 +729,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Layer_1 (0-4)",
-        "Layer_1A (0)",
+        "Layer_1 (All 0-4)",
         "Block-Level",
         960655138052038,
         "randomize",
@@ -766,8 +745,7 @@
         0
       ],
       "widgets_values_named": {
-        "target_layer": "Layer_1 (0-4)",
-        "sub_layer": "Layer_1A (0)",
+        "target_layer": "Layer_1 (All 0-4)",
         "tune_mode": "Block-Level",
         "seed": 960655138052038,
         "control_after_generate": "randomize",
@@ -812,15 +790,6 @@
           "type": "COMBO",
           "widget": {
             "name": "target_layer"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "sub_layer",
-          "name": "sub_layer",
-          "type": "COMBO",
-          "widget": {
-            "name": "sub_layer"
           },
           "link": null
         },
@@ -952,8 +921,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Layer_1 (0-4)",
-        "Layer_1A (0)",
+        "Layer_1 (All 0-4)",
         "Soft Value",
         "",
         "",
@@ -968,8 +936,7 @@
         0
       ],
       "widgets_values_named": {
-        "target_layer": "Layer_1 (0-4)",
-        "sub_layer": "Layer_1A (0)",
+        "target_layer": "Layer_1 (All 0-4)",
         "mode": "Soft Value",
         "vectors_override": "",
         "granular_json": "",
@@ -1276,15 +1243,6 @@
           "link": null
         },
         {
-          "localized_name": "sub_block",
-          "name": "sub_block",
-          "type": "COMBO",
-          "widget": {
-            "name": "sub_block"
-          },
-          "link": null
-        },
-        {
           "localized_name": "seed",
           "name": "seed",
           "type": "INT",
@@ -1430,11 +1388,11 @@
         "3D_Anime_Style.safetensors",
         1,
         1,
-        "Block_1 (0-4)",
-        "Block_1A (0)",
+        "Block_1 (All 0-4)",
         1055276668981430,
         "randomize",
         0.5,
+        0,
         0,
         0,
         0,
@@ -1451,8 +1409,7 @@
         "lora_name": "3D_Anime_Style.safetensors",
         "strength_model": 1,
         "strength_clip": 1,
-        "target_block": "Block_1 (0-4)",
-        "sub_block": "Block_1A (0)",
+        "target_block": "Block_1 (All 0-4)",
         "seed": 1055276668981430,
         "control_after_generate": "randomize",
         "base_chance": 0.5,
@@ -1531,15 +1488,6 @@
           "type": "COMBO",
           "widget": {
             "name": "target_block"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "sub_block",
-          "name": "sub_block",
-          "type": "COMBO",
-          "widget": {
-            "name": "sub_block"
           },
           "link": null
         },
@@ -1671,8 +1619,7 @@
         "3D_Anime_Style.safetensors",
         1,
         1,
-        "Block_1 (0-4)",
-        "Block_1A (0)",
+        "Block_1 (All 0-4)",
         1,
         1,
         1,
@@ -1689,8 +1636,7 @@
         "lora_name": "3D_Anime_Style.safetensors",
         "strength_model": 1,
         "strength_clip": 1,
-        "target_block": "Block_1 (0-4)",
-        "sub_block": "Block_1A (0)",
+        "target_block": "Block_1 (All 0-4)",
         "ATTN_wq_query": 1,
         "ATTN_wk_key": 1,
         "ATTN_wv_value": 1,
@@ -2409,15 +2355,6 @@
           "link": null
         },
         {
-          "localized_name": "sub_block",
-          "name": "sub_block",
-          "type": "COMBO",
-          "widget": {
-            "name": "sub_block"
-          },
-          "link": null
-        },
-        {
           "localized_name": "mode",
           "name": "mode",
           "type": "COMBO",
@@ -2563,8 +2500,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Block_1 (0-4)",
-        "Block_1A (0)",
+        "Block_1 (All 0-4)",
         "Soft Value",
         "",
         "",
@@ -2581,8 +2517,7 @@
         0
       ],
       "widgets_values_named": {
-        "target_block": "Block_1 (0-4)",
-        "sub_block": "Block_1A (0)",
+        "target_block": "Block_1 (All 0-4)",
         "mode": "Soft Value",
         "vectors_override": "",
         "granular_json": "",
