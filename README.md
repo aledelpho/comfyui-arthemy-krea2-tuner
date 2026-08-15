@@ -31,6 +31,7 @@ Three domains (what you're editing) × three precision levels (how targeted you 
 | **🟪 LoRA** | `🟪🔮 LoRA Block Loader` | `🟪🔬 Load Sub-Block LoRA` | `🟪🌪️ Load Sub-Block Chaos LoRA` |
 
 ![Model Tuner Nodes](assets/ModelTuner.png)
+![CLIP Tuner Nodes](assets/ClipTuner.png)
 
 ### 🟦 Tier 1 — Tuner (whole groups)
 One slider per group of blocks:
@@ -51,8 +52,6 @@ Same targeting as Tier 2, but instead of a fixed multiplier, each matched tensor
 - **Element-Level (Sub-atomic) mode**: rolls per individual weight, for finer-grained noise.
 
 > *Use when there is no other way — "Let’s see if by changing this sub-slice in a random way I can get exactly what I’m looking for. When I find it, I can fix the seed!"*
-
-![CLIP Tuner Nodes](assets/ClipTuner.png)
 
 ---
 
