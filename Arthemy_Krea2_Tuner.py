@@ -28,6 +28,16 @@ import comfy.sd
 import comfy.utils
 import folder_paths
 
+# Register arthemy_presets folder paths with ComfyUI
+models_dir = folder_paths.models_dir
+arthemy_presets_dir = os.path.join(models_dir, "arthemy_presets")
+local_presets_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "presets")
+os.makedirs(arthemy_presets_dir, exist_ok=True)
+os.makedirs(local_presets_dir, exist_ok=True)
+
+if "arthemy_presets" not in folder_paths.folder_names_and_paths:
+    folder_paths.folder_names_and_paths["arthemy_presets"] = ([arthemy_presets_dir, local_presets_dir], {".json", ".arthemy"})
+
 class Krea2Config:
     """Global architecture configuration parameters and defaults."""
     MAX_UNET_BLOCKS: int = 28
@@ -1894,6 +1904,157 @@ class ArthemyKrea2CLIPVisualizer(BaseKrea2Node):
         return {"ui": {"graph_data": graph_data, "scale": [scale], "title": ["Qwen3 Text Encoder"]}, "result": (clip, vis_image, info)}
 
 # ==============================================================================
+# PRESET NODES (SAVER & LOADER)
+# ==============================================================================
+
+def extract_patch_multipliers(patcher) -> dict:
+    """Extracts scalar offset multipliers from active patches in a ModelPatcher."""
+    if patcher is None or not hasattr(patcher, "patches"):
+        return {}
+    extracted = {}
+    for k, patch_list in patcher.patches.items():
+        if not patch_list:
+            continue
+        total_offset = 0.0
+        for p in patch_list:
+            off, is_lora, is_chaos = parse_patch_entry(p)
+            total_offset += off
+        if round(total_offset, 6) != 0.0:
+            clean_k = Krea2TensorParser.clean_key(k)
+            extracted[clean_k] = round(total_offset, 6)
+    return extracted
+
+
+class ArthemyKrea2PresetSaver(BaseKrea2Node):
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "model": ("MODEL",),
+                "clip": ("CLIP",),
+                "preset_name": ("STRING", {"default": "my_arthemy_preset"}),
+            },
+            "optional": {
+                "author": ("STRING", {"default": "Arthemy"}),
+                "description": ("STRING", {"default": "Krea-2 tuning preset", "multiline": True}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("saved_path", "info")
+    FUNCTION = "save_preset"
+    CATEGORY = "Arthemy/Presets"
+
+    def save_preset(self, model, clip, preset_name="my_arthemy_preset", author="Arthemy", description="Krea-2 tuning preset"):
+        m_p = get_patcher(model)
+        c_p = get_patcher(clip)
+
+        model_patches = extract_patch_multipliers(m_p)
+        clip_patches = extract_patch_multipliers(c_p)
+
+        if not model_patches and not clip_patches:
+            logger.warning("[ARTHEMY PRESET SAVER] No active patches detected on Model or CLIP.")
+
+        safe_name = re.sub(r'[^\w\-_\.]', '_', preset_name.strip())
+        if not safe_name.endswith(".json"):
+            safe_name += ".json"
+
+        save_dirs = folder_paths.get_folder_paths("arthemy_presets")
+        save_dir = save_dirs[0] if save_dirs else arthemy_presets_dir
+        os.makedirs(save_dir, exist_ok=True)
+        file_path = os.path.join(save_dir, safe_name)
+
+        preset_data = {
+            "name": preset_name.replace(".json", ""),
+            "author": author.strip() if author else "Arthemy",
+            "description": description.strip() if description else "",
+            "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "version": "1.0",
+            "stats": {
+                "model_patched_layers": len(model_patches),
+                "clip_patched_layers": len(clip_patches),
+            },
+            "model_patches": model_patches,
+            "clip_patches": clip_patches,
+        }
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(preset_data, f, indent=2, ensure_ascii=False)
+
+        info = f"Preset saved: '{safe_name}' ({len(model_patches)} model layers, {len(clip_patches)} clip layers)"
+        logger.info(f"[ARTHEMY PRESET SAVER] {info} -> {file_path}")
+        return (file_path, info)
+
+
+class ArthemyKrea2PresetLoader(BaseKrea2Node):
+    @classmethod
+    def INPUT_TYPES(s):
+        preset_files = folder_paths.get_filename_list("arthemy_presets")
+        return {
+            "required": {
+                "model": ("MODEL",),
+                "clip": ("CLIP",),
+                "preset": (sorted(preset_files) if preset_files else ["None"],),
+                "strength_model": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01,
+                                             "tooltip": "Global multiplier for model patches in this preset."}),
+                "strength_clip": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01,
+                                            "tooltip": "Global multiplier for CLIP patches in this preset."}),
+            }
+        }
+
+    RETURN_TYPES = ("MODEL", "CLIP", "STRING")
+    RETURN_NAMES = ("MODEL", "CLIP", "info")
+    FUNCTION = "load_preset"
+    CATEGORY = "Arthemy/Presets"
+
+    def load_preset(self, model, clip, preset, strength_model=1.0, strength_clip=1.0):
+        if not preset or preset == "None":
+            return (model, clip, "No preset selected.")
+
+        file_path = folder_paths.get_full_path("arthemy_presets", preset)
+        if not file_path or not os.path.exists(file_path):
+            raise FileNotFoundError(f"Arthemy Suite Error: Preset '{preset}' not found.")
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        m = model.clone()
+        c = clip.clone()
+
+        model_patches = data.get("model_patches", {})
+        clip_patches = data.get("clip_patches", {})
+
+        n_model = 0
+        n_clip = 0
+
+        if model_patches and strength_model != 0.0:
+            m_patches_to_add = {}
+            for k, off in model_patches.items():
+                scaled_off = off * strength_model
+                if scaled_off != 0.0:
+                    patch_k = f"diffusion_model.{k}" if not k.startswith("diffusion_model.") else k
+                    m_patches_to_add[patch_k] = (1.0 + scaled_off,)
+                    n_model += 1
+            if m_patches_to_add:
+                add_patches_to_front(m, m_patches_to_add, 1.0)
+
+        if clip_patches and strength_clip != 0.0:
+            c_patches_to_add = {}
+            for k, off in clip_patches.items():
+                scaled_off = off * strength_clip
+                if scaled_off != 0.0:
+                    c_patches_to_add[k] = (1.0 + scaled_off,)
+                    n_clip += 1
+            if c_patches_to_add:
+                add_patches_to_front(c, c_patches_to_add, 1.0)
+
+        preset_name = data.get("name", preset)
+        author = data.get("author", "Unknown")
+        info = f"Loaded Preset '{preset_name}' by {author} | Model: {n_model} layers (x{strength_model:.2f}), CLIP: {n_clip} layers (x{strength_clip:.2f})"
+        logger.info(f"[ARTHEMY PRESET LOADER] {info}")
+        return (m, c, info)
+
+# ==============================================================================
 # NODE MAPPINGS & REGISTRATION (3x3 Grid + Savers & Utilities)
 # ==============================================================================
 NODE_CLASS_MAPPINGS = {
@@ -1919,6 +2080,10 @@ NODE_CLASS_MAPPINGS = {
     "ArthemyKrea2ModelVisualizer": ArthemyKrea2ModelVisualizer,
     "ArthemyKrea2CLIPVisualizer": ArthemyKrea2CLIPVisualizer,
     "ArthemyKrea2ResetPatcher": ArthemyKrea2ResetPatcher,
+
+    # Presets
+    "ArthemyKrea2PresetSaver": ArthemyKrea2PresetSaver,
+    "ArthemyKrea2PresetLoader": ArthemyKrea2PresetLoader,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -1944,6 +2109,10 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ArthemyKrea2ModelVisualizer": "🟦📊 Model Visualizer",
     "ArthemyKrea2CLIPVisualizer": "🟨📊 CLIP Visualizer",
     "ArthemyKrea2ResetPatcher": "🟦🟨🔄 Reset Patcher",
+
+    # Presets
+    "ArthemyKrea2PresetSaver": "🟦🟨💾 Preset Saver",
+    "ArthemyKrea2PresetLoader": "🟦🟨📂 Preset Loader",
 }
 
 WEB_DIRECTORY = "./web"

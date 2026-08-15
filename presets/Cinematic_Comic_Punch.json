@@ -1,0 +1,33 @@
+{
+  "name": "Cinematic Comic Punch",
+  "author": "Arthemy",
+  "description": "High-contrast comic styling with boosted mid-block attention, sharp ink edge definition, and solid prompt adherence.",
+  "created_at": "2026-08-15 16:30:00",
+  "version": "1.0",
+  "stats": {
+    "model_patched_layers": 12,
+    "clip_patched_layers": 6
+  },
+  "model_patches": {
+    "blocks.0.attn.wq.weight": 0.05,
+    "blocks.1.attn.wq.weight": 0.05,
+    "blocks.2.attn.wq.weight": 0.08,
+    "blocks.3.attn.wq.weight": 0.08,
+    "blocks.4.attn.wq.weight": 0.06,
+    "blocks.10.attn.wq.weight": 0.12,
+    "blocks.11.attn.wq.weight": 0.12,
+    "blocks.12.attn.wq.weight": 0.15,
+    "blocks.13.attn.wq.weight": 0.15,
+    "blocks.14.attn.wq.weight": 0.10,
+    "blocks.24.mlp.down.weight": -0.05,
+    "blocks.25.mlp.down.weight": -0.05
+  },
+  "clip_patches": {
+    "model.layers.0.self_attn.q_proj.weight": 0.04,
+    "model.layers.1.self_attn.q_proj.weight": 0.04,
+    "model.layers.10.self_attn.q_proj.weight": 0.08,
+    "model.layers.11.self_attn.q_proj.weight": 0.08,
+    "model.layers.30.self_attn.q_proj.weight": 0.06,
+    "model.layers.31.self_attn.q_proj.weight": 0.06
+  }
+}

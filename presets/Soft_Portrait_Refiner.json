@@ -1,0 +1,27 @@
+{
+  "name": "Soft Portrait Refiner",
+  "author": "Arthemy",
+  "description": "Smooth lighting transitions and delicate facial rendering via dampened high-frequency early blocks.",
+  "created_at": "2026-08-15 16:30:00",
+  "version": "1.0",
+  "stats": {
+    "model_patched_layers": 8,
+    "clip_patched_layers": 4
+  },
+  "model_patches": {
+    "blocks.0.attn.wq.weight": -0.04,
+    "blocks.1.attn.wq.weight": -0.04,
+    "blocks.2.attn.wq.weight": -0.06,
+    "blocks.3.attn.wq.weight": -0.06,
+    "blocks.20.mlp.up.weight": 0.05,
+    "blocks.21.mlp.up.weight": 0.05,
+    "blocks.22.mlp.up.weight": 0.04,
+    "blocks.23.mlp.up.weight": 0.04
+  },
+  "clip_patches": {
+    "model.layers.0.self_attn.k_proj.weight": -0.02,
+    "model.layers.1.self_attn.k_proj.weight": -0.02,
+    "model.layers.20.mlp.gate_proj.weight": 0.05,
+    "model.layers.21.mlp.gate_proj.weight": 0.05
+  }
+}

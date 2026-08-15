@@ -21,14 +21,16 @@ The suite is designed around 3 core domains (Model, CLIP, LoRA) structured acros
 
 ---
 
-## 🛠️ Savers, Bakers & Visualizers
+## 🛠️ Savers, Bakers, Presets & Visualizers
 
 | Node | Description |
 |---|---|
 | `🟦💾 Model Saver` | Memory-safe BF16/FP8 model baker & safetensors exporter with streaming tensor processing and auto-incrementing file naming. |
 | `🟨💾 CLIP Saver` | Memory-safe BF16/FP8 exporter for Qwen3 / Qwen3-VL text encoder checkpoints. |
 | `🟦🟨 Model Baker` | In-memory CPU patch baking with submodule parameter isolation — collapses active patches without mutating the cached base checkpoint. |
-| `🟦📊 Model Visualizer` | Real-time visual graph rendering per-block weight offsets, LoRA presence, and chaos modifications with in-node preview output. |
+| `🟦🟨💾 Preset Saver` | Exports all active Model and CLIP tuning patches into a lightweight (~1–2 KB) `.json` preset file. |
+| `🟦🟨📂 Preset Loader` | Loads and applies `.json` presets with independent `strength_model` and `strength_clip` global scaling multipliers. |
+| `🟦📊 Model Visualizer` | Real-time visual graph rendering per-block weight offsets, LoRA presence, and chaos modifications on the LiteGraph Canvas. |
 | `🟨📊 CLIP Visualizer` | Real-time visual diagram for Qwen3 text encoder layers. |
 | `🟦🟨🔄 Reset Patcher` | Cleans and resets all active patches from model and CLIP patchers. |
 
