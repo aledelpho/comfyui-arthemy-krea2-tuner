@@ -1303,6 +1303,11 @@ class ArthemyKrea2ResetPatcher(BaseKrea2Node):
 
 
 class ArthemyKrea2IsolatedLoraBlockLoader(BaseKrea2Node):
+    """Isolated LoRA loader: clones the patcher before applying so the LoRA
+    does not accumulate on top of any previously active patches from upstream nodes.
+    Produces standard ComfyUI 2-tensor (lora_down, lora_up) patch entries, which
+    are correctly detected as is_lora=True by the Visualizer's parse_patch_entry."""
+
     @classmethod
     def INPUT_TYPES(s):
         lora_list = folder_paths.get_filename_list("loras")
@@ -1364,32 +1369,6 @@ class ArthemyKrea2LoadChaosLoRA(BaseKrea2Node):
 
         res_m, res_c = comfy.sd.load_lora_for_models(m, c, filtered_lora, strength_model, strength_clip)
         return (res_m, res_c, f"Chaos LoRA Loaded ({len(filtered_lora)} keys)")
-
-
-class ArthemyKrea2IsolatedLoraBlockSurgeonLoader(BaseSurgeonTuner):
-    @classmethod
-    def INPUT_TYPES(s):
-        lora_list = folder_paths.get_filename_list("loras")
-        return {
-            "required": {
-                "model": ("MODEL",), "clip": ("CLIP",), "lora_name": (lora_list,),
-                "strength_model": ("FLOAT", {"default": 0.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-                "strength_clip": ("FLOAT", {"default": 0.0, "min": -99.00, "max": 99.00, "step": 0.01}),
-            }
-        }
-
-    RETURN_TYPES = ("MODEL", "CLIP", "STRING")
-    RETURN_NAMES = ("MODEL", "CLIP", "info")
-    FUNCTION = "load_lora_surgeon"
-    CATEGORY = "Arthemy/Krea2 LoRA"
-
-    def load_lora_surgeon(self, model, clip, lora_name, strength_model, strength_clip):
-        m = ComfyPatcherAdapter.isolate_patcher(model)
-        c = ComfyPatcherAdapter.isolate_patcher(clip)
-        lora_path = folder_paths.get_full_path("loras", lora_name)
-        lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
-        res_m, res_c = comfy.sd.load_lora_for_models(m, c, lora, strength_model, strength_clip)
-        return (res_m, res_c, f"Lora Surgeon: {lora_name}")
 
 
 class ArthemyKrea2LoadChaosLoraBlockSurgeon(BaseSurgeonTuner):
@@ -1806,8 +1785,9 @@ NODE_CLASS_MAPPINGS = {
     "ArthemyKrea2LoraBlockLoader": ArthemyKrea2LoraBlockLoader,
     "ArthemyKrea2ResetPatcher": ArthemyKrea2ResetPatcher,
     "ArthemyKrea2IsolatedLoraBlockLoader": ArthemyKrea2IsolatedLoraBlockLoader,
+    # Backwards-compatibility alias: old workflows using the Surgeon variant resolve to the merged class
+    "ArthemyKrea2IsolatedLoraBlockSurgeonLoader": ArthemyKrea2IsolatedLoraBlockLoader,
     "ArthemyKrea2LoadChaosLoRA": ArthemyKrea2LoadChaosLoRA,
-    "ArthemyKrea2IsolatedLoraBlockSurgeonLoader": ArthemyKrea2IsolatedLoraBlockSurgeonLoader,
     "ArthemyKrea2LoadChaosLoraBlockSurgeon": ArthemyKrea2LoadChaosLoraBlockSurgeon,
     "ArthemyKrea2ModelBaker": ArthemyKrea2ModelBaker,
     "ArthemyKrea2ModelVisualizer": ArthemyKrea2ModelVisualizer,
@@ -1828,8 +1808,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ArthemyKrea2LoraBlockLoader": "🔮 Arthemy Krea-2 LoRA Block Loader",
     "ArthemyKrea2ResetPatcher": "🔄 Arthemy Krea-2 Reset Patcher",
     "ArthemyKrea2IsolatedLoraBlockLoader": "🔮 Arthemy Krea-2 Isolated LoRA Block Loader",
+    "ArthemyKrea2IsolatedLoraBlockSurgeonLoader": "🔮 Arthemy Krea-2 Isolated LoRA Block Loader",
     "ArthemyKrea2LoadChaosLoRA": "🎲 Arthemy Krea-2 Load Chaos LoRA",
-    "ArthemyKrea2IsolatedLoraBlockSurgeonLoader": "🔮🔬 Arthemy Krea-2 Isolated LoRA Block Surgeon",
     "ArthemyKrea2LoadChaosLoraBlockSurgeon": "🎲🔬 Arthemy Krea-2 Load Chaos LoRA Block Surgeon",
     "ArthemyKrea2ModelBaker": "Arthemy Krea-2 Model Baker",
     "ArthemyKrea2ModelVisualizer": "📊 Arthemy Krea-2 Model Visualizer",
