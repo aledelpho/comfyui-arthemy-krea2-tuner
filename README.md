@@ -142,7 +142,15 @@ Built for **Krea-2** diffusion checkpoints and their paired **Qwen3** text encod
 
 ## 🎨 Visual Tuning Showcase & Effects
 
-Here is a visual breakdown demonstrating the direct stylistic and structural effect of modulating individual Model block groups and CLIP text encoder layers *(click on any image to open in full resolution)*:
+Here is a visual breakdown demonstrating the direct stylistic and structural effect of modulating individual Model block groups and CLIP text encoder layers *(click on any image to open in full resolution)*.
+
+> 💡 **Benchmark Baseline Prompt**: To ensure a strictly controlled and scientific comparison across all tests, the following exact prompt was used identically throughout all experiments:
+
+```text
+Western comics style, bold ink outlines, hatched shadows, eerie detached calm, seen from a dutch high angle close-up, upper body portrait, dynamic pose, dramatic angle, strong perspective. male human plague doctor, thinning gray hair slicked back, thin sparse eyebrows, pale sickly skin gradient, gaunt older adult, long thin gloved fingers, a wispy gray goatee, deep tired wrinkles, dull green eyes. narrow jaw, tall lanky frame, eerie detached calm stare. a long black waxed-leather coat with a high collar, a satchel of glass vials strapped across his chest. holding a bubbling green potion vial up to the light. Background: a dim candle-lit apothecary shop cluttered with shelves of jars and dried herbs. Lighting: flickering warm candlelight from below mixing with cool teal moonlight through a fogged window, creating dramatic contrast across his face.
+```
+
+---
 
 ### 🟦 Model Tuning Effects
 
@@ -200,6 +208,25 @@ Here is a visual breakdown demonstrating the direct stylistic and structural eff
 
 #### 🔸 Embedding
 <a href="assets/examples/Embedding.png"><img src="assets/examples/Embedding.png" width="100%" alt="Embedding Effect" /></a>
+
+---
+
+### 🔬 In-Depth Comparative Studies & Benchmarks
+
+#### 1. Deterministic Multi-Seed Persistence
+Demonstrates how feature isolation works in practice: by identifying and amplifying only the specific Model blocks and CLIP layers responsible for generating the plague doctor's beak mask, the feature persists robustly and deterministically across completely different generation SEEDs.
+
+<a href="assets/examples/SameTuning-DifferentSeed.png"><img src="assets/examples/SameTuning-DifferentSeed.png" width="100%" alt="Same Tuning Different Seed Comparison" /></a>
+
+#### 2. Stochastic Style Discovery with Chaos Tuning
+Showcases the generative exploration power of the Chaos Tuner nodes: different stochastic layer configurations produce distinctly varied aesthetics, ink shading, and line weights from the identical prompt.
+
+<a href="assets/examples/ChaosTuning.png"><img src="assets/examples/ChaosTuning.png" width="100%" alt="Chaos Tuning Variations" /></a>
+
+#### 3. Tuning Generalization Across Workflow Runs (X/Y Benchmark)
+Demonstrates that a tuning calibration optimized on a single reference image consistently imparts its specific aesthetic signature and artistic direction across multiple runs and variations, proving that internal weight tuning reliably generalizes without over-fitting.
+
+<a href="assets/examples/XYBenchmark.png"><img src="assets/examples/XYBenchmark.png" width="100%" alt="X/Y Tuning Benchmark Grid" /></a>
 
 ---
 
