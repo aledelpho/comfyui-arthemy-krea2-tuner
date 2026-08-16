@@ -88,17 +88,17 @@ Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three ti
   <img src="assets/ModelTuner.png" width="650" alt="Model Tuner Nodes" />
 </p>
 
-### 🟦 Tier 1 — Tuner (Whole Groups)
+### Tier 1 — Tuner (Whole Groups)
 **`🟦 Model Tuner`** provides one slider per group of blocks: `Text_Fusion`, `Time_Embed`, `Projection`, and `Block_1` through `Block_6`. Moving a slider scales every tensor inside that group by the same offset.
 * **Use case:** Broad exploration — *"Let's see which general region influences my output."*
 * **Workflow:** `MODEL` → `🟦 Model Tuner` → `Sampler`. Nudge one slider at a time, generate, and compare.
 
-### 🟦 Tier 2 — Sub-Block Tuner (Block + Tensor Type)
+### Tier 2 — Sub-Block Tuner (Block + Tensor Type)
 **`🟦 Model Sub-Block Tuner`** narrows the target: select one block from the `target_block` dropdown, then adjust individual sliders for specific internal tensor types (`ATTN_wq_query`, `ATTN_wk_key`, `ATTN_wv_value`, `ATTN_wo_out`, `MLP_gate_swiglu`, `MLP_up_proj`, `MLP_down_proj`, `NORMS_block_scales`, etc.).
 * **Use case:** Surgical isolation — *"Block 3 is promising, let's isolate attention layers from MLP layers."*
 * **Workflow:** Follows a Tier 1 pass. Set `target_block` to the region identified in Tier 1 and sweep tensor-type sliders individually.
 
-### 🟦 Tier 3 — Chaos Tuner (Seeded Randomness)
+### Tier 3 — Chaos Tuner (Seeded Randomness)
 **`🟦 Model Sub-Block Chaos Tuner`** uses the same targeting as Tier 2, but applies a seeded perturbation: with probability `chance`, each matched tensor is perturbed by `chaos_strength`. Same seed = deterministic, reproducible noise every time.
 * **Block-Level mode:** Perturbs an entire tensor at once.
 * **Element-Level (Sub-atomic) mode:** Rolls per individual weight for finer granularity.
@@ -141,9 +141,9 @@ Tuning applied to the Qwen3 text encoder follows the identical 3-tier structure:
 
 | Domain | Tier 1 — Group-level | Tier 2 — Block + Tensor Type | Tier 3 — Random / Seeded |
 | :--- | :--- | :--- | :--- |
-| 🟦 **Model** | `🟦 Model Tuner` | `🟦 Model Sub-Block Tuner` | `🟦 Model Sub-Block Chaos Tuner` |
-| 🟨 **CLIP** | `🟨 CLIP Tuner` | `🟨 CLIP Sub-Block Tuner` | `🟨 CLIP Sub-Block Chaos Tuner` |
-| 🟪 **LoRA** | `🟪 LoRA Block Loader` | `🟪 Load Sub-Block LoRA` | `🟪 Load Sub-Block Chaos LoRA` |
+| **Model** | `🟦 Model Tuner` | `🟦 Model Sub-Block Tuner` | `🟦 Model Sub-Block Chaos Tuner` |
+| **CLIP** | `🟨 CLIP Tuner` | `🟨 CLIP Sub-Block Tuner` | `🟨 CLIP Sub-Block Chaos Tuner` |
+| **LoRA** | `🟪 LoRA Block Loader` | `🟪 Load Sub-Block LoRA` | `🟪 Load Sub-Block Chaos LoRA` |
 
 ---
 
