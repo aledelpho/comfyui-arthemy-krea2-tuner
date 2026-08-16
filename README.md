@@ -38,10 +38,11 @@ Built for anyone who wants to push a model toward a specific look or behavior �
 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [Included Template Workflow](#included-template-workflow)
 - [Picking the Right Node](#picking-the-right-node)
-  - [Model Tuning](#-tier-1--tuner-whole-groups)
-  - [CLIP Tuning](#-clip-tuning-qwen3)
-  - [LoRA Tuning](#-lora-tuning)
+  - [Model Tuning](#tier-1--tuner-whole-groups)
+  - [CLIP Tuning](#clip-tuning-qwen3)
+  - [LoRA Tuning](#lora-tuning)
   - [Summary Table](#summary-table)
 - [Reading the Sliders](#reading-the-sliders)
 - [Saving and Loading Calibrations](#saving-and-loading-calibrations)
@@ -81,6 +82,22 @@ git clone https://github.com/aledelpho/comfyui-arthemy-krea2-tuner.git
 3. Move one of the block sliders (`Block_1` … `Block_6`) away from `0.00` (`0.00` = no change; positive values strengthen that group, negative values weaken it).
 4. Connect the Tuner's `MODEL` output to your sampler and generate. Compare against the untouched model — with a slider away from `0.00`, you should see an immediate visual shift. If the outputs look identical, verify your checkpoint is Krea-2/Qwen3 (see [Troubleshooting](#troubleshooting)).
 5. *(Optional)* Chain a **`🟨 CLIP Tuner`** on the `CLIP` wire to adjust text encoder layers simultaneously.
+
+---
+
+## Included Template Workflow
+
+The suite comes with a pre-configured, modular sandbox workflow located in [`workflows/TestKrea2TunerWorkflow.json`](workflows/TestKrea2TunerWorkflow.json):
+
+<p align="center">
+  <img src="assets/Workflow.png" width="900" alt="Arthemy Krea-2 Tuner Sandbox Workflow" />
+</p>
+
+### How to use the sandbox:
+1. **Load the template:** Drag and drop `workflows/TestKrea2TunerWorkflow.json` into ComfyUI.
+2. **Pick any tool:** Choose any tuning node or LoRA loader from the organized library at the bottom.
+3. **Plug into the staging slot:** Attach your chosen tool in the open space between the **Loaders / Reset Patcher** and the **Visualizers & Generation** zone.
+4. **Tune & Cook:** Adjust your sliders, verify the live patch waveform in the visualizers, and generate!
 
 ---
 
