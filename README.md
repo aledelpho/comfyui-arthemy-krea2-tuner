@@ -55,10 +55,14 @@ Built for anyone who wants to push a model toward a specific look or behavior â€
 
 ## Installation
 
-### Option 1: Via ComfyUI Manager (Recommended)
-Search for **"Arthemy Krea-2 Tuner"** in the ComfyUI Manager custom node browser and click **Install**.
+### Option 1: Via ComfyUI Manager (Install via Git URL)
+In **ComfyUI Manager**, click **Install via Git URL**, paste the repository URL:
+```text
+https://github.com/aledelpho/comfyui-arthemy-krea2-tuner.git
+```
+and click **Install**.
 
-### Option 2: Manual Installation
+### Option 2: Manual Installation (Git Clone)
 Clone this repository directly into your ComfyUI `custom_nodes` folder:
 
 ```bash
