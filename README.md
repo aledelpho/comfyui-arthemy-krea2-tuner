@@ -88,28 +88,44 @@ Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three ti
   <img src="assets/ModelTuner.png" width="650" alt="Model Tuner Nodes" />
 </p>
 
-### Tier 1 — Tuner (Whole Groups)
+### 🟦 Tier 1 — Tuner (Whole Groups)
 **`🟦 Model Tuner`** provides one slider per group of blocks: `Text_Fusion`, `Time_Embed`, `Projection`, and `Block_1` through `Block_6`. Moving a slider scales every tensor inside that group by the same offset.
 * **Use case:** Broad exploration — *"Let's see which general region influences my output."*
 * **Workflow:** `MODEL` → `🟦 Model Tuner` → `Sampler`. Nudge one slider at a time, generate, and compare.
 
-### Tier 2 — Sub-Block Tuner (Block + Tensor Type)
+<p align="center">
+  <a href="assets/examples/Block_3.png">
+    <img src="assets/examples/Block_3.png" width="800" alt="Block Tuning Showcase - Block 3" />
+  </a>
+  <br>
+  <sub><i>Block Tuning — Modulating an entire block across different values (-1.0 to +2.0) demonstrates how group-level tuning shapes visual structures and features.</i></sub>
+</p>
+
+### 🟦 Tier 2 — Sub-Block Tuner (Block + Tensor Type)
 **`🟦 Model Sub-Block Tuner`** narrows the target: select one block from the `target_block` dropdown, then adjust individual sliders for specific internal tensor types (`ATTN_wq_query`, `ATTN_wk_key`, `ATTN_wv_value`, `ATTN_wo_out`, `MLP_gate_swiglu`, `MLP_up_proj`, `MLP_down_proj`, `NORMS_block_scales`, etc.).
 * **Use case:** Surgical isolation — *"Block 3 is promising, let's isolate attention layers from MLP layers."*
 * **Workflow:** Follows a Tier 1 pass. Set `target_block` to the region identified in Tier 1 and sweep tensor-type sliders individually.
 
-### Tier 3 — Chaos Tuner (Seeded Randomness)
+<p align="center">
+  <a href="assets/examples/sub-block-Tuning.png">
+    <img src="assets/examples/sub-block-Tuning.png" width="800" alt="Sub-Block Tuning Variations inside Block 3" />
+  </a>
+  <br>
+  <sub><i>Sub-Block Tuning — Modulating specific sub-blocks within Block 3 influences fine details and layer-level characteristics.</i></sub>
+</p>
+
+### 🟦 Tier 3 — Chaos Tuner (Seeded Randomness)
 **`🟦 Model Sub-Block Chaos Tuner`** uses the same targeting as Tier 2, but applies a seeded perturbation: with probability `chance`, each matched tensor is perturbed by `chaos_strength`. Same seed = deterministic, reproducible noise every time.
 * **Block-Level mode:** Perturbs an entire tensor at once.
 * **Element-Level (Sub-atomic) mode:** Rolls per individual weight for finer granularity.
 * **Use case:** Creative discovery — *"Let's randomly nudge this sub-slice and lock the seed once an interesting style emerges."*
 
 <p align="center">
-  <a href="assets/examples/ChaosTuning.png">
-    <img src="assets/examples/ChaosTuning.png" width="800" alt="Chaos Tuning Variations" />
+  <a href="assets/examples/chaos-block-Tuning.png">
+    <img src="assets/examples/chaos-block-Tuning.png" width="800" alt="Chaos Tuning Variations" />
   </a>
   <br>
-  <sub><i>Different stochastic configurations, identical prompt — Chaos Tuning as a discovery tool for shading and line-weight variations.</i></sub>
+  <sub><i>Chaos Tuning — Seeded stochastic perturbations applied across sub-blocks introduce controlled stylistic variations and creative discovery.</i></sub>
 </p>
 
 ---
@@ -141,9 +157,9 @@ Tuning applied to the Qwen3 text encoder follows the identical 3-tier structure:
 
 | Domain | Tier 1 — Group-level | Tier 2 — Block + Tensor Type | Tier 3 — Random / Seeded |
 | :--- | :--- | :--- | :--- |
-| **Model** | `🟦 Model Tuner` | `🟦 Model Sub-Block Tuner` | `🟦 Model Sub-Block Chaos Tuner` |
-| **CLIP** | `🟨 CLIP Tuner` | `🟨 CLIP Sub-Block Tuner` | `🟨 CLIP Sub-Block Chaos Tuner` |
-| **LoRA** | `🟪 LoRA Block Loader` | `🟪 Load Sub-Block LoRA` | `🟪 Load Sub-Block Chaos LoRA` |
+| 🟦 **Model** | `🟦 Model Tuner` | `🟦 Model Sub-Block Tuner` | `🟦 Model Sub-Block Chaos Tuner` |
+| 🟨 **CLIP** | `🟨 CLIP Tuner` | `🟨 CLIP Sub-Block Tuner` | `🟨 CLIP Sub-Block Chaos Tuner` |
+| 🟪 **LoRA** | `🟪 LoRA Block Loader` | `🟪 Load Sub-Block LoRA` | `🟪 Load Sub-Block Chaos LoRA` |
 
 ---
 
@@ -212,48 +228,34 @@ Tuning occurs live in memory and **does not modify original checkpoint files**.
 
 A visual reference gallery showing how modulating each Model block and CLIP layer influences output in isolation.
 
-<details>
-<summary><b>Benchmark Baseline Prompt</b> (Used across all examples)</summary>
+### Benchmark Baseline Prompt (Used across all examples)
 
 ```text
 Western comics style, bold ink outlines, hatched shadows, eerie detached calm, seen from a dutch high angle close-up, upper body portrait, dynamic pose, dramatic angle, strong perspective. male human plague doctor, thinning gray hair slicked back, thin sparse eyebrows, pale sickly skin gradient, gaunt older adult, long thin gloved fingers, a wispy gray goatee, deep tired wrinkles, dull green eyes. narrow jaw, tall lanky frame, eerie detached calm stare. a long black waxed-leather coat with a high collar, a satchel of glass vials strapped across his chest. holding a bubbling green potion vial up to the light. Background: a dim candle-lit apothecary shop cluttered with shelves of jars and dried herbs. Lighting: flickering warm candlelight from below mixing with cool teal moonlight through a fogged window, creating dramatic contrast across his face.
 ```
-</details>
 
-<details>
-<summary><b>🟦 Model Tuning Effects</b> (Blocks 1–6, Text Fusion, Time Embed, Projection)</summary>
-<br>
+### 🟦 Model Tuning Effects (Blocks 1–6, Text Fusion, Time Embed, Projection)
 
-| Block | Visual Result |
-| :--- | :--- |
-| **Block 1** | <a href="assets/examples/Block_1.png"><img src="assets/examples/Block_1.png" width="100%" alt="Block 1 Effect" /></a> |
-| **Block 2** | <a href="assets/examples/Block_2.png"><img src="assets/examples/Block_2.png" width="100%" alt="Block 2 Effect" /></a> |
-| **Block 3** | <a href="assets/examples/Block_3.png"><img src="assets/examples/Block_3.png" width="100%" alt="Block 3 Effect" /></a> |
-| **Block 4** | <a href="assets/examples/Block_4.png"><img src="assets/examples/Block_4.png" width="100%" alt="Block 4 Effect" /></a> |
-| **Block 5** | <a href="assets/examples/Block_5.png"><img src="assets/examples/Block_5.png" width="100%" alt="Block 5 Effect" /></a> |
-| **Block 6** | <a href="assets/examples/Block_6.png"><img src="assets/examples/Block_6.png" width="100%" alt="Block 6 Effect" /></a> |
-| **Text Fusion** | <a href="assets/examples/TextFusion.png"><img src="assets/examples/TextFusion.png" width="100%" alt="Text Fusion Effect" /></a> |
-| **Time Embed** | <a href="assets/examples/Time_Embed.png"><img src="assets/examples/Time_Embed.png" width="100%" alt="Time Embed Effect" /></a> |
-| **Projection** | <a href="assets/examples/Projection.png"><img src="assets/examples/Projection.png" width="100%" alt="Projection Effect" /></a> |
+| | |
+|---|---|
+| **Block 1** <br> <a href="assets/examples/Block_1.png"><img src="assets/examples/Block_1.png" width="100%" alt="Block 1 Effect" /></a> | **Block 2** <br> <a href="assets/examples/Block_2.png"><img src="assets/examples/Block_2.png" width="100%" alt="Block 2 Effect" /></a> |
+| **Block 3** <br> <a href="assets/examples/Block_3.png"><img src="assets/examples/Block_3.png" width="100%" alt="Block 3 Effect" /></a> | **Block 4** <br> <a href="assets/examples/Block_4.png"><img src="assets/examples/Block_4.png" width="100%" alt="Block 4 Effect" /></a> |
+| **Block 5** <br> <a href="assets/examples/Block_5.png"><img src="assets/examples/Block_5.png" width="100%" alt="Block 5 Effect" /></a> | **Block 6** <br> <a href="assets/examples/Block_6.png"><img src="assets/examples/Block_6.png" width="100%" alt="Block 6 Effect" /></a> |
+| **Text Fusion** <br> <a href="assets/examples/TextFusion.png"><img src="assets/examples/TextFusion.png" width="100%" alt="Text Fusion Effect" /></a> | **Time Embed** <br> <a href="assets/examples/Time_Embed.png"><img src="assets/examples/Time_Embed.png" width="100%" alt="Time Embed Effect" /></a> |
+| **Projection** <br> <a href="assets/examples/Projection.png"><img src="assets/examples/Projection.png" width="100%" alt="Projection Effect" /></a> | |
 
-</details>
+---
 
-<details>
-<summary><b>🟨 CLIP Text Encoder Tuning Effects</b> (Layers 1–7, Embedding)</summary>
-<br>
+### 🟨 CLIP Text Encoder Tuning Effects (Layers 1–7, Embedding)
 
-| Layer | Visual Result |
-| :--- | :--- |
-| **Layer 1** | <a href="assets/examples/Layer_1.png"><img src="assets/examples/Layer_1.png" width="100%" alt="Layer 1 Effect" /></a> |
-| **Layer 2** | <a href="assets/examples/Layer_2.png"><img src="assets/examples/Layer_2.png" width="100%" alt="Layer 2 Effect" /></a> |
-| **Layer 3** | <a href="assets/examples/Layer_3.png"><img src="assets/examples/Layer_3.png" width="100%" alt="Layer 3 Effect" /></a> |
-| **Layer 4** | <a href="assets/examples/Layer_4.png"><img src="assets/examples/Layer_4.png" width="100%" alt="Layer 4 Effect" /></a> |
-| **Layer 5** | <a href="assets/examples/Layer_5.png"><img src="assets/examples/Layer_5.png" width="100%" alt="Layer 5 Effect" /></a> |
-| **Layer 6** | <a href="assets/examples/Layer_6.png"><img src="assets/examples/Layer_6.png" width="100%" alt="Layer 6 Effect" /></a> |
-| **Layer 7** | <a href="assets/examples/Layer_7.png"><img src="assets/examples/Layer_7.png" width="100%" alt="Layer 7 Effect" /></a> |
-| **Embedding** | <a href="assets/examples/Embedding.png"><img src="assets/examples/Embedding.png" width="100%" alt="Embedding Effect" /></a> |
+| | |
+|---|---|
+| **Layer 1** <br> <a href="assets/examples/Layer_1.png"><img src="assets/examples/Layer_1.png" width="100%" alt="Layer 1 Effect" /></a> | **Layer 2** <br> <a href="assets/examples/Layer_2.png"><img src="assets/examples/Layer_2.png" width="100%" alt="Layer 2 Effect" /></a> |
+| **Layer 3** <br> <a href="assets/examples/Layer_3.png"><img src="assets/examples/Layer_3.png" width="100%" alt="Layer 3 Effect" /></a> | **Layer 4** <br> <a href="assets/examples/Layer_4.png"><img src="assets/examples/Layer_4.png" width="100%" alt="Layer 4 Effect" /></a> |
+| **Layer 5** <br> <a href="assets/examples/Layer_5.png"><img src="assets/examples/Layer_5.png" width="100%" alt="Layer 5 Effect" /></a> | **Layer 6** <br> <a href="assets/examples/Layer_6.png"><img src="assets/examples/Layer_6.png" width="100%" alt="Layer 6 Effect" /></a> |
+| **Layer 7** <br> <a href="assets/examples/Layer_7.png"><img src="assets/examples/Layer_7.png" width="100%" alt="Layer 7 Effect" /></a> | **Embedding** <br> <a href="assets/examples/Embedding.png"><img src="assets/examples/Embedding.png" width="100%" alt="Embedding Effect" /></a> |
 
-</details>
+---
 
 ### Deterministic Multi-Seed Persistence
 
