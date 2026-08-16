@@ -17,7 +17,7 @@
 
 ---
 
-Edit a **Krea-2** model and its **CLIP** text encoder by multiplying specific internal weights up or down, live, with **no dataset and no retraining**. Move a slider, generate, and compare against the untouched model. When you land on a result you like, save it as a lightweight preset or bake it into a full `.safetensors` checkpoint.
+Edit a **Krea-2** model and its **CLIP** text encoder by multiplying specific internal weights up or down, live, **no dataset and no training required**. Move a slider, generate, and compare against the untouched model. When you land on a result you like, save it as a lightweight preset or bake it into a full `.safetensors` checkpoint.
 
 Built for anyone who wants to push a model toward a specific look or behavior — a color palette, a rendering style, a recurring motif — by editing what's already inside it, instead of fine-tuning from scratch.
 
@@ -29,7 +29,7 @@ Built for anyone who wants to push a model toward a specific look or behavior �
     <img src="assets/examples/XYBenchmark.png" width="850" alt="X/Y Tuning Benchmark Grid" />
   </a>
   <br>
-  <sub><i>Same prompt, different block/layer tunings — each calibration imposes its specific aesthetic and structural direction across multiple generation runs.</i></sub>
+  <sub><i>How different promtps behave to different tuning.</i></sub>
 </p>
 
 ---
@@ -88,7 +88,7 @@ Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three ti
   <img src="assets/ModelTuner.png" width="650" alt="Model Tuner Nodes" />
 </p>
 
-### 🟦 Tier 1 — Tuner (Whole Groups)
+### Tier 1 — Tuner (Whole Groups)
 **`🟦 Model Tuner`** provides one slider per group of blocks: `Text_Fusion`, `Time_Embed`, `Projection`, and `Block_1` through `Block_6`. Moving a slider scales every tensor inside that group by the same offset.
 * **Use case:** Broad exploration — *"Let's see which general region influences my output."*
 * **Workflow:** `MODEL` → `🟦 Model Tuner` → `Sampler`. Nudge one slider at a time, generate, and compare.
@@ -98,12 +98,12 @@ Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three ti
     <img src="assets/examples/Block_3.png" width="800" alt="Block Tuning Showcase - Block 3" />
   </a>
   <br>
-  <sub><i>Block Tuning — Modulating an entire block across different values (-1.0 to +2.0) demonstrates how group-level tuning shapes visual structures and features.</i></sub>
+  <sub><i>Block Tuning — Modulating an entire block (Block_3) across different values (-2.0 to +2.0) demonstrates how group-level tuning shapes visual structures and features.</i></sub>
 </p>
 
-### 🟦 Tier 2 — Sub-Block Tuner (Block + Tensor Type)
+### Tier 2 — Sub-Block Tuner (Block + Tensor Type)
 **`🟦 Model Sub-Block Tuner`** narrows the target: select one block from the `target_block` dropdown, then adjust individual sliders for specific internal tensor types (`ATTN_wq_query`, `ATTN_wk_key`, `ATTN_wv_value`, `ATTN_wo_out`, `MLP_gate_swiglu`, `MLP_up_proj`, `MLP_down_proj`, `NORMS_block_scales`, etc.).
-* **Use case:** Surgical isolation — *"Block 3 is promising, let's isolate attention layers from MLP layers."*
+* **Use case:** When a Block is both improving and ruining your ouputs, you can use this tool to identify what parts of that specific block you want to boost — *"Block 3 is promising, let's give it a closer look."*
 * **Workflow:** Follows a Tier 1 pass. Set `target_block` to the region identified in Tier 1 and sweep tensor-type sliders individually.
 
 <p align="center">
@@ -114,11 +114,11 @@ Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three ti
   <sub><i>Sub-Block Tuning — Modulating specific sub-blocks within Block 3 influences fine details and layer-level characteristics.</i></sub>
 </p>
 
-### 🟦 Tier 3 — Chaos Tuner (Seeded Randomness)
+### Tier 3 — Chaos Tuner (Seeded Randomness)
 **`🟦 Model Sub-Block Chaos Tuner`** uses the same targeting as Tier 2, but applies a seeded perturbation: with probability `chance`, each matched tensor is perturbed by `chaos_strength`. Same seed = deterministic, reproducible noise every time.
 * **Block-Level mode:** Perturbs an entire tensor at once.
 * **Element-Level (Sub-atomic) mode:** Rolls per individual weight for finer granularity.
-* **Use case:** Creative discovery — *"Let's randomly nudge this sub-slice and lock the seed once an interesting style emerges."*
+* **Use case:** Creative discovery — *"Randomly nudge one sub-slice and lock the seed once an interesting style emerges."*
 
 <p align="center">
   <a href="assets/examples/chaos-block-Tuning.png">
@@ -157,9 +157,9 @@ Tuning applied to the Qwen3 text encoder follows the identical 3-tier structure:
 
 | Domain | Tier 1 — Group-level | Tier 2 — Block + Tensor Type | Tier 3 — Random / Seeded |
 | :--- | :--- | :--- | :--- |
-| 🟦 **Model** | `🟦 Model Tuner` | `🟦 Model Sub-Block Tuner` | `🟦 Model Sub-Block Chaos Tuner` |
-| 🟨 **CLIP** | `🟨 CLIP Tuner` | `🟨 CLIP Sub-Block Tuner` | `🟨 CLIP Sub-Block Chaos Tuner` |
-| 🟪 **LoRA** | `🟪 LoRA Block Loader` | `🟪 Load Sub-Block LoRA` | `🟪 Load Sub-Block Chaos LoRA` |
+| **Model** | `🟦 Model Tuner` | `🟦 Model Sub-Block Tuner` | `🟦 Model Sub-Block Chaos Tuner` |
+| **CLIP** | `🟨 CLIP Tuner` | `🟨 CLIP Sub-Block Tuner` | `🟨 CLIP Sub-Block Chaos Tuner` |
+| **LoRA** | `🟪 LoRA Block Loader` | `🟪 Load Sub-Block LoRA` | `🟪 Load Sub-Block Chaos LoRA` |
 
 ---
 
@@ -259,7 +259,8 @@ Western comics style, bold ink outlines, hatched shadows, eerie detached calm, s
 
 ### Deterministic Multi-Seed Persistence
 
-Demonstrates how feature isolation works in practice: by identifying and amplifying only the specific Model blocks and CLIP layers responsible for generating the plague doctor's beak mask, the feature persists robustly and deterministically across completely different generation seeds.
+Here you can see how feature isolation works in practice:
+By identifying and amplifying only the specific Model blocks and CLIP layers responsible for generating the plague doctor's beak mask, the feature persists robustly and deterministically across completely different generation seeds.
 
 <p align="center">
   <a href="assets/examples/SameTuning-DifferentSeed.png">
