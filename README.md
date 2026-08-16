@@ -11,7 +11,7 @@
 <p align="center">
   <img alt="ComfyUI custom node" src="https://img.shields.io/badge/ComfyUI-custom--node-6b46c1?style=flat-square">
   <img alt="Compatibility" src="https://img.shields.io/badge/compatible-Krea--2%20%7C%20Qwen3-1e88e5?style=flat-square">
-  <a href="#-license"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square"></a>
+  <a href="#license"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square"></a>
   <img alt="GitHub stars" src="https://img.shields.io/github/stars/aledelpho/comfyui-arthemy-krea2-tuner?style=flat-square">
 </p>
 
@@ -25,34 +25,35 @@ Built for anyone who wants to push a model toward a specific look or behavior �
 > **Requires:** Krea-2 diffusion checkpoints + a Qwen3 text encoder (including Qwen3-VL 4B/8B/32B). Block counts and tensor names are matched to this architecture; these nodes won't affect other model families as-is.
 
 <p align="center">
-  <a href="assets/examples/SameTuning-DifferentSeed.png">
-    <img src="assets/examples/SameTuning-DifferentSeed.png" width="800" alt="Same Tuning, Different Seed" />
+  <a href="assets/examples/XYBenchmark.png">
+    <img src="assets/examples/XYBenchmark.png" width="850" alt="X/Y Tuning Benchmark Grid" />
   </a>
   <br>
-  <sub><i>Same block/layer calibration, four different generation seeds — the isolated feature (here, the beak mask) holds up deterministically. Find the slice responsible for a trait, and it stays put.</i></sub>
+  <sub><i>Same prompt, different block/layer tunings — each calibration imposes its specific aesthetic and structural direction across multiple generation runs.</i></sub>
 </p>
 
 ---
 
-## 📑 Contents
+## Contents
 
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-- [Picking the Right Node](#-picking-the-right-node)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Picking the Right Node](#picking-the-right-node)
   - [Model Tuning](#-tier-1--tuner-whole-groups)
   - [CLIP Tuning](#-clip-tuning-qwen3)
   - [LoRA Tuning](#-lora-tuning)
-  - [At a Glance (Summary Table)](#-at-a-glance)
-- [Reading the Sliders](#-reading-the-sliders)
-- [Saving and Loading Calibrations](#-saving-and-loading-calibrations)
-- [Seeing What's Currently Patched](#-seeing-whats-currently-patched)
-- [Troubleshooting](#-troubleshooting)
-- [Visual Tuning Showcase & Effects](#-visual-tuning-showcase--effects)
-- [Author & License](#-author)
+  - [Summary Table](#summary-table)
+- [Reading the Sliders](#reading-the-sliders)
+- [Saving and Loading Calibrations](#saving-and-loading-calibrations)
+- [Visualizing Active Patches](#visualizing-active-patches)
+- [Troubleshooting](#troubleshooting)
+- [Visual Tuning Showcase & Effects](#visual-tuning-showcase--effects)
+- [Author](#author)
+- [License](#license)
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### Option 1: Via ComfyUI Manager (Recommended)
 Search for **"Arthemy Krea-2 Tuner"** in the ComfyUI Manager custom node browser and click **Install**.
@@ -69,17 +70,17 @@ git clone https://github.com/aledelpho/comfyui-arthemy-krea2-tuner.git
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 1. **Load** your `MODEL` and `CLIP` normally in your workflow.
-2. Add a **`🟦✨ Model Tuner`** node and route `MODEL` through it.
+2. Add a **`🟦 Model Tuner`** node and route `MODEL` through it.
 3. Move one of the block sliders (`Block_1` … `Block_6`) away from `0.00` (`0.00` = no change; positive values strengthen that group, negative values weaken it).
-4. Connect the Tuner's `MODEL` output to your sampler and generate. Compare against the untouched model — with a slider away from `0.00`, you should see an immediate visual shift. If the outputs look identical, verify your checkpoint is Krea-2/Qwen3 (see [Troubleshooting](#-troubleshooting)).
-5. *(Optional)* Chain a **`🟨✨ CLIP Tuner`** on the `CLIP` wire to adjust text encoder layers simultaneously.
+4. Connect the Tuner's `MODEL` output to your sampler and generate. Compare against the untouched model — with a slider away from `0.00`, you should see an immediate visual shift. If the outputs look identical, verify your checkpoint is Krea-2/Qwen3 (see [Troubleshooting](#troubleshooting)).
+5. *(Optional)* Chain a **`🟨 CLIP Tuner`** on the `CLIP` wire to adjust text encoder layers simultaneously.
 
 ---
 
-## 🎛️ Picking the Right Node
+## Picking the Right Node
 
 Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three tiers of precision.
 
@@ -88,17 +89,17 @@ Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three ti
 </p>
 
 ### 🟦 Tier 1 — Tuner (Whole Groups)
-**`🟦✨ Model Tuner`** provides one slider per group of blocks: `Text_Fusion`, `Time_Embed`, `Projection`, and `Block_1` through `Block_6`. Moving a slider scales every tensor inside that group by the same offset.
+**`🟦 Model Tuner`** provides one slider per group of blocks: `Text_Fusion`, `Time_Embed`, `Projection`, and `Block_1` through `Block_6`. Moving a slider scales every tensor inside that group by the same offset.
 * **Use case:** Broad exploration — *"Let's see which general region influences my output."*
-* **Workflow:** `MODEL` → `🟦✨ Model Tuner` → `Sampler`. Nudge one slider at a time, generate, and compare.
+* **Workflow:** `MODEL` → `🟦 Model Tuner` → `Sampler`. Nudge one slider at a time, generate, and compare.
 
-### 🔬 Tier 2 — Sub-Block Tuner (Block + Tensor Type)
-**`🟦🔬 Model Sub-Block Tuner`** narrows the target: select one block from the `target_block` dropdown, then adjust individual sliders for specific internal tensor types (`ATTN_wq_query`, `ATTN_wk_key`, `ATTN_wv_value`, `ATTN_wo_out`, `MLP_gate_swiglu`, `MLP_up_proj`, `MLP_down_proj`, `NORMS_block_scales`, etc.).
+### 🟦 Tier 2 — Sub-Block Tuner (Block + Tensor Type)
+**`🟦 Model Sub-Block Tuner`** narrows the target: select one block from the `target_block` dropdown, then adjust individual sliders for specific internal tensor types (`ATTN_wq_query`, `ATTN_wk_key`, `ATTN_wv_value`, `ATTN_wo_out`, `MLP_gate_swiglu`, `MLP_up_proj`, `MLP_down_proj`, `NORMS_block_scales`, etc.).
 * **Use case:** Surgical isolation — *"Block 3 is promising, let's isolate attention layers from MLP layers."*
 * **Workflow:** Follows a Tier 1 pass. Set `target_block` to the region identified in Tier 1 and sweep tensor-type sliders individually.
 
-### 🌪️ Tier 3 — Chaos Tuner (Seeded Randomness)
-**`🟦🌪️ Model Sub-Block Chaos Tuner`** uses the same targeting as Tier 2, but applies a seeded perturbation: with probability `chance`, each matched tensor is perturbed by `chaos_strength`. Same seed = deterministic, reproducible noise every time.
+### 🟦 Tier 3 — Chaos Tuner (Seeded Randomness)
+**`🟦 Model Sub-Block Chaos Tuner`** uses the same targeting as Tier 2, but applies a seeded perturbation: with probability `chance`, each matched tensor is perturbed by `chaos_strength`. Same seed = deterministic, reproducible noise every time.
 * **Block-Level mode:** Perturbs an entire tensor at once.
 * **Element-Level (Sub-atomic) mode:** Rolls per individual weight for finer granularity.
 * **Use case:** Creative discovery — *"Let's randomly nudge this sub-slice and lock the seed once an interesting style emerges."*
@@ -119,9 +120,9 @@ Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three ti
 </p>
 
 Tuning applied to the Qwen3 text encoder follows the identical 3-tier structure:
-* **`🟨✨ CLIP Tuner` (Tier 1):** One slider per group (`Embedding`, `Layer_1` through `Layer_7`).
-* **`🟨🔬 CLIP Sub-Block Tuner` (Tier 2):** Select a specific layer, then adjust Qwen3-equivalent internal tensor sliders.
-* **`🟨🌪️ CLIP Sub-Block Chaos Tuner` (Tier 3):** Seeded perturbation scoped to CLIP layers.
+* **`🟨 CLIP Tuner` (Tier 1):** One slider per group (`Embedding`, `Layer_1` through `Layer_7`).
+* **`🟨 CLIP Sub-Block Tuner` (Tier 2):** Select a specific layer, then adjust Qwen3-equivalent internal tensor sliders.
+* **`🟨 CLIP Sub-Block Chaos Tuner` (Tier 3):** Seeded perturbation scoped to CLIP layers.
 
 ---
 
@@ -130,23 +131,23 @@ Tuning applied to the Qwen3 text encoder follows the identical 3-tier structure:
   <img src="assets/LoraTuner.png" width="650" alt="LoRA Loader Nodes" />
 </p>
 
-* **`🟪🔮 LoRA Block Loader` (Tier 1):** Drop-in replacement for standard LoRA loaders with per-section strength multipliers.
-* **`🟪🔬 Load Sub-Block LoRA` (Tier 2):** Targets one block and tensor type (e.g., keep only attention layers of a LoRA and drop the rest).
-* **`🟪🌪️ Load Sub-Block Chaos LoRA` (Tier 3):** Randomly retains or drops LoRA keys based on probability sliders and a seed.
+* **`🟪 LoRA Block Loader` (Tier 1):** Drop-in replacement for standard LoRA loaders with per-section strength multipliers.
+* **`🟪 Load Sub-Block LoRA` (Tier 2):** Targets one block and tensor type (e.g., keep only attention layers of a LoRA and drop the rest).
+* **`🟪 Load Sub-Block Chaos LoRA` (Tier 3):** Randomly retains or drops LoRA keys based on probability sliders and a seed.
 
 ---
 
-### 📊 At a Glance
+### Summary Table
 
 | Domain | Tier 1 — Group-level | Tier 2 — Block + Tensor Type | Tier 3 — Random / Seeded |
 | :--- | :--- | :--- | :--- |
-| 🟦 **Model** | `🟦✨ Model Tuner` | `🟦🔬 Model Sub-Block Tuner` | `🟦🌪️ Model Sub-Block Chaos Tuner` |
-| 🟨 **CLIP** | `🟨✨ CLIP Tuner` | `🟨🔬 CLIP Sub-Block Tuner` | `🟨🌪️ CLIP Sub-Block Chaos Tuner` |
-| 🟪 **LoRA** | `🟪🔮 LoRA Block Loader` | `🟪🔬 Load Sub-Block LoRA` | `🟪🌪️ Load Sub-Block Chaos LoRA` |
+| 🟦 **Model** | `🟦 Model Tuner` | `🟦 Model Sub-Block Tuner` | `🟦 Model Sub-Block Chaos Tuner` |
+| 🟨 **CLIP** | `🟨 CLIP Tuner` | `🟨 CLIP Sub-Block Tuner` | `🟨 CLIP Sub-Block Chaos Tuner` |
+| 🟪 **LoRA** | `🟪 LoRA Block Loader` | `🟪 Load Sub-Block LoRA` | `🟪 Load Sub-Block Chaos LoRA` |
 
 ---
 
-## 📐 Reading the Sliders
+## Reading the Sliders
 
 Tier 1 and Tier 2 sliders represent offsets from baseline (`0.00` = no modification). Two calculation modes are available per node:
 
@@ -166,7 +167,7 @@ Tier 1 and Tier 2 sliders represent offsets from baseline (`0.00` = no modificat
 
 ---
 
-## 💾 Saving and Loading Calibrations
+## Saving and Loading Calibrations
 
 Tuning occurs live in memory and **does not modify original checkpoint files**.
 
@@ -175,19 +176,11 @@ Tuning occurs live in memory and **does not modify original checkpoint files**.
   <img src="assets/Preset.png" width="550" alt="Preset System" />
 </p>
 
-* **`🟦🟨💾 Preset Saver`**: Captures all active patches and Chaos seeds into a small JSON file for deterministic reproduction.
-* **`🟦🟨📂 Preset Loader`**: Loads saved presets onto fresh `MODEL`/`CLIP` streams with global `strength_model` and `strength_clip` dials.
+* **`🟦🟨 Preset Saver`**: Captures all active patches and Chaos seeds into a small JSON file for deterministic reproduction.
+* **`🟦🟨 Preset Loader`**: Loads saved presets onto fresh `MODEL`/`CLIP` streams with global `strength_model` and `strength_clip` dials.
 
 > [!WARNING]
 > Presets capture Tuner and Chaos offsets only — not active LoRAs. Use the **Model Baker** first if you wish to bake LoRA weights permanently into the preset.
-
-<p align="center">
-  <a href="assets/examples/XYBenchmark.png">
-    <img src="assets/examples/XYBenchmark.png" width="800" alt="X/Y Tuning Benchmark Grid" />
-  </a>
-  <br>
-  <sub><i>A calibration saved as a preset, reloaded across multiple prompts/seeds: the target aesthetic signature remains consistent.</i></sub>
-</p>
 
 ### 2. Permanent Export (Full Checkpoints)
 <p align="center">
@@ -195,18 +188,18 @@ Tuning occurs live in memory and **does not modify original checkpoint files**.
 </p>
 
 * **`🟦🟨 Model Baker`**: Folds all active memory patches permanently into the model weights and clears the runtime patch list.
-* **`🟦💾 Model Saver` / `🟨💾 CLIP Saver`**: Exports tuned models to `.safetensors` (BF16 or FP8), streamed directly to disk to prevent OOM errors.
-* **`🟦🟨🔄 Reset Patcher`**: Clears all active patches and restores the model to clean baseline in memory.
+* **`🟦 Model Saver` / `🟨 CLIP Saver`**: Exports tuned models to `.safetensors` (BF16 or FP8), streamed directly to disk to prevent OOM errors.
+* **`🟦🟨 Reset Patcher`**: Clears all active patches and restores the model to clean baseline in memory.
 
 ---
 
-## 👁️ Seeing What's Currently Patched
+## Visualizing Active Patches
 
-* **`🟦📊 Model Visualizer` / `🟨📊 CLIP Visualizer`**: Real-time graph nodes that render a bar chart of active weight modifications across blocks before rendering.
+* **`🟦 Model Visualizer` / `🟨 CLIP Visualizer`**: Real-time graph nodes that render a bar chart of active weight modifications across blocks before rendering.
 
 ---
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 * **Nodes don't appear in ComfyUI:** Restart the ComfyUI server process completely (refreshing the browser tab is not sufficient).
 * **Sliders produce no visible change:** Ensure the loaded model is a **Krea-2** checkpoint with a **Qwen3** text encoder. On unsupported models, tensor names do not match and patches apply to 0 tensors.
@@ -215,12 +208,12 @@ Tuning occurs live in memory and **does not modify original checkpoint files**.
 
 ---
 
-## 🎨 Visual Tuning Showcase & Effects
+## Visual Tuning Showcase & Effects
 
 A visual reference gallery showing how modulating each Model block and CLIP layer influences output in isolation.
 
 <details>
-<summary><b>📋 Benchmark Baseline Prompt</b> (Used across all examples)</summary>
+<summary><b>Benchmark Baseline Prompt</b> (Used across all examples)</summary>
 
 ```text
 Western comics style, bold ink outlines, hatched shadows, eerie detached calm, seen from a dutch high angle close-up, upper body portrait, dynamic pose, dramatic angle, strong perspective. male human plague doctor, thinning gray hair slicked back, thin sparse eyebrows, pale sickly skin gradient, gaunt older adult, long thin gloved fingers, a wispy gray goatee, deep tired wrinkles, dull green eyes. narrow jaw, tall lanky frame, eerie detached calm stare. a long black waxed-leather coat with a high collar, a satchel of glass vials strapped across his chest. holding a bubbling green potion vial up to the light. Background: a dim candle-lit apothecary shop cluttered with shelves of jars and dried herbs. Lighting: flickering warm candlelight from below mixing with cool teal moonlight through a fogged window, creating dramatic contrast across his face.
@@ -262,14 +255,24 @@ Western comics style, bold ink outlines, hatched shadows, eerie detached calm, s
 
 </details>
 
+### Deterministic Multi-Seed Persistence
+
+Demonstrates how feature isolation works in practice: by identifying and amplifying only the specific Model blocks and CLIP layers responsible for generating the plague doctor's beak mask, the feature persists robustly and deterministically across completely different generation seeds.
+
+<p align="center">
+  <a href="assets/examples/SameTuning-DifferentSeed.png">
+    <img src="assets/examples/SameTuning-DifferentSeed.png" width="850" alt="Same Tuning, Different Seed" />
+  </a>
+</p>
+
 ---
 
-## 👤 Author
+## Author
 
 **Arthemy** · [@aledelpho](https://github.com/aledelpho)
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
