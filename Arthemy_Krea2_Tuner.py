@@ -1373,7 +1373,7 @@ class ArthemyKrea2LoadSubBlockLora(BaseKrea2Node):
             }
         }
         for name in s.SURGEON_MAP.keys():
-            inputs["required"][name] = ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.05,
+            inputs["required"][name] = ("FLOAT", {"default": 0.00, "min": 0.0, "max": 10.0, "step": 0.05,
                                                   "tooltip": "Sub-tensor multiplier (0.0 = filter out entirely)."})
         return inputs
 
@@ -1410,7 +1410,7 @@ class ArthemyKrea2LoadSubBlockLora(BaseKrea2Node):
                     continue
                 matched_widget = Krea2TensorParser.match_model_sub_tensor(sub_key)
                 if matched_widget:
-                    weight_mult = kwargs.get(matched_widget, 1.0)
+                    weight_mult = kwargs.get(matched_widget, 0.00)
                     if weight_mult <= 0.0:
                         continue
                     elif weight_mult != 1.0:
@@ -1438,7 +1438,7 @@ class ArthemyKrea2LoadChaosLoraBlockSurgeon(BaseSurgeonTuner):
                 "strength_clip": ("FLOAT", {"default": 1.0, "min": -99.00, "max": 99.00, "step": 0.01}),
                 "target_block": (list(s.MODEL_TARGET_MAP.keys()), {"default": "Block_1 (All 0-4)"}),
                 "seed": ("INT", {"default": 42, "min": 0, "max": 0xffffffffffffffff}),
-                "base_chance": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01}),
+                "base_chance": ("FLOAT", {"default": 0.20, "min": 0.0, "max": 1.0, "step": 0.01}),
             }
         }
         for name in s.SURGEON_MAP.keys():
@@ -1450,7 +1450,7 @@ class ArthemyKrea2LoadChaosLoraBlockSurgeon(BaseSurgeonTuner):
     FUNCTION = "load_chaos_lora_surgeon"
     CATEGORY = "Arthemy/Krea2 LoRA"
 
-    def load_chaos_lora_surgeon(self, model: Any, clip: Any, lora_name: str, strength_model: float = 1.0, strength_clip: float = 1.0, target_block: str = "Block_1 (All 0-4)", seed: int = 0, base_chance: float = 0.5, **kwargs: float) -> Tuple[Any, Any, str]:
+    def load_chaos_lora_surgeon(self, model: Any, clip: Any, lora_name: str, strength_model: float = 1.0, strength_clip: float = 1.0, target_block: str = "Block_1 (All 0-4)", seed: int = 0, base_chance: float = 0.20, **kwargs: float) -> Tuple[Any, Any, str]:
         if strength_model == 0 and strength_clip == 0:
             return (model, clip, "LoRA bypassed (strength 0)")
 
