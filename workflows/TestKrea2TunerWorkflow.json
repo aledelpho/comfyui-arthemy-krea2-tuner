@@ -1,8 +1,8 @@
 {
   "id": "a411782d-5652-4240-b701-7d3bf24fe6c3",
   "revision": 0,
-  "last_node_id": 104,
-  "last_link_id": 168,
+  "last_node_id": 110,
+  "last_link_id": 184,
   "nodes": [
     {
       "id": 42,
@@ -23,7 +23,7 @@
           "localized_name": "model",
           "name": "model",
           "type": "MODEL",
-          "link": 161
+          "link": 171
         },
         {
           "localized_name": "positive",
@@ -1152,6 +1152,867 @@
       "bgcolor": "#653"
     },
     {
+      "id": 73,
+      "type": "ArthemyKrea2ModelChaosBlockSurgeonTuner",
+      "pos": [
+        1800,
+        1450
+      ],
+      "size": [
+        370,
+        510
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": null
+        },
+        {
+          "localized_name": "target_block",
+          "name": "target_block",
+          "type": "COMBO",
+          "widget": {
+            "name": "target_block"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "tune_mode",
+          "name": "tune_mode",
+          "type": "COMBO",
+          "widget": {
+            "name": "tune_mode"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "seed",
+          "name": "seed",
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "chaos_strength",
+          "name": "chaos_strength",
+          "type": "FLOAT",
+          "widget": {
+            "name": "chaos_strength"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "ATTN_wq_query_chance",
+          "name": "ATTN_wq_query_chance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "ATTN_wq_query_chance"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "ATTN_wk_key_chance",
+          "name": "ATTN_wk_key_chance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "ATTN_wk_key_chance"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "ATTN_wv_value_chance",
+          "name": "ATTN_wv_value_chance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "ATTN_wv_value_chance"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "ATTN_wo_out_chance",
+          "name": "ATTN_wo_out_chance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "ATTN_wo_out_chance"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "ATTN_gate_attn_chance",
+          "name": "ATTN_gate_attn_chance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "ATTN_gate_attn_chance"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "ATTN_qknorm_scales_chance",
+          "name": "ATTN_qknorm_scales_chance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "ATTN_qknorm_scales_chance"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "MLP_gate_swiglu_chance",
+          "name": "MLP_gate_swiglu_chance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "MLP_gate_swiglu_chance"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "MLP_up_proj_chance",
+          "name": "MLP_up_proj_chance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "MLP_up_proj_chance"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "MLP_down_proj_chance",
+          "name": "MLP_down_proj_chance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "MLP_down_proj_chance"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "MOD_lin_time_chance",
+          "name": "MOD_lin_time_chance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "MOD_lin_time_chance"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "NORMS_block_scales_chance",
+          "name": "NORMS_block_scales_chance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "NORMS_block_scales_chance"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "MODEL",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": null
+        },
+        {
+          "localized_name": "info",
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ArthemyKrea2ModelChaosBlockSurgeonTuner",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Block_1 (All 0-4)",
+        "Block-Level",
+        93612815956452,
+        "randomize",
+        0.1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "widgets_values_named": {
+        "target_block": "Block_1 (All 0-4)",
+        "tune_mode": "Block-Level",
+        "seed": 93612815956452,
+        "control_after_generate": "randomize",
+        "chaos_strength": 0.1,
+        "ATTN_wq_query_chance": 0,
+        "ATTN_wk_key_chance": 0,
+        "ATTN_wv_value_chance": 0,
+        "ATTN_wo_out_chance": 0,
+        "ATTN_gate_attn_chance": 0,
+        "ATTN_qknorm_scales_chance": 0,
+        "MLP_gate_swiglu_chance": 0,
+        "MLP_up_proj_chance": 0,
+        "MLP_down_proj_chance": 0,
+        "MOD_lin_time_chance": 0,
+        "NORMS_block_scales_chance": 0
+      },
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 77,
+      "type": "Note",
+      "pos": [
+        960,
+        1880
+      ],
+      "size": [
+        400,
+        440
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟦✨ Model Tuner ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Adjusts the strength of entire block groups in the model (Blocks 1-6, Text Fusion, Time Embed, Projection).\n\nHOW TO USE:\n1. Mode: Use 'Soft Value' for gentle changes or 'Real Value' for direct scaling.\n2. Sliders: 0.00 means no change (1.0x baseline). Move above 0 to strengthen a group, below 0 to weaken it.\n3. Optional: Use 'vectors_override' or 'granular_json' for advanced custom values."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Adjusts the strength of entire block groups in the model (Blocks 1-6, Text Fusion, Time Embed, Projection).\n\nHOW TO USE:\n1. Mode: Use 'Soft Value' for gentle changes or 'Real Value' for direct scaling.\n2. Sliders: 0.00 means no change (1.0x baseline). Move above 0 to strengthen a group, below 0 to weaken it.\n3. Optional: Use 'vectors_override' or 'granular_json' for advanced custom values."
+      }
+    },
+    {
+      "id": 80,
+      "type": "Note",
+      "pos": [
+        1800,
+        2000
+      ],
+      "size": [
+        370,
+        320
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟦🌪️ Model Sub-Block Chaos Tuner ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Adds random changes to specific parts of a block to discover new styles, textures, and details.\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block'.\n2. 'chaos_strength': Sets how strong the random effect is.\n3. Sliders (0.0 to 1.0): Set the chance that each part receives random changes.\n4. Change the 'seed' to generate different variations."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Adds random changes to specific parts of a block to discover new styles, textures, and details.\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block'.\n2. 'chaos_strength': Sets how strong the random effect is.\n3. Sliders (0.0 to 1.0): Set the chance that each part receives random changes.\n4. Change the 'seed' to generate different variations."
+      }
+    },
+    {
+      "id": 81,
+      "type": "Note",
+      "pos": [
+        2240,
+        1870
+      ],
+      "size": [
+        400,
+        440
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟨✨ CLIP Tuner ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Adjusts the strength of the text encoder layers (Embedding, Layers 1 to 7).\n\nHOW TO USE:\n1. Mode: 'Soft Value' is recommended for text stability.\n2. Layers 1-2 affect basic words and syntax.\n3. Layers 3-5 affect relationships and attributes.\n4. Layers 6-7 affect overall style and composition.\n5. Sliders: 0.00 = no change. Move above 0 to boost, below 0 to reduce."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Adjusts the strength of the text encoder layers (Embedding, Layers 1 to 7).\n\nHOW TO USE:\n1. Mode: 'Soft Value' is recommended for text stability.\n2. Layers 1-2 affect basic words and syntax.\n3. Layers 3-5 affect relationships and attributes.\n4. Layers 6-7 affect overall style and composition.\n5. Sliders: 0.00 = no change. Move above 0 to boost, below 0 to reduce."
+      }
+    },
+    {
+      "id": 82,
+      "type": "Note",
+      "pos": [
+        2660,
+        1910
+      ],
+      "size": [
+        400,
+        400
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟨🔬 CLIP Sub-Block Tuner ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Adjusts specific Attention and MLP parts inside a single CLIP layer.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Move the slider for the specific part you want to tune (e.g. ATTN_q_proj, MLP_gate_proj).\n3. 0.00 = no change."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Adjusts specific Attention and MLP parts inside a single CLIP layer.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Move the slider for the specific part you want to tune (e.g. ATTN_q_proj, MLP_gate_proj).\n3. 0.00 = no change."
+      }
+    },
+    {
+      "id": 83,
+      "type": "Note",
+      "pos": [
+        3080,
+        1910
+      ],
+      "size": [
+        360,
+        400
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟨🌪️ CLIP Sub-Block Chaos Tuner ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Adds small random changes to text encoder layers to get alternative interpretations of your prompt.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Keep 'chaos_strength' low (0.05 to 0.15) so prompts stay readable.\n3. Set the chance sliders (0.0 to 1.0) for the parts you want to randomize.\n4. Change the 'seed' to try different prompt interpretations."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Adds small random changes to text encoder layers to get alternative interpretations of your prompt.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Keep 'chaos_strength' low (0.05 to 0.15) so prompts stay readable.\n3. Set the chance sliders (0.0 to 1.0) for the parts you want to randomize.\n4. Change the 'seed' to try different prompt interpretations."
+      }
+    },
+    {
+      "id": 40,
+      "type": "CLIPTextEncode",
+      "pos": [
+        4100,
+        120
+      ],
+      "size": [
+        390,
+        220
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 172
+        },
+        {
+          "localized_name": "text",
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": 160
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "CONDITIONING",
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            23,
+            26
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "CLIPTextEncode",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Western comics style, bold ink outlines, hatched shadows, hard red-tinted rim light glowing along the edges of her face, ferocious screaming rage, seen from a steep low angle, extreme close-up on the head only, tight framing, dutch angle, sharp perspective. female half-orc, head thrown back with a wild tangle of black hair across her face, thick furrowed eyebrows pressed low in fury, wide crimson eyes wide with screaming rage, mouth stretched open in a full-throated roar baring a single sharp lower tusk, a thick iron ring pierced through the nose bridge, ferociously screaming expression. white background, simple background."
+      ],
+      "widgets_values_named": {
+        "text": "Western comics style, bold ink outlines, hatched shadows, hard red-tinted rim light glowing along the edges of her face, ferocious screaming rage, seen from a steep low angle, extreme close-up on the head only, tight framing, dutch angle, sharp perspective. female half-orc, head thrown back with a wild tangle of black hair across her face, thick furrowed eyebrows pressed low in fury, wide crimson eyes wide with screaming rage, mouth stretched open in a full-throated roar baring a single sharp lower tusk, a thick iron ring pierced through the nose bridge, ferociously screaming expression. white background, simple background."
+      }
+    },
+    {
+      "id": 43,
+      "type": "ConditioningZeroOut",
+      "pos": [
+        4100,
+        380
+      ],
+      "size": [
+        390,
+        30
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "conditioning",
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "CONDITIONING",
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            24
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "ConditioningZeroOut",
+        "widget_ue_connectable": {}
+      }
+    },
+    {
+      "id": 87,
+      "type": "ArthemyKrea2ModelBaker",
+      "pos": [
+        4570,
+        1380
+      ],
+      "size": [
+        170,
+        230
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 2,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": null
+        },
+        {
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "MODEL",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            150
+          ]
+        },
+        {
+          "localized_name": "CLIP",
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            151
+          ]
+        },
+        {
+          "localized_name": "info",
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ArthemyKrea2ModelBaker",
+        "widget_ue_connectable": {}
+      },
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 84,
+      "type": "Note",
+      "pos": [
+        3490,
+        1860
+      ],
+      "size": [
+        300,
+        430
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟪🔮 LoRA Block Loader ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Loads a LoRA and lets you turn it on or off for whole block groups.\n\nHOW TO USE:\n1. Select your LoRA file and set the main Model / CLIP strength.\n2. Set block sliders to 1.0 for full LoRA strength, or 0.0 to completely disable the LoRA on that block."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Loads a LoRA and lets you turn it on or off for whole block groups.\n\nHOW TO USE:\n1. Select your LoRA file and set the main Model / CLIP strength.\n2. Set block sliders to 1.0 for full LoRA strength, or 0.0 to completely disable the LoRA on that block."
+      }
+    },
+    {
+      "id": 102,
+      "type": "ArthemyKrea2PresetLoader",
+      "pos": [
+        4960,
+        1780
+      ],
+      "size": [
+        270,
+        150
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": null
+        },
+        {
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": null
+        },
+        {
+          "localized_name": "preset",
+          "name": "preset",
+          "type": "COMBO",
+          "widget": {
+            "name": "preset"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "strength_model",
+          "name": "strength_model",
+          "type": "FLOAT",
+          "widget": {
+            "name": "strength_model"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "strength_clip",
+          "name": "strength_clip",
+          "type": "FLOAT",
+          "widget": {
+            "name": "strength_clip"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "MODEL",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": null
+        },
+        {
+          "localized_name": "CLIP",
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": null
+        },
+        {
+          "localized_name": "info",
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ArthemyKrea2PresetLoader",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Cinematic_Comic_Punch.json",
+        1,
+        1
+      ],
+      "widgets_values_named": {
+        "preset": "Cinematic_Comic_Punch.json",
+        "strength_model": 1,
+        "strength_clip": 1
+      },
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 103,
+      "type": "Note",
+      "pos": [
+        4960,
+        1980
+      ],
+      "size": [
+        360,
+        270
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟦🟨📂 Preset Loader ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Loads and applies a lightweight (.json) tuning preset onto your Model and CLIP.\n• Restores scalar layer offsets and deterministically reproduces bit-exact Chaos perturbation masks.\n\nHOW TO USE:\n1. 'preset': Select the .json preset file from the dropdown.\n2. 'strength_model': Global scaling multiplier for Model patches (1.0 = 100%, 0.5 = 50%, 1.5 = amplified).\n3. 'strength_clip': Global scaling multiplier for CLIP text encoder patches.\n4. Presets can be stacked with other tuners downstream or monitored on Visualizers."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Loads and applies a lightweight (.json) tuning preset onto your Model and CLIP.\n• Restores scalar layer offsets and deterministically reproduces bit-exact Chaos perturbation masks.\n\nHOW TO USE:\n1. 'preset': Select the .json preset file from the dropdown.\n2. 'strength_model': Global scaling multiplier for Model patches (1.0 = 100%, 0.5 = 50%, 1.5 = amplified).\n3. 'strength_clip': Global scaling multiplier for CLIP text encoder patches.\n4. Presets can be stacked with other tuners downstream or monitored on Visualizers."
+      }
+    },
+    {
+      "id": 94,
+      "type": "Note",
+      "pos": [
+        2160,
+        300
+      ],
+      "size": [
+        360,
+        160
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "❓What to do? - YOU CAN DELETE THIS",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Place in this area any combination of the Custom Nodes below.\n\nINPUT\n- Attach the very first \"Model\" or \"CLIP\" INPUT from the Reset Patcher\n\nOUTPUT\n- Attach the very last \"Model\" or \"CLIP\" OUTPUT to the Visualizers at the beginning of the \"Image Generation\" Zone."
+      ],
+      "widgets_values_named": {
+        "text": "Place in this area any combination of the Custom Nodes below.\n\nINPUT\n- Attach the very first \"Model\" or \"CLIP\" INPUT from the Reset Patcher\n\nOUTPUT\n- Attach the very last \"Model\" or \"CLIP\" OUTPUT to the Visualizers at the beginning of the \"Image Generation\" Zone."
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 101,
+      "type": "ArthemyKrea2PresetSaver",
+      "pos": [
+        4580,
+        1780
+      ],
+      "size": [
+        300,
+        150
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": null
+        },
+        {
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": null
+        },
+        {
+          "localized_name": "preset_name",
+          "name": "preset_name",
+          "type": "STRING",
+          "widget": {
+            "name": "preset_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "author",
+          "name": "author",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "author"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "saved_path",
+          "name": "saved_path",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "localized_name": "info",
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ArthemyKrea2PresetSaver",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "my_arthemy_preset",
+        "Arthemy"
+      ],
+      "widgets_values_named": {
+        "preset_name": "my_arthemy_preset",
+        "author": "Arthemy"
+      },
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 104,
+      "type": "Note",
+      "pos": [
+        4580,
+        1980
+      ],
+      "size": [
+        360,
+        270
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟦🟨💾 Preset Saver ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Exports all active Model, CLIP, and Chaos tunings into a lightweight (~1-2 KB) .json preset file.\n• Allows instant sharing and reloading of complex tuning setups without saving multi-gigabyte models.\n\nHOW TO USE:\n1. Connect your tuned Model and CLIP outputs to this node.\n2. 'preset_name': Name of the preset (saved to 'models/arthemy_presets/').\n3. 'author': Your creator name or handle.\n4. Active LoRAs are excluded from presets; use Model Baker / Saver to bake LoRA weights permanently."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Exports all active Model, CLIP, and Chaos tunings into a lightweight (~1-2 KB) .json preset file.\n• Allows instant sharing and reloading of complex tuning setups without saving multi-gigabyte models.\n\nHOW TO USE:\n1. Connect your tuned Model and CLIP outputs to this node.\n2. 'preset_name': Name of the preset (saved to 'models/arthemy_presets/').\n3. 'author': Your creator name or handle.\n4. Active LoRAs are excluded from presets; use Model Baker / Saver to bake LoRA weights permanently."
+      }
+    },
+    {
+      "id": 79,
+      "type": "Note",
+      "pos": [
+        1380,
+        2000
+      ],
+      "size": [
+        400,
+        320
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟦🔬 Model Sub-Block Tuner ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Adjusts specific internal parts inside a single model block (Attention Q/K/V/Out, SwiGLU MLP, Norms).\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block' you want to change.\n2. Adjust the sliders for the specific parts you want to tune (0.00 = no change).\n3. Connect multiple nodes in a row if you need to edit more than one sub-block."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Adjusts specific internal parts inside a single model block (Attention Q/K/V/Out, SwiGLU MLP, Norms).\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block' you want to change.\n2. Adjust the sliders for the specific parts you want to tune (0.00 = no change).\n3. Connect multiple nodes in a row if you need to edit more than one sub-block."
+      }
+    },
+    {
+      "id": 85,
+      "type": "Note",
+      "pos": [
+        3810,
+        1950
+      ],
+      "size": [
+        320,
+        340
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟪🔬 Load Sub-Block LoRA ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Loads a LoRA only on specific internal parts of a single block (e.g. keep only Attention, or only MLP).\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. Set sliders to 1.0 for parts you want to keep, or 0.0 for parts you want to disable."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Loads a LoRA only on specific internal parts of a single block (e.g. keep only Attention, or only MLP).\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. Set sliders to 1.0 for parts you want to keep, or 0.0 for parts you want to disable."
+      }
+    },
+    {
+      "id": 86,
+      "type": "Note",
+      "pos": [
+        4150,
+        2020
+      ],
+      "size": [
+        360,
+        270
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🟪🌪️ Load Sub-Block Chaos LoRA ___ README",
+      "properties": {
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "WHAT IT DOES:\n• Randomly applies parts of a LoRA to create blended styles without typical LoRA artifacts.\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. 'base_chance': Sets the default chance (0.0 to 1.0) for all parts.\n3. Use component sliders to customize chances for specific parts.\n4. Change the 'seed' to test different random combinations."
+      ],
+      "widgets_values_named": {
+        "text": "WHAT IT DOES:\n• Randomly applies parts of a LoRA to create blended styles without typical LoRA artifacts.\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. 'base_chance': Sets the default chance (0.0 to 1.0) for all parts.\n3. Use component sliders to customize chances for specific parts.\n4. Change the 'seed' to test different random combinations."
+      }
+    },
+    {
       "id": 72,
       "type": "ArthemyKrea2ModelBlockSurgeonTuner",
       "pos": [
@@ -1163,7 +2024,7 @@
         510
       ],
       "flags": {},
-      "order": 7,
+      "order": 25,
       "mode": 0,
       "inputs": [
         {
@@ -1364,158 +2225,47 @@
       "bgcolor": "#335"
     },
     {
-      "id": 73,
-      "type": "ArthemyKrea2ModelChaosBlockSurgeonTuner",
+      "id": 37,
+      "type": "ArthemyKrea2ResetPatcher",
       "pos": [
-        1800,
-        1450
+        1070,
+        450
       ],
       "size": [
-        370,
-        510
+        290,
+        130
       ],
       "flags": {},
-      "order": 8,
+      "order": 30,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "model",
           "name": "model",
           "type": "MODEL",
-          "link": null
+          "link": 19
         },
         {
-          "localized_name": "target_block",
-          "name": "target_block",
-          "type": "COMBO",
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 20
+        },
+        {
+          "localized_name": "reset_model",
+          "name": "reset_model",
+          "type": "BOOLEAN",
           "widget": {
-            "name": "target_block"
+            "name": "reset_model"
           },
           "link": null
         },
         {
-          "localized_name": "tune_mode",
-          "name": "tune_mode",
-          "type": "COMBO",
+          "localized_name": "reset_clip",
+          "name": "reset_clip",
+          "type": "BOOLEAN",
           "widget": {
-            "name": "tune_mode"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "seed",
-          "name": "seed",
-          "type": "INT",
-          "widget": {
-            "name": "seed"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "chaos_strength",
-          "name": "chaos_strength",
-          "type": "FLOAT",
-          "widget": {
-            "name": "chaos_strength"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "ATTN_wq_query_chance",
-          "name": "ATTN_wq_query_chance",
-          "type": "FLOAT",
-          "widget": {
-            "name": "ATTN_wq_query_chance"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "ATTN_wk_key_chance",
-          "name": "ATTN_wk_key_chance",
-          "type": "FLOAT",
-          "widget": {
-            "name": "ATTN_wk_key_chance"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "ATTN_wv_value_chance",
-          "name": "ATTN_wv_value_chance",
-          "type": "FLOAT",
-          "widget": {
-            "name": "ATTN_wv_value_chance"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "ATTN_wo_out_chance",
-          "name": "ATTN_wo_out_chance",
-          "type": "FLOAT",
-          "widget": {
-            "name": "ATTN_wo_out_chance"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "ATTN_gate_attn_chance",
-          "name": "ATTN_gate_attn_chance",
-          "type": "FLOAT",
-          "widget": {
-            "name": "ATTN_gate_attn_chance"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "ATTN_qknorm_scales_chance",
-          "name": "ATTN_qknorm_scales_chance",
-          "type": "FLOAT",
-          "widget": {
-            "name": "ATTN_qknorm_scales_chance"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "MLP_gate_swiglu_chance",
-          "name": "MLP_gate_swiglu_chance",
-          "type": "FLOAT",
-          "widget": {
-            "name": "MLP_gate_swiglu_chance"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "MLP_up_proj_chance",
-          "name": "MLP_up_proj_chance",
-          "type": "FLOAT",
-          "widget": {
-            "name": "MLP_up_proj_chance"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "MLP_down_proj_chance",
-          "name": "MLP_down_proj_chance",
-          "type": "FLOAT",
-          "widget": {
-            "name": "MLP_down_proj_chance"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "MOD_lin_time_chance",
-          "name": "MOD_lin_time_chance",
-          "type": "FLOAT",
-          "widget": {
-            "name": "MOD_lin_time_chance"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "NORMS_block_scales_chance",
-          "name": "NORMS_block_scales_chance",
-          "type": "FLOAT",
-          "widget": {
-            "name": "NORMS_block_scales_chance"
+            "name": "reset_clip"
           },
           "link": null
         }
@@ -1525,6 +2275,102 @@
           "localized_name": "MODEL",
           "name": "MODEL",
           "type": "MODEL",
+          "links": [
+            182
+          ]
+        },
+        {
+          "localized_name": "CLIP",
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            184
+          ]
+        },
+        {
+          "localized_name": "info",
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ArthemyKrea2ResetPatcher",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        true,
+        true
+      ],
+      "widgets_values_named": {
+        "reset_model": true,
+        "reset_clip": true
+      },
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 96,
+      "type": "ArthemyKrea2ModelVisualizer",
+      "pos": [
+        3510,
+        130
+      ],
+      "size": [
+        560,
+        460
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 182
+        },
+        {
+          "localized_name": "scale",
+          "name": "scale",
+          "type": "FLOAT",
+          "widget": {
+            "name": "scale"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "image_width",
+          "name": "image_width",
+          "type": "INT",
+          "widget": {
+            "name": "image_width"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "image_height",
+          "name": "image_height",
+          "type": "INT",
+          "widget": {
+            "name": "image_height"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "MODEL",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            171
+          ]
+        },
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
           "links": null
         },
         {
@@ -1535,47 +2381,160 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "ArthemyKrea2ModelChaosBlockSurgeonTuner",
+        "Node name for S&R": "ArthemyKrea2ModelVisualizer",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Block_1 (All 0-4)",
-        "Block-Level",
-        515679134238433,
-        "randomize",
-        0.1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
+        1,
+        960,
+        480
       ],
       "widgets_values_named": {
-        "target_block": "Block_1 (All 0-4)",
-        "tune_mode": "Block-Level",
-        "seed": 515679134238433,
-        "control_after_generate": "randomize",
-        "chaos_strength": 0.1,
-        "ATTN_wq_query_chance": 0,
-        "ATTN_wk_key_chance": 0,
-        "ATTN_wv_value_chance": 0,
-        "ATTN_wo_out_chance": 0,
-        "ATTN_gate_attn_chance": 0,
-        "ATTN_qknorm_scales_chance": 0,
-        "MLP_gate_swiglu_chance": 0,
-        "MLP_up_proj_chance": 0,
-        "MLP_down_proj_chance": 0,
-        "MOD_lin_time_chance": 0,
-        "NORMS_block_scales_chance": 0
+        "scale": 1,
+        "image_width": 960,
+        "image_height": 480
       },
       "color": "#223",
       "bgcolor": "#335"
+    },
+    {
+      "id": 35,
+      "type": "ArthemyKrea2CLIPVisualizer",
+      "pos": [
+        3510,
+        650
+      ],
+      "size": [
+        560,
+        480
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 184
+        },
+        {
+          "localized_name": "scale",
+          "name": "scale",
+          "type": "FLOAT",
+          "widget": {
+            "name": "scale"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "image_width",
+          "name": "image_width",
+          "type": "INT",
+          "widget": {
+            "name": "image_width"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "image_height",
+          "name": "image_height",
+          "type": "INT",
+          "widget": {
+            "name": "image_height"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "CLIP",
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            172
+          ]
+        },
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": []
+        },
+        {
+          "localized_name": "info",
+          "name": "info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ArthemyKrea2CLIPVisualizer",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        5,
+        1024,
+        480
+      ],
+      "widgets_values_named": {
+        "scale": 5,
+        "image_width": 1024,
+        "image_height": 480
+      },
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 93,
+      "type": "PrimitiveStringMultiline",
+      "pos": [
+        780,
+        120
+      ],
+      "size": [
+        580,
+        280
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "value",
+          "name": "value",
+          "type": "STRING",
+          "widget": {
+            "name": "value"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "STRING",
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            160
+          ]
+        }
+      ],
+      "title": "Prompt",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "PrimitiveStringMultiline",
+        "widget_ue_connectable": {}
+      },
+      "widgets_values": [
+        "Western comics style, bold ink outlines, hatched shadows, eerie detached calm, seen from a dutch high angle close-up, upper body portrait, dynamic pose, dramatic angle, strong perspective. male human plague doctor, thinning gray hair slicked back, thin sparse eyebrows, pale sickly skin gradient, gaunt older adult, long thin gloved fingers, a wispy gray goatee, deep tired wrinkles, dull green eyes. narrow jaw, tall lanky frame, eerie detached calm stare. a long black waxed-leather coat with a high collar, a satchel of glass vials strapped across his chest. holding a bubbling green potion vial up to the light. Background: a dim candle-lit apothecary shop cluttered with shelves of jars and dried herbs. Lighting: flickering warm candlelight from below mixing with cool teal moonlight through a fogged window, creating dramatic contrast across his face."
+      ],
+      "widgets_values_named": {
+        "value": "Western comics style, bold ink outlines, hatched shadows, eerie detached calm, seen from a dutch high angle close-up, upper body portrait, dynamic pose, dramatic angle, strong perspective. male human plague doctor, thinning gray hair slicked back, thin sparse eyebrows, pale sickly skin gradient, gaunt older adult, long thin gloved fingers, a wispy gray goatee, deep tired wrinkles, dull green eyes. narrow jaw, tall lanky frame, eerie detached calm stare. a long black waxed-leather coat with a high collar, a satchel of glass vials strapped across his chest. holding a bubbling green potion vial up to the light. Background: a dim candle-lit apothecary shop cluttered with shelves of jars and dried herbs. Lighting: flickering warm candlelight from below mixing with cool teal moonlight through a fogged window, creating dramatic contrast across his face."
+      },
+      "color": "#232",
+      "bgcolor": "#353"
     },
     {
       "id": 76,
@@ -1589,7 +2548,7 @@
         420
       ],
       "flags": {},
-      "order": 9,
+      "order": 28,
       "mode": 0,
       "inputs": [
         {
@@ -1737,7 +2696,7 @@
       "widgets_values": [
         "Layer_1 (All 0-4)",
         "Block-Level",
-        836466960027507,
+        595874850715855,
         "randomize",
         0.1,
         0,
@@ -1753,7 +2712,7 @@
       "widgets_values_named": {
         "target_layer": "Layer_1 (All 0-4)",
         "tune_mode": "Block-Level",
-        "seed": 836466960027507,
+        "seed": 595874850715855,
         "control_after_generate": "randomize",
         "chaos_strength": 0.1,
         "ATTN_q_proj_chance": 0,
@@ -1770,632 +2729,6 @@
       "bgcolor": "#653"
     },
     {
-      "id": 77,
-      "type": "Note",
-      "pos": [
-        960,
-        1880
-      ],
-      "size": [
-        400,
-        440
-      ],
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟦✨ Model Tuner ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Adjusts the strength of entire block groups in the model (Blocks 1-6, Text Fusion, Time Embed, Projection).\n\nHOW TO USE:\n1. Mode: Use 'Soft Value' for gentle changes or 'Real Value' for direct scaling.\n2. Sliders: 0.00 means no change (1.0x baseline). Move above 0 to strengthen a group, below 0 to weaken it.\n3. Optional: Use 'vectors_override' or 'granular_json' for advanced custom values."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Adjusts the strength of entire block groups in the model (Blocks 1-6, Text Fusion, Time Embed, Projection).\n\nHOW TO USE:\n1. Mode: Use 'Soft Value' for gentle changes or 'Real Value' for direct scaling.\n2. Sliders: 0.00 means no change (1.0x baseline). Move above 0 to strengthen a group, below 0 to weaken it.\n3. Optional: Use 'vectors_override' or 'granular_json' for advanced custom values."
-      }
-    },
-    {
-      "id": 80,
-      "type": "Note",
-      "pos": [
-        1800,
-        2000
-      ],
-      "size": [
-        370,
-        320
-      ],
-      "flags": {},
-      "order": 12,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟦🌪️ Model Sub-Block Chaos Tuner ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Adds random changes to specific parts of a block to discover new styles, textures, and details.\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block'.\n2. 'chaos_strength': Sets how strong the random effect is.\n3. Sliders (0.0 to 1.0): Set the chance that each part receives random changes.\n4. Change the 'seed' to generate different variations."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Adds random changes to specific parts of a block to discover new styles, textures, and details.\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block'.\n2. 'chaos_strength': Sets how strong the random effect is.\n3. Sliders (0.0 to 1.0): Set the chance that each part receives random changes.\n4. Change the 'seed' to generate different variations."
-      }
-    },
-    {
-      "id": 81,
-      "type": "Note",
-      "pos": [
-        2240,
-        1870
-      ],
-      "size": [
-        400,
-        440
-      ],
-      "flags": {},
-      "order": 13,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟨✨ CLIP Tuner ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Adjusts the strength of the text encoder layers (Embedding, Layers 1 to 7).\n\nHOW TO USE:\n1. Mode: 'Soft Value' is recommended for text stability.\n2. Layers 1-2 affect basic words and syntax.\n3. Layers 3-5 affect relationships and attributes.\n4. Layers 6-7 affect overall style and composition.\n5. Sliders: 0.00 = no change. Move above 0 to boost, below 0 to reduce."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Adjusts the strength of the text encoder layers (Embedding, Layers 1 to 7).\n\nHOW TO USE:\n1. Mode: 'Soft Value' is recommended for text stability.\n2. Layers 1-2 affect basic words and syntax.\n3. Layers 3-5 affect relationships and attributes.\n4. Layers 6-7 affect overall style and composition.\n5. Sliders: 0.00 = no change. Move above 0 to boost, below 0 to reduce."
-      }
-    },
-    {
-      "id": 82,
-      "type": "Note",
-      "pos": [
-        2660,
-        1910
-      ],
-      "size": [
-        400,
-        400
-      ],
-      "flags": {},
-      "order": 14,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟨🔬 CLIP Sub-Block Tuner ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Adjusts specific Attention and MLP parts inside a single CLIP layer.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Move the slider for the specific part you want to tune (e.g. ATTN_q_proj, MLP_gate_proj).\n3. 0.00 = no change."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Adjusts specific Attention and MLP parts inside a single CLIP layer.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Move the slider for the specific part you want to tune (e.g. ATTN_q_proj, MLP_gate_proj).\n3. 0.00 = no change."
-      }
-    },
-    {
-      "id": 83,
-      "type": "Note",
-      "pos": [
-        3080,
-        1910
-      ],
-      "size": [
-        360,
-        400
-      ],
-      "flags": {},
-      "order": 15,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟨🌪️ CLIP Sub-Block Chaos Tuner ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Adds small random changes to text encoder layers to get alternative interpretations of your prompt.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Keep 'chaos_strength' low (0.05 to 0.15) so prompts stay readable.\n3. Set the chance sliders (0.0 to 1.0) for the parts you want to randomize.\n4. Change the 'seed' to try different prompt interpretations."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Adds small random changes to text encoder layers to get alternative interpretations of your prompt.\n\nHOW TO USE:\n1. Select the 'target_layer' and 'sub_layer'.\n2. Keep 'chaos_strength' low (0.05 to 0.15) so prompts stay readable.\n3. Set the chance sliders (0.0 to 1.0) for the parts you want to randomize.\n4. Change the 'seed' to try different prompt interpretations."
-      }
-    },
-    {
-      "id": 40,
-      "type": "CLIPTextEncode",
-      "pos": [
-        4100,
-        120
-      ],
-      "size": [
-        390,
-        220
-      ],
-      "flags": {},
-      "order": 35,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "clip",
-          "name": "clip",
-          "type": "CLIP",
-          "link": 21
-        },
-        {
-          "localized_name": "text",
-          "name": "text",
-          "type": "STRING",
-          "widget": {
-            "name": "text"
-          },
-          "link": 160
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "CONDITIONING",
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            23,
-            26
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.31.0",
-        "Node name for S&R": "CLIPTextEncode",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "Western comics style, bold ink outlines, hatched shadows, hard red-tinted rim light glowing along the edges of her face, ferocious screaming rage, seen from a steep low angle, extreme close-up on the head only, tight framing, dutch angle, sharp perspective. female half-orc, head thrown back with a wild tangle of black hair across her face, thick furrowed eyebrows pressed low in fury, wide crimson eyes wide with screaming rage, mouth stretched open in a full-throated roar baring a single sharp lower tusk, a thick iron ring pierced through the nose bridge, ferociously screaming expression. white background, simple background."
-      ],
-      "widgets_values_named": {
-        "text": "Western comics style, bold ink outlines, hatched shadows, hard red-tinted rim light glowing along the edges of her face, ferocious screaming rage, seen from a steep low angle, extreme close-up on the head only, tight framing, dutch angle, sharp perspective. female half-orc, head thrown back with a wild tangle of black hair across her face, thick furrowed eyebrows pressed low in fury, wide crimson eyes wide with screaming rage, mouth stretched open in a full-throated roar baring a single sharp lower tusk, a thick iron ring pierced through the nose bridge, ferociously screaming expression. white background, simple background."
-      }
-    },
-    {
-      "id": 43,
-      "type": "ConditioningZeroOut",
-      "pos": [
-        4100,
-        380
-      ],
-      "size": [
-        390,
-        30
-      ],
-      "flags": {},
-      "order": 36,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "conditioning",
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 26
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "CONDITIONING",
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            24
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.31.0",
-        "Node name for S&R": "ConditioningZeroOut",
-        "widget_ue_connectable": {}
-      }
-    },
-    {
-      "id": 35,
-      "type": "ArthemyKrea2CLIPVisualizer",
-      "pos": [
-        3510,
-        650
-      ],
-      "size": [
-        560,
-        480
-      ],
-      "flags": {},
-      "order": 34,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "clip",
-          "name": "clip",
-          "type": "CLIP",
-          "link": 168
-        },
-        {
-          "localized_name": "scale",
-          "name": "scale",
-          "type": "FLOAT",
-          "widget": {
-            "name": "scale"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "image_width",
-          "name": "image_width",
-          "type": "INT",
-          "widget": {
-            "name": "image_width"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "image_height",
-          "name": "image_height",
-          "type": "INT",
-          "widget": {
-            "name": "image_height"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "CLIP",
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": [
-            21
-          ]
-        },
-        {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": []
-        },
-        {
-          "localized_name": "info",
-          "name": "info",
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ArthemyKrea2CLIPVisualizer",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        5,
-        1024,
-        480
-      ],
-      "widgets_values_named": {
-        "scale": 5,
-        "image_width": 1024,
-        "image_height": 480
-      },
-      "color": "#432",
-      "bgcolor": "#653"
-    },
-    {
-      "id": 96,
-      "type": "ArthemyKrea2ModelVisualizer",
-      "pos": [
-        3510,
-        130
-      ],
-      "size": [
-        560,
-        460
-      ],
-      "flags": {},
-      "order": 33,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "model",
-          "name": "model",
-          "type": "MODEL",
-          "link": 167
-        },
-        {
-          "localized_name": "scale",
-          "name": "scale",
-          "type": "FLOAT",
-          "widget": {
-            "name": "scale"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "image_width",
-          "name": "image_width",
-          "type": "INT",
-          "widget": {
-            "name": "image_width"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "image_height",
-          "name": "image_height",
-          "type": "INT",
-          "widget": {
-            "name": "image_height"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "MODEL",
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": null
-        },
-        {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": null
-        },
-        {
-          "localized_name": "info",
-          "name": "info",
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ArthemyKrea2ModelVisualizer",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        1,
-        960,
-        480
-      ],
-      "widgets_values_named": {
-        "scale": 1,
-        "image_width": 960,
-        "image_height": 480
-      },
-      "color": "#223",
-      "bgcolor": "#335"
-    },
-    {
-      "id": 37,
-      "type": "ArthemyKrea2ResetPatcher",
-      "pos": [
-        1070,
-        450
-      ],
-      "size": [
-        290,
-        130
-      ],
-      "flags": {},
-      "order": 30,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "model",
-          "name": "model",
-          "type": "MODEL",
-          "link": 19
-        },
-        {
-          "localized_name": "clip",
-          "name": "clip",
-          "type": "CLIP",
-          "link": 20
-        },
-        {
-          "localized_name": "reset_model",
-          "name": "reset_model",
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "reset_model"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "reset_clip",
-          "name": "reset_clip",
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "reset_clip"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "MODEL",
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            161,
-            167
-          ]
-        },
-        {
-          "localized_name": "CLIP",
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": [
-            168
-          ]
-        },
-        {
-          "localized_name": "info",
-          "name": "info",
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ArthemyKrea2ResetPatcher",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        true,
-        true
-      ],
-      "widgets_values_named": {
-        "reset_model": true,
-        "reset_clip": true
-      },
-      "color": "#2a363b",
-      "bgcolor": "#3f5159"
-    },
-    {
-      "id": 93,
-      "type": "PrimitiveStringMultiline",
-      "pos": [
-        780,
-        120
-      ],
-      "size": [
-        580,
-        280
-      ],
-      "flags": {},
-      "order": 17,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "value",
-          "name": "value",
-          "type": "STRING",
-          "widget": {
-            "name": "value"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "STRING",
-          "name": "STRING",
-          "type": "STRING",
-          "links": [
-            160
-          ]
-        }
-      ],
-      "title": "Prompt",
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.33.0",
-        "Node name for S&R": "PrimitiveStringMultiline",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "Western comics style, bold ink outlines, hatched shadows, hard red-tinted rim light glowing along the edges of her face, ferocious screaming rage, seen from a steep low angle, extreme close-up on the head only, tight framing, dutch angle, sharp perspective. female half-orc, head thrown back with a wild tangle of black hair across her face, thick furrowed eyebrows pressed low in fury, wide crimson eyes wide with screaming rage, mouth stretched open in a full-throated roar baring a single sharp lower tusk, a thick iron ring pierced through the nose bridge, ferociously screaming expression. white background, simple background"
-      ],
-      "widgets_values_named": {
-        "value": "Western comics style, bold ink outlines, hatched shadows, hard red-tinted rim light glowing along the edges of her face, ferocious screaming rage, seen from a steep low angle, extreme close-up on the head only, tight framing, dutch angle, sharp perspective. female half-orc, head thrown back with a wild tangle of black hair across her face, thick furrowed eyebrows pressed low in fury, wide crimson eyes wide with screaming rage, mouth stretched open in a full-throated roar baring a single sharp lower tusk, a thick iron ring pierced through the nose bridge, ferociously screaming expression. white background, simple background"
-      },
-      "color": "#232",
-      "bgcolor": "#353"
-    },
-    {
-      "id": 87,
-      "type": "ArthemyKrea2ModelBaker",
-      "pos": [
-        4570,
-        1380
-      ],
-      "size": [
-        170,
-        230
-      ],
-      "flags": {},
-      "order": 18,
-      "mode": 2,
-      "inputs": [
-        {
-          "localized_name": "model",
-          "name": "model",
-          "type": "MODEL",
-          "link": null
-        },
-        {
-          "localized_name": "clip",
-          "name": "clip",
-          "type": "CLIP",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "MODEL",
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            150
-          ]
-        },
-        {
-          "localized_name": "CLIP",
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": [
-            151
-          ]
-        },
-        {
-          "localized_name": "info",
-          "name": "info",
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ArthemyKrea2ModelBaker",
-        "widget_ue_connectable": {}
-      },
-      "color": "#2a363b",
-      "bgcolor": "#3f5159"
-    },
-    {
-      "id": 84,
-      "type": "Note",
-      "pos": [
-        3490,
-        1860
-      ],
-      "size": [
-        300,
-        430
-      ],
-      "flags": {},
-      "order": 19,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟪🔮 LoRA Block Loader ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Loads a LoRA and lets you turn it on or off for whole block groups.\n\nHOW TO USE:\n1. Select your LoRA file and set the main Model / CLIP strength.\n2. Set block sliders to 1.0 for full LoRA strength, or 0.0 to completely disable the LoRA on that block."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Loads a LoRA and lets you turn it on or off for whole block groups.\n\nHOW TO USE:\n1. Select your LoRA file and set the main Model / CLIP strength.\n2. Set block sliders to 1.0 for full LoRA strength, or 0.0 to completely disable the LoRA on that block."
-      }
-    },
-    {
       "id": 65,
       "type": "ArthemyKrea2LoraBlockLoader",
       "pos": [
@@ -2407,7 +2740,7 @@
         370
       ],
       "flags": {},
-      "order": 20,
+      "order": 27,
       "mode": 0,
       "inputs": [
         {
@@ -2556,7 +2889,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "Krea2\\Testone\\tuniques_bleues_krea2.safetensors",
+        "Krea2\\Arthemy_Western_bib_epoch_10.safetensors",
         1,
         1,
         0,
@@ -2570,7 +2903,7 @@
         0
       ],
       "widgets_values_named": {
-        "lora_name": "Krea2\\Testone\\tuniques_bleues_krea2.safetensors",
+        "lora_name": "Krea2\\Arthemy_Western_bib_epoch_10.safetensors",
         "strength_model": 1,
         "strength_clip": 1,
         "Text_Fusion": 0,
@@ -2587,7 +2920,7 @@
       "bgcolor": "#535"
     },
     {
-      "id": 66,
+      "id": 110,
       "type": "ArthemyKrea2LoadSubBlockLora",
       "pos": [
         3810,
@@ -2598,7 +2931,7 @@
         460
       ],
       "flags": {},
-      "order": 21,
+      "order": 29,
       "mode": 0,
       "inputs": [
         {
@@ -2770,42 +3103,42 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "ArthemyKrea2LoadSubBlockLora",
-        "widget_ue_connectable": {}
+        "widget_ue_connectable": {},
+        "Node name for S&R": "ArthemyKrea2LoadSubBlockLora"
       },
       "widgets_values": [
-        "3D_Anime_Style.safetensors",
+        "Krea2\\Arthemy_Western_bib_epoch_10.safetensors",
         1,
         1,
         "Block_1 (All 0-4)",
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
       ],
       "widgets_values_named": {
-        "lora_name": "3D_Anime_Style.safetensors",
+        "lora_name": "Krea2\\Arthemy_Western_bib_epoch_10.safetensors",
         "strength_model": 1,
         "strength_clip": 1,
         "target_block": "Block_1 (All 0-4)",
-        "ATTN_wq_query": 1,
-        "ATTN_wk_key": 1,
-        "ATTN_wv_value": 1,
-        "ATTN_wo_out": 1,
-        "ATTN_gate_attn": 1,
-        "ATTN_qknorm_scales": 1,
-        "MLP_gate_swiglu": 1,
-        "MLP_up_proj": 1,
-        "MLP_down_proj": 1,
-        "MOD_lin_time": 1,
-        "NORMS_block_scales": 1
+        "ATTN_wq_query": 0,
+        "ATTN_wk_key": 0,
+        "ATTN_wv_value": 0,
+        "ATTN_wo_out": 0,
+        "ATTN_gate_attn": 0,
+        "ATTN_qknorm_scales": 0,
+        "MLP_gate_swiglu": 0,
+        "MLP_up_proj": 0,
+        "MLP_down_proj": 0,
+        "MOD_lin_time": 0,
+        "NORMS_block_scales": 0
       },
       "color": "#323",
       "bgcolor": "#535"
@@ -2822,7 +3155,7 @@
         530
       ],
       "flags": {},
-      "order": 23,
+      "order": 15,
       "mode": 0,
       "inputs": [
         {
@@ -3016,11 +3349,11 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "3D_Anime_Style.safetensors",
+        "Krea2\\Arthemy_Western_bib_epoch_10.safetensors",
         1,
         1,
         "Block_1 (All 0-4)",
-        954534845756996,
+        476488490622974,
         "randomize",
         0.5,
         0,
@@ -3036,11 +3369,11 @@
         0
       ],
       "widgets_values_named": {
-        "lora_name": "3D_Anime_Style.safetensors",
+        "lora_name": "Krea2\\Arthemy_Western_bib_epoch_10.safetensors",
         "strength_model": 1,
         "strength_clip": 1,
         "target_block": "Block_1 (All 0-4)",
-        "seed": 954534845756996,
+        "seed": 476488490622974,
         "control_after_generate": "randomize",
         "base_chance": 0.5,
         "ATTN_wq_query_chance": 0,
@@ -3059,338 +3392,6 @@
       "bgcolor": "#535"
     },
     {
-      "id": 102,
-      "type": "ArthemyKrea2PresetLoader",
-      "pos": [
-        4960,
-        1780
-      ],
-      "size": [
-        270,
-        150
-      ],
-      "flags": {},
-      "order": 25,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "model",
-          "name": "model",
-          "type": "MODEL",
-          "link": null
-        },
-        {
-          "localized_name": "clip",
-          "name": "clip",
-          "type": "CLIP",
-          "link": null
-        },
-        {
-          "localized_name": "preset",
-          "name": "preset",
-          "type": "COMBO",
-          "widget": {
-            "name": "preset"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "strength_model",
-          "name": "strength_model",
-          "type": "FLOAT",
-          "widget": {
-            "name": "strength_model"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "strength_clip",
-          "name": "strength_clip",
-          "type": "FLOAT",
-          "widget": {
-            "name": "strength_clip"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "MODEL",
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": null
-        },
-        {
-          "localized_name": "CLIP",
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": null
-        },
-        {
-          "localized_name": "info",
-          "name": "info",
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ArthemyKrea2PresetLoader",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "Cinematic_Comic_Punch.json",
-        1,
-        1
-      ],
-      "widgets_values_named": {
-        "preset": "Cinematic_Comic_Punch.json",
-        "strength_model": 1,
-        "strength_clip": 1
-      },
-      "color": "#2a363b",
-      "bgcolor": "#3f5159"
-    },
-    {
-      "id": 103,
-      "type": "Note",
-      "pos": [
-        4960,
-        1980
-      ],
-      "size": [
-        360,
-        270
-      ],
-      "flags": {},
-      "order": 26,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟦🟨📂 Preset Loader ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Loads and applies a lightweight (.json) tuning preset onto your Model and CLIP.\n• Restores scalar layer offsets and deterministically reproduces bit-exact Chaos perturbation masks.\n\nHOW TO USE:\n1. 'preset': Select the .json preset file from the dropdown.\n2. 'strength_model': Global scaling multiplier for Model patches (1.0 = 100%, 0.5 = 50%, 1.5 = amplified).\n3. 'strength_clip': Global scaling multiplier for CLIP text encoder patches.\n4. Presets can be stacked with other tuners downstream or monitored on Visualizers."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Loads and applies a lightweight (.json) tuning preset onto your Model and CLIP.\n• Restores scalar layer offsets and deterministically reproduces bit-exact Chaos perturbation masks.\n\nHOW TO USE:\n1. 'preset': Select the .json preset file from the dropdown.\n2. 'strength_model': Global scaling multiplier for Model patches (1.0 = 100%, 0.5 = 50%, 1.5 = amplified).\n3. 'strength_clip': Global scaling multiplier for CLIP text encoder patches.\n4. Presets can be stacked with other tuners downstream or monitored on Visualizers."
-      }
-    },
-    {
-      "id": 94,
-      "type": "Note",
-      "pos": [
-        2160,
-        300
-      ],
-      "size": [
-        360,
-        160
-      ],
-      "flags": {},
-      "order": 29,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "❓What to do? - YOU CAN DELETE THIS",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "Place in this area any combination of the Custom Nodes below.\n\nINPUT\n- Attach the very first \"Model\" or \"CLIP\" INPUT from the Reset Patcher\n\nOUTPUT\n- Attach the very last \"Model\" or \"CLIP\" OUTPUT to the Visualizers at the beginning of the \"Image Generation\" Zone."
-      ],
-      "widgets_values_named": {
-        "text": "Place in this area any combination of the Custom Nodes below.\n\nINPUT\n- Attach the very first \"Model\" or \"CLIP\" INPUT from the Reset Patcher\n\nOUTPUT\n- Attach the very last \"Model\" or \"CLIP\" OUTPUT to the Visualizers at the beginning of the \"Image Generation\" Zone."
-      },
-      "color": "#322",
-      "bgcolor": "#533"
-    },
-    {
-      "id": 101,
-      "type": "ArthemyKrea2PresetSaver",
-      "pos": [
-        4580,
-        1780
-      ],
-      "size": [
-        300,
-        150
-      ],
-      "flags": {},
-      "order": 27,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "model",
-          "name": "model",
-          "type": "MODEL",
-          "link": null
-        },
-        {
-          "localized_name": "clip",
-          "name": "clip",
-          "type": "CLIP",
-          "link": null
-        },
-        {
-          "localized_name": "preset_name",
-          "name": "preset_name",
-          "type": "STRING",
-          "widget": {
-            "name": "preset_name"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "author",
-          "name": "author",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "author"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "saved_path",
-          "name": "saved_path",
-          "type": "STRING",
-          "links": null
-        },
-        {
-          "localized_name": "info",
-          "name": "info",
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ArthemyKrea2PresetSaver",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "my_arthemy_preset",
-        "Arthemy"
-      ],
-      "widgets_values_named": {
-        "preset_name": "my_arthemy_preset",
-        "author": "Arthemy"
-      },
-      "color": "#2a363b",
-      "bgcolor": "#3f5159"
-    },
-    {
-      "id": 104,
-      "type": "Note",
-      "pos": [
-        4580,
-        1980
-      ],
-      "size": [
-        360,
-        270
-      ],
-      "flags": {},
-      "order": 28,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟦🟨💾 Preset Saver ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Exports all active Model, CLIP, and Chaos tunings into a lightweight (~1-2 KB) .json preset file.\n• Allows instant sharing and reloading of complex tuning setups without saving multi-gigabyte models.\n\nHOW TO USE:\n1. Connect your tuned Model and CLIP outputs to this node.\n2. 'preset_name': Name of the preset (saved to 'models/arthemy_presets/').\n3. 'author': Your creator name or handle.\n4. Active LoRAs are excluded from presets; use Model Baker / Saver to bake LoRA weights permanently."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Exports all active Model, CLIP, and Chaos tunings into a lightweight (~1-2 KB) .json preset file.\n• Allows instant sharing and reloading of complex tuning setups without saving multi-gigabyte models.\n\nHOW TO USE:\n1. Connect your tuned Model and CLIP outputs to this node.\n2. 'preset_name': Name of the preset (saved to 'models/arthemy_presets/').\n3. 'author': Your creator name or handle.\n4. Active LoRAs are excluded from presets; use Model Baker / Saver to bake LoRA weights permanently."
-      }
-    },
-    {
-      "id": 79,
-      "type": "Note",
-      "pos": [
-        1380,
-        2000
-      ],
-      "size": [
-        400,
-        320
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟦🔬 Model Sub-Block Tuner ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Adjusts specific internal parts inside a single model block (Attention Q/K/V/Out, SwiGLU MLP, Norms).\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block' you want to change.\n2. Adjust the sliders for the specific parts you want to tune (0.00 = no change).\n3. Connect multiple nodes in a row if you need to edit more than one sub-block."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Adjusts specific internal parts inside a single model block (Attention Q/K/V/Out, SwiGLU MLP, Norms).\n\nHOW TO USE:\n1. Select the 'target_block' and 'sub_block' you want to change.\n2. Adjust the sliders for the specific parts you want to tune (0.00 = no change).\n3. Connect multiple nodes in a row if you need to edit more than one sub-block."
-      }
-    },
-    {
-      "id": 85,
-      "type": "Note",
-      "pos": [
-        3810,
-        1950
-      ],
-      "size": [
-        320,
-        340
-      ],
-      "flags": {},
-      "order": 22,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟪🔬 Load Sub-Block LoRA ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Loads a LoRA only on specific internal parts of a single block (e.g. keep only Attention, or only MLP).\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. Set sliders to 1.0 for parts you want to keep, or 0.0 for parts you want to disable."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Loads a LoRA only on specific internal parts of a single block (e.g. keep only Attention, or only MLP).\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. Set sliders to 1.0 for parts you want to keep, or 0.0 for parts you want to disable."
-      }
-    },
-    {
-      "id": 86,
-      "type": "Note",
-      "pos": [
-        4150,
-        2020
-      ],
-      "size": [
-        360,
-        270
-      ],
-      "flags": {},
-      "order": 24,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "title": "🟪🌪️ Load Sub-Block Chaos LoRA ___ README",
-      "properties": {
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        "WHAT IT DOES:\n• Randomly applies parts of a LoRA to create blended styles without typical LoRA artifacts.\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. 'base_chance': Sets the default chance (0.0 to 1.0) for all parts.\n3. Use component sliders to customize chances for specific parts.\n4. Change the 'seed' to test different random combinations."
-      ],
-      "widgets_values_named": {
-        "text": "WHAT IT DOES:\n• Randomly applies parts of a LoRA to create blended styles without typical LoRA artifacts.\n\nHOW TO USE:\n1. Select your LoRA, 'target_block', and 'sub_block'.\n2. 'base_chance': Sets the default chance (0.0 to 1.0) for all parts.\n3. Use component sliders to customize chances for specific parts.\n4. Change the 'seed' to test different random combinations."
-      }
-    },
-    {
       "id": 71,
       "type": "Note",
       "pos": [
@@ -3402,7 +3403,7 @@
         320
       ],
       "flags": {},
-      "order": 16,
+      "order": 24,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -3433,14 +3434,6 @@
       0,
       37,
       1,
-      "CLIP"
-    ],
-    [
-      21,
-      35,
-      0,
-      40,
-      0,
       "CLIP"
     ],
     [
@@ -3524,15 +3517,23 @@
       "STRING"
     ],
     [
-      161,
-      37,
+      171,
+      96,
       0,
       42,
       0,
       "MODEL"
     ],
     [
-      167,
+      172,
+      35,
+      0,
+      40,
+      0,
+      "CLIP"
+    ],
+    [
+      182,
       37,
       0,
       96,
@@ -3540,7 +3541,7 @@
       "MODEL"
     ],
     [
-      168,
+      184,
       37,
       1,
       35,
@@ -3661,10 +3662,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.5202287289390115,
+      "scale": 0.37895843976949967,
       "offset": [
-        -739.4350638102201,
-        590.1921435867162
+        1508.2001736179404,
+        225.09189427420327
       ]
     },
     "anomalous_hashes": {
@@ -3676,17 +3677,17 @@
         "hash": "",
         "size": 26283332608
       },
-      "65_Krea2\\Testone\\tuniques_bleues_krea2.safetensors": {
+      "65_Krea2\\Arthemy_Western_bib_epoch_10.safetensors": {
         "hash": "",
-        "size": 228588848
+        "size": 228588904
       },
-      "66_3D_Anime_Style.safetensors": {
+      "110_Krea2\\Arthemy_Western_bib_epoch_10.safetensors": {
         "hash": "",
-        "size": 228485988
+        "size": 228588904
       },
-      "67_3D_Anime_Style.safetensors": {
+      "67_Krea2\\Arthemy_Western_bib_epoch_10.safetensors": {
         "hash": "",
-        "size": 228485988
+        "size": 228588904
       }
     },
     "ue_links": [],
