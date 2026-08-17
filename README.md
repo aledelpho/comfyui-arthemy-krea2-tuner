@@ -259,11 +259,11 @@ Western comics style, bold ink outlines, hatched shadows, eerie detached calm, s
 
 | | |
 |---|---|
-| **Block 1** <br> <a href="assets/examples/Block_1.webp"><img src="assets/examples/Block_1.webp" width="100%" alt="Block 1 Effect" /></a> | **Block 2** <br> <a href="assets/examples/Block_2.webp"><img src="assets/examples/Block_2.webp" width="100%" alt="Block 2 Effect" /></a> |
-| **Block 3** <br> <a href="assets/examples/Block_3.webp"><img src="assets/examples/Block_3.webp" width="100%" alt="Block 3 Effect" /></a> | **Block 4** <br> <a href="assets/examples/Block_4.webp"><img src="assets/examples/Block_4.webp" width="100%" alt="Block 4 Effect" /></a> |
-| **Block 5** <br> <a href="assets/examples/Block_5.webp"><img src="assets/examples/Block_5.webp" width="100%" alt="Block 5 Effect" /></a> | **Block 6** <br> <a href="assets/examples/Block_6.webp"><img src="assets/examples/Block_6.webp" width="100%" alt="Block 6 Effect" /></a> |
-| **Text Fusion** <br> <a href="assets/examples/TextFusion.webp"><img src="assets/examples/TextFusion.webp" width="100%" alt="Text Fusion Effect" /></a> | **Time Embed** <br> <a href="assets/examples/Time_Embed.webp"><img src="assets/examples/Time_Embed.webp" width="100%" alt="Time Embed Effect" /></a> |
-| **Projection** <br> <a href="assets/examples/Projection.webp"><img src="assets/examples/Projection.webp" width="100%" alt="Projection Effect" /></a> | |
+| **Block 1** <br><br> [![Block 1 Effect](assets/examples/Block_1.webp)](assets/examples/Block_1.webp) | **Block 2** <br><br> [![Block 2 Effect](assets/examples/Block_2.webp)](assets/examples/Block_2.webp) |
+| **Block 3** <br><br> [![Block 3 Effect](assets/examples/Block_3.webp)](assets/examples/Block_3.webp) | **Block 4** <br><br> [![Block 4 Effect](assets/examples/Block_4.webp)](assets/examples/Block_4.webp) |
+| **Block 5** <br><br> [![Block 5 Effect](assets/examples/Block_5.webp)](assets/examples/Block_5.webp) | **Block 6** <br><br> [![Block 6 Effect](assets/examples/Block_6.webp)](assets/examples/Block_6.webp) |
+| **Text Fusion** <br><br> [![Text Fusion Effect](assets/examples/TextFusion.webp)](assets/examples/TextFusion.webp) | **Time Embed** <br><br> [![Time Embed Effect](assets/examples/Time_Embed.webp)](assets/examples/Time_Embed.webp) |
+| **Projection** <br><br> [![Projection Effect](assets/examples/Projection.webp)](assets/examples/Projection.webp) | |
 
 ---
 
@@ -271,10 +271,10 @@ Western comics style, bold ink outlines, hatched shadows, eerie detached calm, s
 
 | | |
 |---|---|
-| **Layer 1** <br> <a href="assets/examples/Layer_1.webp"><img src="assets/examples/Layer_1.webp" width="100%" alt="Layer 1 Effect" /></a> | **Layer 2** <br> <a href="assets/examples/Layer_2.webp"><img src="assets/examples/Layer_2.webp" width="100%" alt="Layer 2 Effect" /></a> |
-| **Layer 3** <br> <a href="assets/examples/Layer_3.webp"><img src="assets/examples/Layer_3.webp" width="100%" alt="Layer 3 Effect" /></a> | **Layer 4** <br> <a href="assets/examples/Layer_4.webp"><img src="assets/examples/Layer_4.webp" width="100%" alt="Layer 4 Effect" /></a> |
-| **Layer 5** <br> <a href="assets/examples/Layer_5.webp"><img src="assets/examples/Layer_5.webp" width="100%" alt="Layer 5 Effect" /></a> | **Layer 6** <br> <a href="assets/examples/Layer_6.webp"><img src="assets/examples/Layer_6.webp" width="100%" alt="Layer 6 Effect" /></a> |
-| **Layer 7** <br> <a href="assets/examples/Layer_7.webp"><img src="assets/examples/Layer_7.webp" width="100%" alt="Layer 7 Effect" /></a> | **Embedding** <br> <a href="assets/examples/Embedding.webp"><img src="assets/examples/Embedding.webp" width="100%" alt="Embedding Effect" /></a> |
+| **Layer 1** <br><br> [![Layer 1 Effect](assets/examples/Layer_1.webp)](assets/examples/Layer_1.webp) | **Layer 2** <br><br> [![Layer 2 Effect](assets/examples/Layer_2.webp)](assets/examples/Layer_2.webp) |
+| **Layer 3** <br><br> [![Layer 3 Effect](assets/examples/Layer_3.webp)](assets/examples/Layer_3.webp) | **Layer 4** <br><br> [![Layer 4 Effect](assets/examples/Layer_4.webp)](assets/examples/Layer_4.webp) |
+| **Layer 5** <br><br> [![Layer 5 Effect](assets/examples/Layer_5.webp)](assets/examples/Layer_5.webp) | **Layer 6** <br><br> [![Layer 6 Effect](assets/examples/Layer_6.webp)](assets/examples/Layer_6.webp) |
+| **Layer 7** <br><br> [![Layer 7 Effect](assets/examples/Layer_7.webp)](assets/examples/Layer_7.webp) | **Embedding** <br><br> [![Embedding Effect](assets/examples/Embedding.webp)](assets/examples/Embedding.webp) |
 
 ---
 
