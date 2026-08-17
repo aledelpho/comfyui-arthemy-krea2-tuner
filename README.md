@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/Generation.png" width="900" alt="Arthemy Krea-2 Tuner Generation Pipeline" />
+  <img src="assets/Generation.webp" width="900" alt="Arthemy Krea-2 Tuner Generation Pipeline" />
 </p>
 
 <h1 align="center">Arthemy Krea-2 Tuner</h1>
@@ -25,8 +25,8 @@ Built for anyone who wants to push a model toward a specific look or behavior �
 > **Requires:** Krea-2 diffusion checkpoints + a Qwen3 text encoder (including Qwen3-VL 4B/8B/32B). Block counts and tensor names are matched to this architecture; these nodes won't affect other model families as-is.
 
 <p align="center">
-  <a href="assets/examples/XYBenchmark.png">
-    <img src="assets/examples/XYBenchmark.png" width="850" alt="X/Y Tuning Benchmark Grid" />
+  <a href="assets/examples/XYBenchmark.webp">
+    <img src="assets/examples/XYBenchmark.webp" width="850" alt="X/Y Tuning Benchmark Grid" />
   </a>
   <br>
   <sub><i>How different promtps behave to different tuning.</i></sub>
@@ -90,7 +90,7 @@ git clone https://github.com/aledelpho/comfyui-arthemy-krea2-tuner.git
 The suite comes with a pre-configured, modular sandbox workflow located in [`workflows/TestKrea2TunerWorkflow.json`](workflows/TestKrea2TunerWorkflow.json):
 
 <p align="center">
-  <img src="assets/Workflow.png" width="900" alt="Arthemy Krea-2 Tuner Sandbox Workflow" />
+  <img src="assets/Workflow.webp" width="900" alt="Arthemy Krea-2 Tuner Sandbox Workflow" />
 </p>
 
 ### How to use the sandbox:
@@ -106,7 +106,7 @@ The suite comes with a pre-configured, modular sandbox workflow located in [`wor
 Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three tiers of precision.
 
 <p align="center">
-  <img src="assets/ModelTuner.png" width="650" alt="Model Tuner Nodes" />
+  <img src="assets/ModelTuner.webp" width="650" alt="Model Tuner Nodes" />
 </p>
 
 ### Tier 1 — Tuner (Whole Groups)
@@ -115,8 +115,8 @@ Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three ti
 * **Workflow:** `MODEL` → `🟦 Model Tuner` → `Sampler`. Nudge one slider at a time, generate, and compare.
 
 <p align="center">
-  <a href="assets/examples/Block_3.png">
-    <img src="assets/examples/Block_3.png" width="800" alt="Block Tuning Showcase - Block 3" />
+  <a href="assets/examples/Block_3.webp">
+    <img src="assets/examples/Block_3.webp" width="800" alt="Block Tuning Showcase - Block 3" />
   </a>
   <br>
   <sub><i>Block Tuning — Modulating an entire block (Block_3) across different values (-2.0 to +2.0) demonstrates how group-level tuning shapes visual structures and features.</i></sub>
@@ -128,8 +128,8 @@ Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three ti
 * **Workflow:** Follows a Tier 1 pass. Set `target_block` to the region identified in Tier 1 and sweep tensor-type sliders individually.
 
 <p align="center">
-  <a href="assets/examples/sub-block-Tuning.png">
-    <img src="assets/examples/sub-block-Tuning.png" width="800" alt="Sub-Block Tuning Variations inside Block 3" />
+  <a href="assets/examples/sub-block-Tuning.webp">
+    <img src="assets/examples/sub-block-Tuning.webp" width="800" alt="Sub-Block Tuning Variations inside Block 3" />
   </a>
   <br>
   <sub><i>Sub-Block Tuning — Modulating specific sub-blocks within Block 3 influences fine details and layer-level characteristics.</i></sub>
@@ -142,8 +142,8 @@ Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three ti
 * **Use case:** Creative discovery — *"Randomly nudge one sub-slice and lock the seed once an interesting style emerges."*
 
 <p align="center">
-  <a href="assets/examples/chaos-block-Tuning.png">
-    <img src="assets/examples/chaos-block-Tuning.png" width="800" alt="Chaos Tuning Variations" />
+  <a href="assets/examples/chaos-block-Tuning.webp">
+    <img src="assets/examples/chaos-block-Tuning.webp" width="800" alt="Chaos Tuning Variations" />
   </a>
   <br>
   <sub><i>Chaos Tuning — Seeded stochastic perturbations applied across sub-blocks introduce controlled stylistic variations and creative discovery.</i></sub>
@@ -153,7 +153,7 @@ Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three ti
 
 ### 🟨 CLIP Tuning (Qwen3)
 <p align="center">
-  <img src="assets/ClipTuner.png" width="650" alt="CLIP Tuner Nodes" />
+  <img src="assets/ClipTuner.webp" width="650" alt="CLIP Tuner Nodes" />
 </p>
 
 Tuning applied to the Qwen3 text encoder follows the identical 3-tier structure:
@@ -165,7 +165,7 @@ Tuning applied to the Qwen3 text encoder follows the identical 3-tier structure:
 
 ### 🟪 LoRA Tuning
 <p align="center">
-  <img src="assets/LoraTuner.png" width="650" alt="LoRA Loader Nodes" />
+  <img src="assets/LoraTuner.webp" width="650" alt="LoRA Loader Nodes" />
 </p>
 
 * **`🟪 LoRA Block Loader` (Tier 1):** Drop-in replacement for standard LoRA loaders with per-section strength multipliers.
@@ -210,7 +210,7 @@ Tuning occurs live in memory and **does not modify original checkpoint files**.
 
 ### 1. Presets (Lightweight JSON)
 <p align="center">
-  <img src="assets/Preset.png" width="550" alt="Preset System" />
+  <img src="assets/Preset.webp" width="550" alt="Preset System" />
 </p>
 
 * **`🟦🟨 Preset Saver`**: Captures all active patches and Chaos seeds into a small JSON file for deterministic reproduction.
@@ -221,7 +221,7 @@ Tuning occurs live in memory and **does not modify original checkpoint files**.
 
 ### 2. Permanent Export (Full Checkpoints)
 <p align="center">
-  <img src="assets/Saver.png" width="450" alt="Model and CLIP Savers" />
+  <img src="assets/Saver.webp" width="450" alt="Model and CLIP Savers" />
 </p>
 
 * **`🟦🟨 Model Baker`**: Folds all active memory patches permanently into the model weights and clears the runtime patch list.
@@ -259,11 +259,11 @@ Western comics style, bold ink outlines, hatched shadows, eerie detached calm, s
 
 | | |
 |---|---|
-| **Block 1** <br> <a href="assets/examples/Block_1.png"><img src="assets/examples/Block_1.png" width="100%" alt="Block 1 Effect" /></a> | **Block 2** <br> <a href="assets/examples/Block_2.png"><img src="assets/examples/Block_2.png" width="100%" alt="Block 2 Effect" /></a> |
-| **Block 3** <br> <a href="assets/examples/Block_3.png"><img src="assets/examples/Block_3.png" width="100%" alt="Block 3 Effect" /></a> | **Block 4** <br> <a href="assets/examples/Block_4.png"><img src="assets/examples/Block_4.png" width="100%" alt="Block 4 Effect" /></a> |
-| **Block 5** <br> <a href="assets/examples/Block_5.png"><img src="assets/examples/Block_5.png" width="100%" alt="Block 5 Effect" /></a> | **Block 6** <br> <a href="assets/examples/Block_6.png"><img src="assets/examples/Block_6.png" width="100%" alt="Block 6 Effect" /></a> |
-| **Text Fusion** <br> <a href="assets/examples/TextFusion.png"><img src="assets/examples/TextFusion.png" width="100%" alt="Text Fusion Effect" /></a> | **Time Embed** <br> <a href="assets/examples/Time_Embed.png"><img src="assets/examples/Time_Embed.png" width="100%" alt="Time Embed Effect" /></a> |
-| **Projection** <br> <a href="assets/examples/Projection.png"><img src="assets/examples/Projection.png" width="100%" alt="Projection Effect" /></a> | |
+| **Block 1** <br> <a href="assets/examples/Block_1.webp"><img src="assets/examples/Block_1.webp" width="100%" alt="Block 1 Effect" /></a> | **Block 2** <br> <a href="assets/examples/Block_2.webp"><img src="assets/examples/Block_2.webp" width="100%" alt="Block 2 Effect" /></a> |
+| **Block 3** <br> <a href="assets/examples/Block_3.webp"><img src="assets/examples/Block_3.webp" width="100%" alt="Block 3 Effect" /></a> | **Block 4** <br> <a href="assets/examples/Block_4.webp"><img src="assets/examples/Block_4.webp" width="100%" alt="Block 4 Effect" /></a> |
+| **Block 5** <br> <a href="assets/examples/Block_5.webp"><img src="assets/examples/Block_5.webp" width="100%" alt="Block 5 Effect" /></a> | **Block 6** <br> <a href="assets/examples/Block_6.webp"><img src="assets/examples/Block_6.webp" width="100%" alt="Block 6 Effect" /></a> |
+| **Text Fusion** <br> <a href="assets/examples/TextFusion.webp"><img src="assets/examples/TextFusion.webp" width="100%" alt="Text Fusion Effect" /></a> | **Time Embed** <br> <a href="assets/examples/Time_Embed.webp"><img src="assets/examples/Time_Embed.webp" width="100%" alt="Time Embed Effect" /></a> |
+| **Projection** <br> <a href="assets/examples/Projection.webp"><img src="assets/examples/Projection.webp" width="100%" alt="Projection Effect" /></a> | |
 
 ---
 
@@ -271,10 +271,10 @@ Western comics style, bold ink outlines, hatched shadows, eerie detached calm, s
 
 | | |
 |---|---|
-| **Layer 1** <br> <a href="assets/examples/Layer_1.png"><img src="assets/examples/Layer_1.png" width="100%" alt="Layer 1 Effect" /></a> | **Layer 2** <br> <a href="assets/examples/Layer_2.png"><img src="assets/examples/Layer_2.png" width="100%" alt="Layer 2 Effect" /></a> |
-| **Layer 3** <br> <a href="assets/examples/Layer_3.png"><img src="assets/examples/Layer_3.png" width="100%" alt="Layer 3 Effect" /></a> | **Layer 4** <br> <a href="assets/examples/Layer_4.png"><img src="assets/examples/Layer_4.png" width="100%" alt="Layer 4 Effect" /></a> |
-| **Layer 5** <br> <a href="assets/examples/Layer_5.png"><img src="assets/examples/Layer_5.png" width="100%" alt="Layer 5 Effect" /></a> | **Layer 6** <br> <a href="assets/examples/Layer_6.png"><img src="assets/examples/Layer_6.png" width="100%" alt="Layer 6 Effect" /></a> |
-| **Layer 7** <br> <a href="assets/examples/Layer_7.png"><img src="assets/examples/Layer_7.png" width="100%" alt="Layer 7 Effect" /></a> | **Embedding** <br> <a href="assets/examples/Embedding.png"><img src="assets/examples/Embedding.png" width="100%" alt="Embedding Effect" /></a> |
+| **Layer 1** <br> <a href="assets/examples/Layer_1.webp"><img src="assets/examples/Layer_1.webp" width="100%" alt="Layer 1 Effect" /></a> | **Layer 2** <br> <a href="assets/examples/Layer_2.webp"><img src="assets/examples/Layer_2.webp" width="100%" alt="Layer 2 Effect" /></a> |
+| **Layer 3** <br> <a href="assets/examples/Layer_3.webp"><img src="assets/examples/Layer_3.webp" width="100%" alt="Layer 3 Effect" /></a> | **Layer 4** <br> <a href="assets/examples/Layer_4.webp"><img src="assets/examples/Layer_4.webp" width="100%" alt="Layer 4 Effect" /></a> |
+| **Layer 5** <br> <a href="assets/examples/Layer_5.webp"><img src="assets/examples/Layer_5.webp" width="100%" alt="Layer 5 Effect" /></a> | **Layer 6** <br> <a href="assets/examples/Layer_6.webp"><img src="assets/examples/Layer_6.webp" width="100%" alt="Layer 6 Effect" /></a> |
+| **Layer 7** <br> <a href="assets/examples/Layer_7.webp"><img src="assets/examples/Layer_7.webp" width="100%" alt="Layer 7 Effect" /></a> | **Embedding** <br> <a href="assets/examples/Embedding.webp"><img src="assets/examples/Embedding.webp" width="100%" alt="Embedding Effect" /></a> |
 
 ---
 
@@ -284,8 +284,8 @@ Here you can see how feature isolation works in practice:
 By identifying and amplifying only the specific Model blocks and CLIP layers responsible for generating the plague doctor's beak mask, the feature persists robustly and deterministically across completely different generation seeds.
 
 <p align="center">
-  <a href="assets/examples/SameTuning-DifferentSeed.png">
-    <img src="assets/examples/SameTuning-DifferentSeed.png" width="850" alt="Same Tuning, Different Seed" />
+  <a href="assets/examples/SameTuning-DifferentSeed.webp">
+    <img src="assets/examples/SameTuning-DifferentSeed.webp" width="850" alt="Same Tuning, Different Seed" />
   </a>
 </p>
 
