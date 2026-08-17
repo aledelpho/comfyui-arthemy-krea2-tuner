@@ -45,16 +45,45 @@ class Krea2Config:
     DEFAULT_GC_THRESHOLD_MB: int = 500
 
 def parse_granular_json(json_string: str) -> Dict[str, Any]:
-    """Parses granular JSON configurations strictly, raising an explicit error for invalid syntax."""
+    """Parses granular JSON configurations, supporting single dictionaries and automatically
+    merging multiple consecutive JSON blocks pasted together."""
     if not json_string or not json_string.strip():
         return {}
+    
+    # 1. Try standard direct parse
     try:
         parsed_data = json.loads(json_string)
-        if not isinstance(parsed_data, dict):
-            raise ValueError("JSON root must be a dictionary.")
-        return parsed_data
-    except Exception as e:
-        raise ValueError(f"Arthemy Suite Error: Invalid Granular JSON syntax.\nDetails: {str(e)}")
+        if isinstance(parsed_data, dict):
+            return parsed_data
+    except Exception:
+        pass
+
+    # 2. Resilient multi-block JSON decoding (merges multiple consecutive { ... } { ... } blocks)
+    merged = {}
+    decoder = json.JSONDecoder()
+    s = json_string.strip()
+    idx = 0
+    parsed_any = False
+    
+    while idx < len(s):
+        while idx < len(s) and s[idx].isspace():
+            idx += 1
+        if idx >= len(s):
+            break
+        try:
+            obj, end = decoder.raw_decode(s, idx)
+            if isinstance(obj, dict):
+                merged.update(obj)
+                parsed_any = True
+            idx = end
+        except Exception as e:
+            if not parsed_any:
+                raise ValueError(f"Arthemy Suite Error: Invalid Granular JSON syntax.\nDetails: {str(e)}")
+            break
+
+    if parsed_any:
+        return merged
+    raise ValueError("Arthemy Suite Error: Invalid Granular JSON syntax. JSON root must be a dictionary.")
 
 def generate_fast_seed(key_string: str, base_seed: int) -> int:
     """Generates a fast, deterministic seed using CRC32."""
@@ -489,15 +518,79 @@ def dequantize_weight(weight: Any, scale: Any = None) -> torch.Tensor:
         return fp32_w
     return weight
 
-def resolve_granular_weight(clean_key: str, granular_map: Dict[str, Any], default_val: float) -> float:
+def resolve_granular_entry(clean_key: str, granular_map: Dict[str, Any], default_val: Any = None) -> Any:
     if not granular_map:
         return default_val
     if clean_key in granular_map:
-        return float(granular_map[clean_key])
+        return granular_map[clean_key]
     for pfx, val in granular_map.items():
-        if pfx and (clean_key.startswith(pfx) or f".{pfx}" in clean_key):
-            return float(val)
+        if pfx and (clean_key == pfx or clean_key.startswith(pfx) or f".{pfx}" in clean_key or clean_key.endswith(pfx)):
+            return val
     return default_val
+
+def resolve_granular_weight(clean_key: str, granular_map: Dict[str, Any], default_val: float) -> float:
+    entry = resolve_granular_entry(clean_key, granular_map, default_val)
+    if isinstance(entry, (int, float)):
+        return float(entry)
+    return default_val
+
+def build_granular_patch(granular_val: Any, base_weight: torch.Tensor, mode: str = "Soft Value", default_scalar: float = 0.0) -> Optional[Tuple[Any, ...]]:
+    """Builds a scalar multiplier tuple (1.0 + strength,) or an additive tensor diff tuple (diff_tensor,)
+    from a granular value (scalar offset, list/tuple of floats, or sparse channel dict)."""
+    if granular_val is None:
+        if default_scalar == 0.0:
+            return None
+        target_w = soft_target_weight(default_scalar, mode)
+        strength = target_w - 1.0
+        return (1.0 + strength,) if strength != 0 else None
+
+    # Case 1: List or tuple of channel values (additive delta or direct diff)
+    if isinstance(granular_val, (list, tuple)):
+        try:
+            val_list = [float(x) for x in granular_val]
+            if len(val_list) == base_weight.numel():
+                t = torch.tensor(val_list, dtype=base_weight.dtype, device=base_weight.device).view_as(base_weight)
+                return (t,)
+            elif len(val_list) > 0 and base_weight.ndim >= 1 and len(val_list) == base_weight.shape[-1]:
+                t = torch.tensor(val_list, dtype=base_weight.dtype, device=base_weight.device).expand_as(base_weight).contiguous()
+                return (t,)
+            else:
+                logger.warning(f"[Arthemy Granular] Vector size mismatch: got {len(val_list)} values, expected {base_weight.numel()} for shape {tuple(base_weight.shape)}.")
+                return None
+        except (ValueError, TypeError) as e:
+            logger.warning(f"[Arthemy Granular] Failed to parse array for granular patch: {e}")
+            return None
+
+    # Case 2: Dictionary of sparse channel deltas (e.g. {"8": -0.5117, "9": -0.8906} or {"channels": ...})
+    elif isinstance(granular_val, dict):
+        try:
+            diff = torch.zeros_like(base_weight)
+            flat_diff = diff.flatten()
+            channels_dict = granular_val.get("channels", granular_val)
+            applied = False
+            for ch_k, ch_v in channels_dict.items():
+                if str(ch_k).isdigit():
+                    ch_idx = int(ch_k)
+                    if 0 <= ch_idx < flat_diff.numel():
+                        flat_diff[ch_idx] = float(ch_v)
+                        applied = True
+            if applied:
+                return (diff,)
+            return None
+        except Exception as e:
+            logger.warning(f"[Arthemy Granular] Failed to parse channel dict for granular patch: {e}")
+            return None
+
+    # Case 3: Scalar (int or float) -> standard scalar multiplier
+    elif isinstance(granular_val, (int, float)):
+        raw_val = float(granular_val)
+        target_w = soft_target_weight(raw_val, mode)
+        strength = target_w - 1.0
+        if strength != 0:
+            return (1.0 + strength,)
+        return None
+
+    return None
 
 # ==============================================================================
 # POINT 4: DRY UNIFIED BASE SURGEON TUNER (BaseSurgeonTuner)
@@ -576,7 +669,15 @@ class BaseSurgeonTuner(BaseKrea2Node):
             else:
                 raw_target = slider_map.get(matched_widget_key, 0.0)
                 if granular_map:
-                    raw_target = resolve_granular_weight(clean_k, granular_map, raw_target)
+                    granular_entry = resolve_granular_entry(clean_k, granular_map, None)
+                    if granular_entry is not None:
+                        patch_val = build_granular_patch(granular_entry, base_weight, mode=mode, default_scalar=raw_target)
+                        if patch_val is not None:
+                            patches_to_add[target_patch_key] = patch_val
+                            active_count += 1
+                            continue
+                        else:
+                            continue
 
                 target_w = soft_target_weight(raw_target, mode)
                 strength = target_w - 1.0
@@ -720,13 +821,21 @@ class ArthemyKrea2ModelTuner(BaseKrea2Node):
             if k.endswith(".comfy_quant") or f"{k}_scale" in base_sd:
                 continue
 
-            target_weight = w_base
             clean_key = Krea2TensorParser.clean_key(k)
+            patch_key = f"diffusion_model.{clean_key}" if not clean_key.startswith("diffusion_model.") else clean_key
 
             if granular_map:
-                raw_target = resolve_granular_weight(clean_key, granular_map, 0.0)
-                target_weight = get_target_weight(raw_target)
-            elif use_vector:
+                granular_entry = resolve_granular_entry(clean_key, granular_map, None)
+                if granular_entry is not None:
+                    patch_val = build_granular_patch(granular_entry, base_weight, mode=mode)
+                    if patch_val is not None:
+                        if valid_keys is not None and k not in valid_keys: continue
+                        patches_to_add[patch_key] = patch_val
+                        active_patches += 1
+                    continue
+
+            target_weight = w_base
+            if use_vector:
                 if "txtfusion.layerwise_blocks" in clean_key:
                     match = RE_TXTFUSION_LAYERWISE.search(clean_key)
                     if match: target_weight = final_weights[28 + int(match.group(1))]
@@ -828,8 +937,7 @@ class ArthemyKrea2CLIPTuner(BaseKrea2Node):
         patches_to_add = {}
         active_patches = 0
         valid_keys = getattr(c_p, 'model_keys', None)
-
-
+        tasks = []
 
         def get_block_weight(idx):
             if idx < 5:  return w_b1
@@ -840,18 +948,27 @@ class ArthemyKrea2CLIPTuner(BaseKrea2Node):
             if idx < 30: return w_b6
             return w_b7
 
-        tasks = []
         for k, base_weight in base_sd.items():
             if k.endswith(".position_ids") or k.endswith(".logit_scale") or f"{k}_scale" in base_sd: continue
 
-            target_scale = 1.0
+            clean_k = Krea2TensorParser.clean_key(k)
             if granular_map:
-                raw_target = resolve_granular_weight(k, granular_map, 0.0)
-                target_scale = get_target_weight(raw_target)
-            elif "embed_tokens" in k:
+                granular_entry = resolve_granular_entry(clean_k, granular_map, None)
+                if granular_entry is None:
+                    granular_entry = resolve_granular_entry(k, granular_map, None)
+                if granular_entry is not None:
+                    patch_val = build_granular_patch(granular_entry, base_weight, mode=mode)
+                    if patch_val is not None:
+                        if valid_keys is not None and k not in valid_keys: continue
+                        patches_to_add[k] = patch_val
+                        active_patches += 1
+                    continue
+
+            target_scale = 1.0
+            if "embed_tokens" in k:
                 target_scale = w_vocab
             else:
-                idx, _ = Krea2TensorParser.extract_clip_layer_idx(Krea2TensorParser.clean_key(k))
+                idx, _ = Krea2TensorParser.extract_clip_layer_idx(clean_k)
                 if idx is not None:
                     target_scale = get_block_weight(idx)
 
