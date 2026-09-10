@@ -1,8 +1,11 @@
 # Arthemy Krea-2 Tuner Suite for ComfyUI
 
+[![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-purple.svg)](https://github.com/aledelpho/comfyui-arthemy-krea2-tuner)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-Custom--Node-blue.svg)](https://github.com/comfyanonymous/ComfyUI)
 [![Tests: Passing](https://img.shields.io/badge/Tests-11%2F11%20Passing-brightgreen.svg)](tests/)
+
+> **Release 2.0**: The comprehensive major release featuring zero-retraining geometric subspace steering, Lie algebra rotations, channel profiling, self-contained 5D LoRA compression, native memory safety, and interactive template workflows.
 
 A high-precision ComfyUI node suite designed for fine-grained tuning, geometric subspace steering, and lightweight checkpoint manipulation for **Krea-2** and modern diffusion models **without retraining**.
 
