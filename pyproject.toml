@@ -1,0 +1,35 @@
+[project]
+name = "comfyui-arthemy-krea2-tuner"
+version = "1.0.0"
+description = "Comprehensive ComfyUI tuning and steering suite for diffusion models (Krea-2, DiT) using native patches, SVD Lie rotations, channel gains, and 5D LoRA compaction."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "Arthemy" }
+]
+keywords = [
+    "comfyui",
+    "custom-nodes",
+    "krea2",
+    "diffusion",
+    "tuning",
+    "svd",
+    "lie-rotation",
+    "channel-magnitude",
+    "lora"
+]
+dependencies = [
+    "torch>=2.0.0",
+    "safetensors>=0.4.0",
+    "numpy",
+    "Pillow"
+]
+
+[project.urls]
+Homepage = "https://github.com/Arthemy/ComfyUI-Arthemy-Krea2-Tuner"
+Repository = "https://github.com/Arthemy/ComfyUI-Arthemy-Krea2-Tuner"
+
+[tool.comfy]
+PublisherId = "arthemy"
+DisplayName = "Arthemy Krea-2 Tuner Suite"
+Icon = ""

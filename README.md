@@ -1,302 +1,178 @@
-<p align="center">
-  <img src="assets/Generation.webp" width="900" alt="Arthemy Krea-2 Tuner Generation Pipeline" />
-</p>
+# Arthemy Krea-2 Tuner Suite for ComfyUI
 
-<h1 align="center">Arthemy Krea-2 Tuner</h1>
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![ComfyUI](https://img.shields.io/badge/ComfyUI-Custom--Node-blue.svg)](https://github.com/comfyanonymous/ComfyUI)
+[![Tests: Passing](https://img.shields.io/badge/Tests-11%2F11%20Passing-brightgreen.svg)](tests/)
 
-<p align="center">
-  Live weight tuning for <b>Krea-2</b> diffusion models and their <b>Qwen3</b> text encoder, directly inside ComfyUI.
-</p>
-
-<p align="center">
-  <img alt="ComfyUI custom node" src="https://img.shields.io/badge/ComfyUI-custom--node-6b46c1?style=flat-square">
-  <img alt="Compatibility" src="https://img.shields.io/badge/compatible-Krea--2%20%7C%20Qwen3-1e88e5?style=flat-square">
-  <a href="#license"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square"></a>
-  <img alt="GitHub stars" src="https://img.shields.io/github/stars/aledelpho/comfyui-arthemy-krea2-tuner?style=flat-square">
-</p>
+A high-precision ComfyUI node suite designed for fine-grained tuning, geometric subspace steering, and lightweight checkpoint manipulation for **Krea-2** and modern diffusion models **without retraining**.
 
 ---
 
-Edit a **Krea-2** model and its **CLIP** text encoder by multiplying specific internal weights up or down, live, **no dataset and no training required**. Move a slider, generate, and compare against the untouched model. When you land on a result you like, save it as a lightweight preset or bake it into a full `.safetensors` checkpoint.
+## Highlights
 
-Built for anyone who wants to push a model toward a specific look or behavior — a color palette, a rendering style, a recurring motif — by editing what's already inside it, instead of fine-tuning from scratch.
-
-> [!NOTE]
-> **Requires:** Krea-2 diffusion checkpoints + a Qwen3 text encoder (including Qwen3-VL 4B/8B/32B). Block counts and tensor names are matched to this architecture; these nodes won't affect other model families as-is.
-
-<p align="center">
-  <a href="assets/examples/XYBenchmark.webp">
-    <img src="assets/examples/XYBenchmark.webp" width="850" alt="X/Y Tuning Benchmark Grid" />
-  </a>
-  <br>
-  <sub><i>How different promtps behave to different tuning.</i></sub>
-</p>
+* **Zero-Retraining Steering**: Steer diffusion aesthetics, composition, and prompt alignment using analytical geometry and spectral analysis.
+* **Native Memory Safety**: Everything is applied as native ComfyUI patches. Base checkpoints remain strictly immutable in memory until explicitly saved or baked.
+* **Lie Algebra Orthogonal Rotations**: Rotate dominant SVD weight subspaces in $SO(n)$ without altering the Frobenius norm of the matrix.
+* **Channel Magnitude Profiling**: Dynamically profile the model's residual stream and apply direction-aware row/column gain vectors with microscopic overhead (~24 KB vs gigabytes of dense deltas).
+* **5D LoRA Compression**: Compress dense LoRA updates into principal SVD directions with Discrete Cosine Transform (DCT) compaction, reducing preset footprints by up to 70x.
+* **In-Place BF16/FP8 Baker & Savers**: Stream and fold active patches directly into clean checkpoints without triggering out-of-memory (OOM) errors or `ModelPatcherDynamic` assertion failures.
+* **On-Node Interactive Visualizers**: Real-time canvas widgets on LiteGraph nodes that plot gain distributions and rotation angles directly in the ComfyUI interface.
 
 ---
 
-## Contents
+## Node Catalog
 
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Included Template Workflow](#included-template-workflow)
-- [Picking the Right Node](#picking-the-right-node)
-  - [Model Tuning](#tier-1--tuner-whole-groups)
-  - [CLIP Tuning](#clip-tuning-qwen3)
-  - [LoRA Tuning](#lora-tuning)
-  - [Summary Table](#summary-table)
-- [Reading the Sliders](#reading-the-sliders)
-- [Saving and Loading Calibrations](#saving-and-loading-calibrations)
-- [Visualizing Active Patches](#visualizing-active-patches)
-- [Troubleshooting](#troubleshooting)
-- [Visual Tuning Showcase & Effects](#visual-tuning-showcase--effects)
-- [Author](#author)
-- [License](#license)
+Every node clones the ComfyUI patcher and attaches patches, so any number of them can be
+chained in any order. Each one returns an `info` string ending in `Patches: N` — if `N` is 0,
+that node did nothing, and the string says why.
+
+Colour prefixes: 🟪 model · 🟨 text encoder · 🩷 LoRA.
+
+### 🟪 Model Tools (diffusion backbone)
+
+| Node | What it gives you |
+|---|---|
+| **🟪✨ Model Tuner** | One multiplier per section: `Text_Fusion`, `Time_Embed`, `Projection`, and `Block_1..6` = blocks 0-4, 5-9, 10-14, 15-19, 20-23, 24-27. `Soft Value` damps the slider to 10% (1.00 → ×1.10), `Real Value` is 1:1. |
+| **🟪🔬 Model Sub-Block Tuner** | The same, one tensor family at a time: WQ/WK/WV/WO, attention gate, QK-norm scales, SwiGLU gate/up/down, time modulation, block norms — inside a block group or one single block. |
+| **🟪🌪️ Model Sub-Block Chaos Tuner** | Reproducible pseudo-random perturbation of the families you choose. Per-family probability sliders, `chaos_strength`, and a CRC32 seed that reproduces across restarts. Rolled once per module, so paired tensors are never split. |
+| **🟪📊 Channel Magnitude Tuner** | A *vertical* cut: ranks the residual-stream channels by energy, splits them into 12 logarithmic bands and scales each one. `channel_scope` picks the sub-network (MLP by default), `channel_path` picks whether the gain lands where it reads from the residual, where it writes back, or both. The ranking is profiled from the checkpoint and cached, so only the first move costs anything. |
+| **🟪🌿 Model Axis Rotator** | Four independent rotation dials (±180°) inside each weight's dominant subspace — local in-plane, branch-into-trunk, long-range channel phase, and mirrored pairwise. Orthogonal, so the Frobenius norm is unchanged: it moves what a layer *means*, not how loud it is. `depth_reach` sets the rotated rank (8 / 16 / 32). |
+| **🟪🌀 Model Chaos Rotator** | The same rotation, with random per-plane angles instead of dials. `chaos_strength` caps the angle as a fraction of 90°, `harmonic_coherence` snaps angles towards 45° multiples, the seed reproduces exactly. |
+| **🟪🧭 Model Compass Rotator** | Rotation along one *chosen bearing*: `style_direction` (0-360°) blends continuously between local and long-range planes, `rotation_angle` (-90..+90) is how far you travel, `manifold` picks the output or the input space. Nearby bearings give related styles, so it can be swept like a map. |
+| **🟪🧬 5D Model Tuner** | Injects a compressed LoRA back as a native low-rank patch, one SVD direction per slider, restricted to any block / component / single tensor. |
+
+### 🟨 CLIP Tools (Qwen3-VL text encoder)
+
+| Node | What it gives you |
+|---|---|
+| **🟨✨ CLIP Tuner** | `Embedding` plus seven layer groups: text layers 0-4, 5-9, 10-14, 15-19, 20-24, 25-29, 30-35. The vision tower (36-59) is deliberately left alone — it only runs when reference images are fed to the encoder. |
+| **🟨🔬 CLIP Sub-Block Tuner** | Q/K/V/O projections, query norm, MLP gate/up/down and layer norms, inside a layer group or one single layer. Visual layers 36-59 are addressable here. |
+| **🟨🌪️ CLIP Sub-Block Chaos Tuner** | Reproducible perturbation of the same families. The failure mode to watch for is the prompt being ignored, not the image degrading — keep `chaos_strength` around 0.05-0.15. |
+| **🟨🌿 CLIP Axis Rotator** | The four rotation dials, on the text encoder. Far more sensitive than the model: 5-10° is already a lot. |
+| **🟨🌀 CLIP Chaos Rotator** | Random-angle rotation of text-encoder subspaces: a different reading of the same prompt, at unchanged strength. |
+| **🟨🧭 CLIP Compass Rotator** | Bearing-based rotation on the text encoder. |
+| **🟨🧬 5D CLIP Tuner** | 5D injection into the text encoder. |
+
+### 🩷 LoRA Tools
+
+| Node | What it gives you |
+|---|---|
+| **🩷🔮 LoRA Block Loader** | Loads a LoRA with one keep/drop slider per block group. Keep a style LoRA only on blocks 24-27 and most of its character bleed goes away. |
+| **🩷🔬 Load Sub-Block LoRA** | The same, per tensor family: attention only (composition without texture), MLP only (surface without layout). |
+| **🩷🌪️ Load Sub-Block Chaos LoRA** | Loads a random subset of the LoRA's tensors, so it blends in without the usual all-or-nothing signature. `base_chance` plus per-family overrides, seeded. |
+| **🩷🧬 LoRA-to-5D Extractor** | Compresses a LoRA into its N dominant SVD directions (1-8) as a portable `.json` modifier. `storage=auto` measures the fidelity a DCT would actually reach on that LoRA's tensor sizes and falls back to exact raw factors below 35%. It is an output node, so bypass it (Ctrl+B) once the modifier exists. |
+
+### 🟪🟨 Presets, Savers, Baker & Utilities
+
+| Node | What it gives you |
+|---|---|
+| **🟪🟨💾 Preset Saver** | Serialises every active tuning: scalar and granular patches, plus reproducible recipes for Chaos, Rotations, Channel Magnitude and 5D. `prune_5d_to_target` embeds only the layers each 5D node can actually reach — a 5D aimed at one block group makes the preset ~6.5× smaller, aimed at a single tensor ~48×. |
+| **🟪🟨📂 Preset Loader** | Replays a preset by re-running the nodes that made it, with a global `strength_model` / `strength_clip` on top. A malformed recipe is skipped with a warning instead of taking the whole preset down. |
+| **🟪🟨🔄 Reset Patcher** | Drops this suite's pending patches and recipes and rolls the patch id so ComfyUI restores anything it had already written in place. It deliberately leaves `object_patches`, hook patches and ComfyUI's own weight backup alone — FreeU, ModelSamplingAuraFlow and friends survive a reset. |
+| **🟪📊 Model Visualizer / 🟨📊 CLIP Visualizer** | On-canvas plot of what is actually patched, per block or per layer, measured from the patcher rather than from the widget values. |
+| **🟪💾 Model Saver / 🟨💾 CLIP Saver** | Stream a full `.safetensors` checkpoint of the tuned weights in BF16 or FP8_E4M3. They read patched weights directly, so there is no need to bake first. |
+| **🟪🟨 Model Baker** | Folds every pending patch into a freshly cloned module tree in memory — no file written, and the base checkpoint is never mutated. One-way for the session: baked weights *are* the weights. |
+
+> **Quantized checkpoints.** Every tuner refuses layers that carry a scaled-FP8 companion
+> scale — patching them would apply that scale twice — and reports how many it skipped. The
+> Savers handle those correctly by folding the scale into the weight.
+
+---
+
+## How to work with it
+
+1. Fix the seed and the prompt, generate once. That image is your reference.
+2. Add **one** node and move **one** widget. Generate again.
+3. Read the node's `info` output. It ends with `Patches: N`; `N = 0` means nothing was applied,
+   and the message says why (wrong block selection, quantized layers, a LoRA that carries no
+   such tensor).
+4. Keep what works and save it with the **Preset Saver**. Presets are text: they can be
+   re-loaded at a different strength, stacked, or edited by hand.
+
+Order matters only between a *scaling* node (Tuners, LoRA loaders) and an *additive* one
+(Rotators, 5D). Two scalings commute; a scaling and a rotation do not.
 
 ---
 
 ## Installation
 
-### Option 1: Via ComfyUI Manager (Install via Git URL)
-In **ComfyUI Manager**, click **Install via Git URL**, paste the repository URL:
-```text
-https://github.com/aledelpho/comfyui-arthemy-krea2-tuner.git
-```
-and click **Install**.
+### Method 1: ComfyUI Manager (Recommended)
+Search for `Arthemy Krea-2 Tuner` in the ComfyUI Manager and click **Install**.
 
-### Option 2: Manual Installation (Git Clone)
-Clone this repository directly into your ComfyUI `custom_nodes` folder:
-
+### Method 2: Git Clone
+Navigate to your ComfyUI `custom_nodes` directory:
 ```bash
 cd ComfyUI/custom_nodes
-git clone https://github.com/aledelpho/comfyui-arthemy-krea2-tuner.git
+git clone https://github.com/Arthemy/ComfyUI-Arthemy-Krea2-Tuner.git
+```
+Install the lightweight dependencies (torch, safetensors, numpy, pillow are already bundled with standard ComfyUI environments):
+```bash
+pip install -r ComfyUI-Arthemy-Krea2-Tuner/requirements.txt
 ```
 
-*Restart ComfyUI completely afterward.*
-
----
-
-## Quick Start
-
-1. **Load** your `MODEL` and `CLIP` normally in your workflow.
-2. Add a **`🟦 Model Tuner`** node and route `MODEL` through it.
-3. Move one of the block sliders (`Block_1` … `Block_6`) away from `0.00` (`0.00` = no change; positive values strengthen that group, negative values weaken it).
-4. Connect the Tuner's `MODEL` output to your sampler and generate. Compare against the untouched model — with a slider away from `0.00`, you should see an immediate visual shift. If the outputs look identical, verify your checkpoint is Krea-2/Qwen3 (see [Troubleshooting](#troubleshooting)).
-5. *(Optional)* Chain a **`🟨 CLIP Tuner`** on the `CLIP` wire to adjust text encoder layers simultaneously.
-
----
-
-## Included Template Workflow
-
-The suite comes with a pre-configured, modular sandbox workflow located in [`workflows/TestKrea2TunerWorkflow.json`](workflows/TestKrea2TunerWorkflow.json):
-
-<p align="center">
-  <img src="assets/Workflow.webp" width="900" alt="Arthemy Krea-2 Tuner Sandbox Workflow" />
-</p>
-
-### How to use the sandbox:
-1. **Load the template:** Drag and drop `workflows/TestKrea2TunerWorkflow.json` into ComfyUI.
-2. **Pick any tool:** Choose any tuning node or LoRA loader from the organized library at the bottom.
-3. **Plug into the staging slot:** Attach your chosen tool in the open space between the **Loaders / Reset Patcher** and the **Visualizers & Generation** zone.
-4. **Tune & Cook:** Adjust your sliders, verify the live patch waveform in the visualizers, and generate!
-
----
-
-## Picking the Right Node
-
-Every domain — **Model**, **CLIP**, and **LoRA** — is tuned through three tiers of precision.
-
-<p align="center">
-  <img src="assets/ModelTuner.webp" width="650" alt="Model Tuner Nodes" />
-</p>
-
-### Tier 1 — Tuner (Whole Groups)
-**`🟦 Model Tuner`** provides one slider per group of blocks: `Text_Fusion`, `Time_Embed`, `Projection`, and `Block_1` through `Block_6`. Moving a slider scales every tensor inside that group by the same offset.
-* **Use case:** Broad exploration — *"Let's see which general region influences my output."*
-* **Workflow:** `MODEL` → `🟦 Model Tuner` → `Sampler`. Nudge one slider at a time, generate, and compare.
-
-<p align="center">
-  <a href="assets/examples/Block_3.webp">
-    <img src="assets/examples/Block_3.webp" width="800" alt="Block Tuning Showcase - Block 3" />
-  </a>
-  <br>
-  <sub><i>Block Tuning — Modulating an entire block (Block_3) across different values (-2.0 to +2.0) demonstrates how group-level tuning shapes visual structures and features.</i></sub>
-</p>
-
-### Tier 2 — Sub-Block Tuner (Block + Tensor Type)
-**`🟦 Model Sub-Block Tuner`** narrows the target: select one block from the `target_block` dropdown, then adjust individual sliders for specific internal tensor types (`ATTN_wq_query`, `ATTN_wk_key`, `ATTN_wv_value`, `ATTN_wo_out`, `MLP_gate_swiglu`, `MLP_up_proj`, `MLP_down_proj`, `NORMS_block_scales`, etc.).
-* **Use case:** When a Block is both improving and ruining your ouputs, you can use this tool to identify what parts of that specific block you want to boost — *"Block 3 is promising, let's give it a closer look."*
-* **Workflow:** Follows a Tier 1 pass. Set `target_block` to the region identified in Tier 1 and sweep tensor-type sliders individually.
-
-<p align="center">
-  <a href="assets/examples/sub-block-Tuning.webp">
-    <img src="assets/examples/sub-block-Tuning.webp" width="800" alt="Sub-Block Tuning Variations inside Block 3" />
-  </a>
-  <br>
-  <sub><i>Sub-Block Tuning — Modulating specific sub-blocks within Block 3 influences fine details and layer-level characteristics.</i></sub>
-</p>
-
-### Tier 3 — Chaos Tuner (Seeded Randomness)
-**`🟦 Model Sub-Block Chaos Tuner`** uses the same targeting as Tier 2, but applies a seeded perturbation: with probability `chance`, each matched tensor is perturbed by `chaos_strength`. Same seed = deterministic, reproducible noise every time.
-* **Block-Level mode:** Perturbs an entire tensor at once.
-* **Element-Level (Sub-atomic) mode:** Rolls per individual weight for finer granularity.
-* **Use case:** Creative discovery — *"Randomly nudge one sub-slice and lock the seed once an interesting style emerges."*
-
-<p align="center">
-  <a href="assets/examples/chaos-block-Tuning.webp">
-    <img src="assets/examples/chaos-block-Tuning.webp" width="800" alt="Chaos Tuning Variations" />
-  </a>
-  <br>
-  <sub><i>Chaos Tuning — Seeded stochastic perturbations applied across sub-blocks introduce controlled stylistic variations and creative discovery.</i></sub>
-</p>
-
----
-
-### 🟨 CLIP Tuning (Qwen3)
-<p align="center">
-  <img src="assets/ClipTuner.webp" width="650" alt="CLIP Tuner Nodes" />
-</p>
-
-Tuning applied to the Qwen3 text encoder follows the identical 3-tier structure:
-* **`🟨 CLIP Tuner` (Tier 1):** One slider per group (`Embedding`, `Layer_1` through `Layer_7`).
-* **`🟨 CLIP Sub-Block Tuner` (Tier 2):** Select a specific layer, then adjust Qwen3-equivalent internal tensor sliders.
-* **`🟨 CLIP Sub-Block Chaos Tuner` (Tier 3):** Seeded perturbation scoped to CLIP layers.
-
----
-
-### 🟪 LoRA Tuning
-<p align="center">
-  <img src="assets/LoraTuner.webp" width="650" alt="LoRA Loader Nodes" />
-</p>
-
-* **`🟪 LoRA Block Loader` (Tier 1):** Drop-in replacement for standard LoRA loaders with per-section strength multipliers.
-* **`🟪 Load Sub-Block LoRA` (Tier 2):** Targets one block and tensor type (e.g., keep only attention layers of a LoRA and drop the rest).
-* **`🟪 Load Sub-Block Chaos LoRA` (Tier 3):** Randomly retains or drops LoRA keys based on probability sliders and a seed.
-
----
-
-### Summary Table
-
-| Domain | Tier 1 — Group-level | Tier 2 — Block + Tensor Type | Tier 3 — Random / Seeded |
-| :--- | :--- | :--- | :--- |
-| **Model** | `🟦 Model Tuner` | `🟦 Model Sub-Block Tuner` | `🟦 Model Sub-Block Chaos Tuner` |
-| **CLIP** | `🟨 CLIP Tuner` | `🟨 CLIP Sub-Block Tuner` | `🟨 CLIP Sub-Block Chaos Tuner` |
-| **LoRA** | `🟪 LoRA Block Loader` | `🟪 Load Sub-Block LoRA` | `🟪 Load Sub-Block Chaos LoRA` |
-
----
-
-## Reading the Sliders
-
-Tier 1 and Tier 2 sliders represent offsets from baseline (`0.00` = no modification). Two calculation modes are available per node:
-
-| Mode | Formula | Use For |
-| :--- | :--- | :--- |
-| **Soft Value** | `1.0 + (slider × 0.10)` | Gentle adjustments — a slider of `1.0` moves the weight by +10%. *(Recommended default)* |
-| **Real Value** | `1.0 + slider` | Direct multiplier — a slider of `1.0` doubles the weight (+100%). For aggressive changes. |
-
-* **Chaos Sliders:** `chance` (`0.0`–`1.0`) defines the probability a tensor is touched; `chaos_strength` controls the perturbation amplitude.
-
-### Optional Scripting Overrides
-* **`vectors_override`**: Comma-separated list of raw values setting every group slider at once (34 values for Model Tuner, 8 for CLIP Tuner). Leave empty to use UI sliders.
-* **`granular_json`**: JSON map targeting specific tensor-key substrings with custom weights:
-  ```json
-  {"blocks.3.attn.wq": 0.4, "blocks.3.mlp.down": -0.2}
-  ```
-
----
-
-## Saving and Loading Calibrations
-
-Tuning occurs live in memory and **does not modify original checkpoint files**.
-
-### 1. Presets (Lightweight JSON)
-<p align="center">
-  <img src="assets/Preset.webp" width="550" alt="Preset System" />
-</p>
-
-* **`🟦🟨 Preset Saver`**: Captures all active patches and Chaos seeds into a small JSON file for deterministic reproduction.
-* **`🟦🟨 Preset Loader`**: Loads saved presets onto fresh `MODEL`/`CLIP` streams with global `strength_model` and `strength_clip` dials.
-
-> [!WARNING]
-> Presets capture Tuner and Chaos offsets only — not active LoRAs. Use the **Model Baker** first if you wish to bake LoRA weights permanently into the preset.
-
-### 2. Permanent Export (Full Checkpoints)
-<p align="center">
-  <img src="assets/Saver.webp" width="450" alt="Model and CLIP Savers" />
-</p>
-
-* **`🟦🟨 Model Baker`**: Folds all active memory patches permanently into the model weights and clears the runtime patch list.
-* **`🟦 Model Saver` / `🟨 CLIP Saver`**: Exports tuned models to `.safetensors` (BF16 or FP8), streamed directly to disk to prevent OOM errors.
-* **`🟦🟨 Reset Patcher`**: Clears all active patches and restores the model to clean baseline in memory.
-
----
-
-## Visualizing Active Patches
-
-* **`🟦 Model Visualizer` / `🟨 CLIP Visualizer`**: Real-time graph nodes that render a bar chart of active weight modifications across blocks before rendering.
-
----
-
-## Troubleshooting
-
-* **Nodes don't appear in ComfyUI:** Restart the ComfyUI server process completely (refreshing the browser tab is not sufficient).
-* **Sliders produce no visible change:** Ensure the loaded model is a **Krea-2** checkpoint with a **Qwen3** text encoder. On unsupported models, tensor names do not match and patches apply to 0 tensors.
-* **Out of Memory (OOM) during baking/saving:** Model Baker and Savers use chunked streaming, but large checkpoints still require memory overhead. Close background GPU tasks before exporting.
-* **Saved preset doesn't include my LoRA:** Presets only store offset multipliers. Use **`🟦🟨 Model Baker`** to fuse the LoRA into the model before saving.
-
----
-
-## Visual Tuning Showcase & Effects
-
-A visual reference gallery showing how modulating each Model block and CLIP layer influences output in isolation.
-
-### Benchmark Baseline Prompt (Used across all examples)
-
-```text
-Western comics style, bold ink outlines, hatched shadows, eerie detached calm, seen from a dutch high angle close-up, upper body portrait, dynamic pose, dramatic angle, strong perspective. male human plague doctor, thinning gray hair slicked back, thin sparse eyebrows, pale sickly skin gradient, gaunt older adult, long thin gloved fingers, a wispy gray goatee, deep tired wrinkles, dull green eyes. narrow jaw, tall lanky frame, eerie detached calm stare. a long black waxed-leather coat with a high collar, a satchel of glass vials strapped across his chest. holding a bubbling green potion vial up to the light. Background: a dim candle-lit apothecary shop cluttered with shelves of jars and dried herbs. Lighting: flickering warm candlelight from below mixing with cool teal moonlight through a fogged window, creating dramatic contrast across his face.
+### Method 3: Comfy CLI
+```bash
+comfy node install arthemy-krea2-tuner
 ```
 
-### 🟦 Model Tuning Effects (Blocks 1–6, Text Fusion, Time Embed, Projection)
+---
 
-| | |
-|---|---|
-| **Block 1** <br><br> [![Block 1 Effect](assets/examples/Block_1.webp)](assets/examples/Block_1.webp) | **Block 2** <br><br> [![Block 2 Effect](assets/examples/Block_2.webp)](assets/examples/Block_2.webp) |
-| **Block 3** <br><br> [![Block 3 Effect](assets/examples/Block_3.webp)](assets/examples/Block_3.webp) | **Block 4** <br><br> [![Block 4 Effect](assets/examples/Block_4.webp)](assets/examples/Block_4.webp) |
-| **Block 5** <br><br> [![Block 5 Effect](assets/examples/Block_5.webp)](assets/examples/Block_5.webp) | **Block 6** <br><br> [![Block 6 Effect](assets/examples/Block_6.webp)](assets/examples/Block_6.webp) |
-| **Text Fusion** <br><br> [![Text Fusion Effect](assets/examples/TextFusion.webp)](assets/examples/TextFusion.webp) | **Time Embed** <br><br> [![Time Embed Effect](assets/examples/Time_Embed.webp)](assets/examples/Time_Embed.webp) |
-| **Projection** <br><br> [![Projection Effect](assets/examples/Projection.webp)](assets/examples/Projection.webp) | |
+## Presets & Example Workflow
+
+A preset is a small JSON file that records everything the suite is doing to a model, and
+replays it. Presets live **inside this node's own folder**
+(`custom_nodes/Arthemy_Krea2_Tuner/presets/`), so nothing is scattered through your root
+`models/` directory: the **🟪🟨💾 Preset Saver** writes there and the **🟪🟨📂 Preset Loader**
+reads from there.
+
+What a preset carries:
+
+* every scalar and granular patch, per tensor;
+* reproducible recipes for Chaos perturbations, subspace rotations, Channel Magnitude bands
+  and 5D injections — replayed by re-running the node that made them, not by storing tensors;
+* optionally the 5D modifiers themselves (`embed_5d_modifiers`), so the preset reproduces on a
+  machine that has never seen the source LoRA. With `prune_5d_to_target` on it embeds only the
+  layers each 5D node can actually reach, which is what keeps that self-contained copy small.
+
+Loading one is not the end of the chain: `strength_model` / `strength_clip` scale the whole
+preset (0.50 for half, 1.50 to push it, negative to invert it), and you can keep tuning after
+it. Presets are text, so they can also be edited by hand.
+
+Shipped with the repository:
+
+* **`presets/Arthemy_Comics_Preset.json`** — the Arthemy Comics tuning. Block and layer gains
+  across the diffusion model and the Qwen3-VL text encoder, four style-compass rotations on
+  blocks 10-14, and six scoped 5D injections carried inside the file, so it reproduces on a
+  machine that has never seen the source LoRAs. It is a large file for that reason: the tuning
+  itself is about 50 KB, the embedded 5D payloads are the rest.
+
+A complete graph **is** included, in **[`example_workflows/`](example_workflows/)**: every node
+in the suite, wired and laid out, with a note next to each one explaining what it does and how
+to drive it. Drag the `.json` onto the ComfyUI canvas to open it.
 
 ---
 
-### 🟨 CLIP Text Encoder Tuning Effects (Layers 1–7, Embedding)
+## Developer Guide & Testing
 
-| | |
-|---|---|
-| **Layer 1** <br><br> [![Layer 1 Effect](assets/examples/Layer_1.webp)](assets/examples/Layer_1.webp) | **Layer 2** <br><br> [![Layer 2 Effect](assets/examples/Layer_2.webp)](assets/examples/Layer_2.webp) |
-| **Layer 3** <br><br> [![Layer 3 Effect](assets/examples/Layer_3.webp)](assets/examples/Layer_3.webp) | **Layer 4** <br><br> [![Layer 4 Effect](assets/examples/Layer_4.webp)](assets/examples/Layer_4.webp) |
-| **Layer 5** <br><br> [![Layer 5 Effect](assets/examples/Layer_5.webp)](assets/examples/Layer_5.webp) | **Layer 6** <br><br> [![Layer 6 Effect](assets/examples/Layer_6.webp)](assets/examples/Layer_6.webp) |
-| **Layer 7** <br><br> [![Layer 7 Effect](assets/examples/Layer_7.webp)](assets/examples/Layer_7.webp) | **Embedding** <br><br> [![Embedding Effect](assets/examples/Embedding.webp)](assets/examples/Embedding.webp) |
+The codebase includes an extensive offline and PyTorch-based test suite in `tests/`:
 
----
+* **Contract Validation**: Ensures node inputs, outputs, defaults, and preset replay dispatches are consistent.
+* **Memory Invariance**: Verifies that ComfyUI patcher backups are never corrupted.
+* **Numerical Parity**: Validates that lightweight channel adapters match exact dense delta computations.
 
-### Deterministic Multi-Seed Persistence
+Seven of the eleven suites are pure Python and run anywhere (`python3 tests/test_node_contracts.py`);
+the four that need real tensors skip themselves when torch is missing, so run the whole set with
+ComfyUI's own interpreter:
+```powershell
+Get-ChildItem -Path tests -Filter "test_*.py" | ForEach-Object {
+    & "path/to/comfyui/python.exe" $_.FullName
+}
+```
 
-Here you can see how feature isolation works in practice:
-By identifying and amplifying only the specific Model blocks and CLIP layers responsible for generating the plague doctor's beak mask, the feature persists robustly and deterministically across completely different generation seeds.
-
-<p align="center">
-  <a href="assets/examples/SameTuning-DifferentSeed.webp">
-    <img src="assets/examples/SameTuning-DifferentSeed.webp" width="850" alt="Same Tuning, Different Seed" />
-  </a>
-</p>
-
----
-
-## Author
-
-**Arthemy** · [@aledelpho](https://github.com/aledelpho)
+For detailed architectural notes, memory management invariants, and porting instructions to other architectures, see **[ARCHITECTURE.md](ARCHITECTURE.md)**.
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [MIT License](LICENSE).

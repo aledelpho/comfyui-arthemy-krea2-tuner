@@ -1,31 +1,48 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-.Python
-*.egg-info/
-dist/
-build/
+*$py.class
 
-# PyTorch / ML artifacts
-*.pt
-*.pth
+# Caching & Local Runtime
+.cache/
+.pytest_cache/
+*.log
+arthemy_profiles/
+
+# Presets: everything the user generates stays local. A reference preset can be shipped by
+# adding an allow-line for it here - the line must name a file that actually exists, or
+# `git add .` silently skips the preset you meant to ship.
+presets/*
+!presets/README.md
+!presets/Arthemy_Comics_Preset.json
+
+# Large Model Weights & Checkpoints (do not commit models directly)
 *.safetensors
-*.gguf
 *.ckpt
+*.pt
 *.bin
+*.onnx
 
-# OS
+# Backups & Temporary files
+_backup*/
+*.bak
+*.tmp
+*.swp
+*~
+
+# Operating System
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Editor
-.vscode/
-.idea/
-*.swp
-*.swo
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
 
-# Logs
-*.log
+# IDE & Editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
