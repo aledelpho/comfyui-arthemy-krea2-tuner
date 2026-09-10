@@ -164,6 +164,10 @@ A vertical rather than horizontal cut: profiles the residual stream ($d_{model} 
 * `channel_path`: applies gains where the network reads from residual, writes back, or both.
 * **Ultra-low footprint:** Generates ~24 KB rank vectors instead of multi-gigabyte dense matrices. Profiles are cached in `models/arthemy_profiles/`.
 
+<p align="center">
+  <img src="assets/Channel.webp" width="750" alt="Channel Magnitude Tuner Node" />
+</p>
+
 ---
 
 ### 🟨 CLIP Tools (Qwen3-VL Text Encoder)
@@ -180,6 +184,10 @@ Tuning applied to the Qwen3-VL text encoder provides fine-grained steering over 
 ---
 
 ### 🌿 Subspace Rotators (Lie Algebra & Geometric Steering)
+
+<p align="center">
+  <img src="assets/Rotators.webp" width="650" alt="Subspace Rotator Suite" />
+</p>
 
 #### Why Subspace Rotators? (The Geometry of Meaning vs Volume)
 Traditional weight tuning multiplies tensors by scalars:
@@ -218,6 +226,10 @@ Rotates weights along a continuous spherical bearing:
 ---
 
 ### 🧬 5D LoRA Compaction & Subspace Injection
+
+<p align="center">
+  <img src="assets/Lora5D.webp" width="850" alt="5D LoRA Compaction and Subspace Injection Suite" />
+</p>
 
 #### Why 5D? (Lightweight, Self-Contained & Zero Bleed)
 * **The Problem with Standard LoRAs:** Full LoRA files weigh anywhere from 50 MB to 300+ MB. They carry extensive high-rank noise, bleed across unrelated features, and cannot be shared inside small ComfyUI presets without requiring everyone to manually hunt down and download the original `.safetensors` files.
@@ -313,7 +325,7 @@ Slider controls represent offsets relative to base weights (`0.00` = neutral/unm
 ## Visualizing Active Patches
 
 <p align="center">
-  <img src="assets/Preset.webp" width="550" alt="Visualization and Diagnostic Tools" />
+  <img src="assets/Visualizers.webp" width="750" alt="Model and CLIP Visualizers on Canvas" />
 </p>
 
 * **🟪📊 Model Visualizer / 🟨📊 CLIP Visualizer:** Connect inline to inspect real-time bar graphs of patch magnitudes directly on the node canvas.
