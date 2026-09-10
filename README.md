@@ -41,7 +41,9 @@ Edit a **Krea-2** model and its **Qwen3** text encoder by modulating internal we
 - [Node Catalog & Deep Dive](#node-catalog--deep-dive)
   - [🟪 Model Tools (Diffusion Backbone)](#-model-tools-diffusion-backbone)
   - [🟨 CLIP Tools (Qwen3-VL Text Encoder)](#-clip-tools-qwen3-vl-text-encoder)
-  - [🩷 LoRA Tools & 5D Compaction](#-lora-tools--5d-compaction)
+  - [🌿 Subspace Rotators (Lie Algebra & Geometric Steering)](#-subspace-rotators-lie-algebra--geometric-steering)
+  - [🧬 5D LoRA Compaction & Subspace Injection](#-5d-lora-compaction--subspace-injection)
+  - [🩷 LoRA Block & Sub-Block Tools](#-lora-block--sub-block-tools)
   - [🟪🟨 Presets, Savers & Baker](#-presets-savers--baker)
   - [Summary Architecture Matrix](#summary-architecture-matrix)
 - [Reading the Controls](#reading-the-controls)
@@ -104,7 +106,7 @@ The suite includes a ready-to-run, modular reference workflow located in [`examp
 1. **Load the template:** Drag and drop `example_workflows/Arthemy_Krea2_Tuner_Workflow.json` onto the ComfyUI canvas.
 2. **Left area:** Checkpoint loader, prompt encode, latent dimensions, and the **Reset Patcher**.
 3. **Workspace slot:** Copy and paste any tuning tool from the organized banks below and chain it directly between the **Reset Patcher** and the **Visualizers**.
-4. **Bottom banks:** All nodes categorized by colour: 🟪 Model Tuners · 🟨 CLIP Tuners · 🩷 LoRA & 5D · 🟪🟨 Rotators · Presets & Savers. Each node carries a dedicated README note explaining its exact inputs.
+4. **Bottom banks:** All nodes categorized by colour: 🟪 Model Tuners · 🟨 CLIP Tuners · 🌿 Rotators · 🧬 5D Suite · 🩷 LoRA · Presets & Savers. Each node carries a dedicated README note explaining its exact inputs.
 5. **Tune & Cook:** Adjust your sliders, observe live patch waveforms on the visualizers, and queue the generation!
 
 ---
@@ -162,18 +164,6 @@ A vertical rather than horizontal cut: profiles the residual stream ($d_{model} 
 * `channel_path`: applies gains where the network reads from residual, writes back, or both.
 * **Ultra-low footprint:** Generates ~24 KB rank vectors instead of multi-gigabyte dense matrices. Profiles are cached in `models/arthemy_profiles/`.
 
-#### 5. 🟪🌿 Model Axis Rotator (Lie Algebra $SO(n)$)
-Applies 4 independent rotation dials (±180°) inside the dominant SVD subspaces of the target weights: local in-plane, branch-into-trunk, long-range channel phase, and mirrored pairwise.
-* **Norm Invariant:** Rotates within the special orthogonal group $SO(n)$, preserving the exact Frobenius norm of the base checkpoint. Moves what a layer *means*, not how loud it is.
-* `depth_reach`: selects rotation rank (8, 16, or 32).
-
-#### 6. 🟪🌀 Model Chaos Rotator & 🟪🧭 Model Compass Rotator
-* **Chaos Rotator:** Rotates subspaces along pseudo-random angles with `harmonic_coherence` snapping toward 45° multiples.
-* **Compass Rotator:** Rotates weights along a chosen continuous bearing `style_direction` (0–360°), allowing smooth spherical sweeps across stylistic manifolds.
-
-#### 7. 🟪🧬 5D Model Tuner
-Injects compressed LoRA representations directly back into diffusion layers as native low-rank patches, adjustable slider-by-slider for each dominant SVD direction.
-
 ---
 
 ### 🟨 CLIP Tools (Qwen3-VL Text Encoder)
@@ -186,13 +176,78 @@ Tuning applied to the Qwen3-VL text encoder provides fine-grained steering over 
 * **🟨✨ CLIP Tuner:** Group sliders covering `Embedding` and `Layer_1` through `Layer_7` (text layers 0-4 through 30-35).
 * **🟨🔬 CLIP Sub-Block Tuner:** Granular control over `ATTN_q_proj`, `k_proj`, `v_proj`, `o_proj`, query norms, and MLP projections inside specific layers.
 * **🟨🌪️ CLIP Sub-Block Chaos Tuner:** Seeded stochastic perturbations on linguistic projections.
-* **🟨🌿 CLIP Axis Rotator:** Subspace Lie rotation dials on the text encoder (sensitive: 5°–10° produces noticeable semantic re-interpretations).
-* **🟨🌀 CLIP Chaos Rotator & 🟨🧭 CLIP Compass Rotator:** Continuous bearing and random-plane subspace rotations on text embeddings.
-* **🟨🧬 5D CLIP Tuner:** Re-injects compressed 5D LoRA adapters into linguistic layers.
 
 ---
 
-### 🩷 LoRA Tools & 5D Compaction
+### 🌿 Subspace Rotators (Lie Algebra & Geometric Steering)
+
+#### Why Subspace Rotators? (The Geometry of Meaning vs Volume)
+Traditional weight tuning multiplies tensors by scalars:
+* **The Problem with Scalar Scaling:** Multiplying a layer's weights increases or decreases its total Frobenius norm (its mathematical "energy" or "volume"). Turning a slider up too high causes color clipping, burnt highlights, and contrast collapse. Turning it down too far erases the layer's features entirely.
+* **The Geometric Solution:** Rotators operate within the **Special Orthogonal Group $SO(n)$** inside the principal Singular Value Decomposition (SVD) subspaces of the weights. By rotating the basis vectors orthogonally, the Frobenius norm of the matrix remains strictly unchanged:
+  $$\| W_{\text{rotated}} \|_F = \| W_{\text{base}} \|_F$$
+  Instead of changing **how loud** a layer speaks (volume), Rotators change **what the layer says** (orientation and semantic meaning). This allows profound aesthetic transformations without signal destruction or contrast degradation.
+
+#### The Rotator Suite
+
+##### 1. 🟪🌿 Model Axis Rotator & 🟨🌿 CLIP Axis Rotator (Cartesian Subspaces)
+Provides four independent rotation dials (ranging ±180°) inside the dominant SVD subspaces of the target weights:
+* **In-Plane:** Rotates vectors within their primary 2D projection plane.
+* **Branch-into-Trunk:** Modulates how secondary feature branches inject into the principal trunk.
+* **Channel Phase:** Rotates long-range residual channel phases.
+* **Mirrored Pairwise:** Conjugate rotation of paired singular vectors.
+* `depth_reach`: Sets the active rotated rank (8, 16, or 32).
+
+##### 2. 🟪🌀 Model Chaos Rotator & 🟨🌀 CLIP Chaos Rotator (Stochastic Subspaces)
+Applies pseudo-random orthogonal rotations across subspace planes:
+* `chaos_strength`: Caps maximum rotation angle as a fraction of 90°.
+* `harmonic_coherence`: Snaps rotation angles toward musical/harmonic multiples of 45°, maintaining visual cohesion.
+* `seed`: Fully deterministic CRC32 seed.
+
+##### 3. 🟪🧭 Model Compass Rotator & 🟨🧭 CLIP Compass Rotator (Spherical Navigation)
+Rotates weights along a continuous spherical bearing:
+* `style_direction` (0–360°): Blends smoothly between local and long-range geometric planes. Moving along the compass dial shifts aesthetic flavor gradually like turning a map dial.
+* `rotation_angle` (-90° to +90°): Distance traveled along that specific bearing.
+* `manifold`: Chooses between the input manifold (what the layer listens to) or output manifold (what it emits).
+
+#### How to Use Rotators:
+1. **Model Backbone:** Start with `rotation_angle` or axis dials between **10° and 30°**. You will notice immediate alterations in style, shading, and anatomical structure with zero loss of dynamic range.
+2. **Text Encoder (CLIP):** The text encoder is remarkably sensitive to rotation. Keep angles gentle (**5° to 15°**). Larger angles re-interpret prompt semantics completely rather than changing visual rendering.
+3. **Non-Commutative Ordering:** Note that scaling and rotation do not commute ($W \cdot R \neq R \cdot W$). Chaining a Rotator *before* a Tuner produces a different effect than chaining it *after*.
+
+---
+
+### 🧬 5D LoRA Compaction & Subspace Injection
+
+#### Why 5D? (Lightweight, Self-Contained & Zero Bleed)
+* **The Problem with Standard LoRAs:** Full LoRA files weigh anywhere from 50 MB to 300+ MB. They carry extensive high-rank noise, bleed across unrelated features, and cannot be shared inside small ComfyUI presets without requiring everyone to manually hunt down and download the original `.safetensors` files.
+* **The 5D Solution:** The 5D engine uses spectral decomposition to distill any LoRA down to its $N$ dominant SVD directions (typically 1 to 5). It then applies an adaptive Discrete Cosine Transform (DCT) compaction algorithm:
+  * Measures actual DCT reconstruction fidelity against raw factors.
+  * Compresses multi-megabyte LoRA deltas into portable JSON payloads of **just 20 KB to 50 KB** (up to **70× footprint reduction**).
+  * Enables **100% self-contained presets**: embedding 5D payloads into a preset allows any other ComfyUI user to replicate your exact tuning without needing the source LoRA installed on their machine.
+
+#### The 5D Suite
+
+##### 1. 🩷🧬 LoRA-to-5D Extractor (Analytical Compressor)
+* Inspects a local LoRA file and extracts its $N$ principal SVD singular components (`num_dimensions = 1..8`, default 5).
+* Exports an optimized `.json` modifier into `models/arthemy_modifiers/`.
+* `storage`: `auto` measures compression fidelity and automatically selects DCT compaction or raw factor fallback.
+* 💡 **Workflow tip:** Since this is an output node, run it once, then **bypass it with `Ctrl+B`** so it doesn't recalculate on every generation.
+
+##### 2. 🟪🧬 5D Model Tuner & 🟨🧬 5D CLIP Tuner (Subspace Injectors)
+* Point `modifier_name` to your extracted `.json` modifier (or let it read from an embedded preset).
+* Offers individual sliders for each dominant direction (`Dir_01` through `Dir_08`).
+* Allows surgical scoping: inject the LoRA modifier strictly into a specific block range (`Block_3`), a component (`ATTN`), or a single layer (`ATTN_wq_query`), completely eliminating unwanted character or style bleed.
+
+##### 3. 🎯 Target-Scoped Preset Pruning (`prune_5d_to_target`)
+When saving a preset with embedded 5D modifiers using **Preset Saver**:
+* With `prune_5d_to_target` enabled, the saver automatically detects which exact layers your 5D Tuner nodes target.
+* It discards all unused layer tensors from the JSON payload (e.g., embedding only the 40 layers of blocks 10–14 instead of all 262 layers).
+* This drops preset file sizes from hundreds of megabytes down to lightweight, shareable files!
+
+---
+
+### 🩷 LoRA Block & Sub-Block Tools
 
 <p align="center">
   <img src="assets/LoraTuner.webp" width="650" alt="LoRA Loader Nodes" />
@@ -201,7 +256,6 @@ Tuning applied to the Qwen3-VL text encoder provides fine-grained steering over 
 * **🩷🔮 LoRA Block Loader:** Drop-in replacement for standard LoRA loaders with independent block-group multipliers. Isolating a style LoRA to blocks 24–27 preserves style while eliminating character bleed.
 * **🩷🔬 Load Sub-Block LoRA:** Applies LoRA weights strictly to selected tensor families (e.g. attention only for composition, MLP only for texture).
 * **🩷🌪️ Load Sub-Block Chaos LoRA:** Stochastically samples LoRA keys according to per-family probability sliders.
-* **🩷🧬 LoRA-to-5D Extractor:** Compresses any external LoRA checkpoint into its $N$ dominant SVD directions (1–8) and exports a compact `.json` modifier into `models/arthemy_modifiers/`. Features automatic fidelity measurement with DCT compression fallback.
 
 ---
 
@@ -213,7 +267,8 @@ Tuning applied to the Qwen3-VL text encoder provides fine-grained steering over 
 </p>
 
 * **🟪🟨💾 Preset Saver:** Serializes all active scalar, granular, Chaos, Rotation, Channel Magnitude, and 5D configurations into a clean JSON preset located in `custom_nodes/Arthemy_Krea2_Tuner/presets/`.
-  * `prune_5d_to_target`: When enabled, strips unused layers from embedded 5D modifiers, reducing file sizes from ~50x to ~70x.
+  * `embed_5d_modifiers`: Embeds 5D payloads directly into the JSON so presets are portable across machines.
+  * `prune_5d_to_target`: Strips unreachable layers from embedded modifiers, keeping file size minimal.
 * **🟪🟨📂 Preset Loader:** Replays presets with master `strength_model` and `strength_clip` multipliers. Safely skips incompatible scaled-FP8 companion scales.
 * **Shipped Reference Preset:** Includes **`presets/Arthemy_Comics_Preset.json`**, delivering the complete Arthemy Comics aesthetic with embedded self-contained 5D payloads.
 
@@ -230,12 +285,14 @@ Tuning applied to the Qwen3-VL text encoder provides fine-grained steering over 
 
 ### Summary Architecture Matrix
 
-| Domain | Group Level | Granular / Sub-Block | Subspace Rotations ($SO(n)$) | Stochastic Discovery | 5D Compaction |
+| Category | Domain | Group Level | Granular / Sub-Block | Geometric / SVD | Stochastic Discovery |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Diffusion Model** | `Model Tuner` | `Model Sub-Block Tuner` <br> `Channel Magnitude Tuner` | `Model Axis Rotator` <br> `Model Compass Rotator` | `Model Sub-Block Chaos` <br> `Model Chaos Rotator` | `5D Model Tuner` |
-| **Qwen3 CLIP** | `CLIP Tuner` | `CLIP Sub-Block Tuner` | `CLIP Axis Rotator` <br> `CLIP Compass Rotator` | `CLIP Sub-Block Chaos` <br> `CLIP Chaos Rotator` | `5D CLIP Tuner` |
-| **LoRA** | `LoRA Block Loader` | `Load Sub-Block LoRA` | — | `Load Sub-Block Chaos LoRA` | `LoRA-to-5D Extractor` |
-| **Runtime & Disk** | `Preset Loader` | `Preset Saver` | `Reset Patcher` | `Model Baker` (RAM) | `Model / CLIP Savers` (Disk) |
+| **Magnitude Tuning** | **Diffusion Model** | `Model Tuner` | `Model Sub-Block Tuner` <br> `Channel Magnitude Tuner` | — | `Model Sub-Block Chaos` |
+| **Magnitude Tuning** | **Qwen3 CLIP** | `CLIP Tuner` | `CLIP Sub-Block Tuner` | — | `CLIP Sub-Block Chaos` |
+| **Subspace Rotators** | **Model & CLIP** | — | — | `Model / CLIP Axis Rotator` <br> `Model / CLIP Compass Rotator` | `Model / CLIP Chaos Rotator` |
+| **5D Compaction** | **Model, CLIP & LoRA** | — | — | `5D Model Tuner` <br> `5D CLIP Tuner` | `LoRA-to-5D Extractor` |
+| **LoRA Filtering** | **External LoRA** | `LoRA Block Loader` | `Load Sub-Block LoRA` | — | `Load Sub-Block Chaos LoRA` |
+| **Memory & Storage** | **System & Disk** | `Preset Loader` | `Preset Saver` | `Reset Patcher` | `Model Baker` (RAM) <br> `Savers` (Disk) |
 
 ---
 
