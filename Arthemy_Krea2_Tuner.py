@@ -303,7 +303,12 @@ class Krea2TensorParser:
         "MLP_gate_swiglu": ("mlp.gate.weight", "mlp.gate"),
         "MLP_up_proj": ("mlp.up.weight", "mlp.up"),
         "MLP_down_proj": ("mlp.down.weight", "mlp.down"),
-        "MOD_lin_time": ("mod.lin",),
+        # "MOD_lin_time" used to sit here, mapped to "mod.lin". Krea-2 has no such tensor:
+        # a block carries only attn.{wq,wk,wv,wo,gate} and mlp.{gate,up,down}, and the time
+        # modulation lives at model level in tmlp.* / tproj.*, which the Model Tuner already
+        # exposes as the Time_Embed group. The widget matched nothing and every sweep over it
+        # produced images byte-identical to the baseline. Removed rather than re-pointed: a
+        # tensor with no block index has no place in a SUB-BLOCK node.
         "NORMS_block_scales": ("prenorm.scale", "postnorm.scale"),
     }
 
@@ -5276,8 +5281,18 @@ class _ChaosRotationMixin:
         inputs = s._common_inputs()
         inputs["seed"] = ("INT", {"default": 42, "min": 0, "max": 0xffffffffffffffff,
                                   "tooltip": "Deterministic seed (CRC32-based, so it reproduces across ComfyUI restarts)."})
-        inputs["chaos_strength"] = ("FLOAT", {"default": 0.35, "min": 0.0, "max": 1.0, "step": 0.01,
-                                             "tooltip": "Maximum per-plane rotation, as a fraction of 90 deg."})
+        # Cap raised from 1.0 to 4.0. The 1.0 ceiling was an interface choice, not a
+        # mathematical one: the value scales the per-plane rotation angle, the result
+        # stays orthogonal at any magnitude, and the relative displacement saturates
+        # on its own near strength 3. The old ceiling silently blocked matching this
+        # node against a rotation at the same Frobenius displacement -- on the Krea-2
+        # text encoder, D = 0.30 needs strength 1.88, which the widget refused while
+        # the engine computed it fine. A control that cannot reach the magnitude it is
+        # meant to control for is not a control.
+        inputs["chaos_strength"] = ("FLOAT", {"default": 0.35, "min": 0.0, "max": 4.0, "step": 0.01,
+                                             "tooltip": "Maximum per-plane rotation, as a fraction of 90 deg. "
+                                                        "Above 1.0 the planes turn past 90 deg; the displacement "
+                                                        "keeps growing but saturates around 3.0."})
         inputs["harmonic_coherence"] = ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.05,
                                                  "tooltip": "Snaps the random plane angles towards 45 deg multiples."})
         return {"required": inputs, "hidden": {"unique_id": "UNIQUE_ID"}}

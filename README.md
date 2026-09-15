@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/aledelpho/comfyui-arthemy-krea2-tuner/releases/tag/v2.0.0"><img alt="Version 2.0.0" src="https://img.shields.io/badge/version-2.0.0-purple?style=flat-square"></a>
+  <a href="https://github.com/aledelpho/comfyui-arthemy-krea2-tuner/releases/tag/v2.0.1"><img alt="Version 2.0.1" src="https://img.shields.io/badge/version-2.0.1-purple?style=flat-square"></a>
   <img alt="ComfyUI custom node" src="https://img.shields.io/badge/ComfyUI-custom--node-6b46c1?style=flat-square">
   <img alt="Compatibility" src="https://img.shields.io/badge/compatible-Krea--2%20%7C%20Qwen3-1e88e5?style=flat-square">
   <a href="tests/"><img alt="Tests Passing" src="https://img.shields.io/badge/tests-11%2F11%20passing-brightgreen?style=flat-square"></a>
